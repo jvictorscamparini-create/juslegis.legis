@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F8F7F4}a{color:#795A38;text-decoration:none}a:hover{color:#B9965B}*{box-sizing:border-box}button{font-family:inherit;cursor:pointer;border:0;background:none;padding:0;color:inherit;text-align:left}input{font-family:inherit}</style>
+</helmet>
+<div style="display:flex;min-height:100vh;width:100%;font-family:'Plus Jakarta Sans',sans-serif;color:#17191C;background:#F8F7F4;position:relative">
+
+  <sc-if value="{{ showDrawerBg }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:rgba(23,25,28,.5);z-index:30"></div></sc-if>
+
+  <aside style="{{ asideStyle }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:2px 0 14px">
+      <svg width="40" height="40" viewBox="0 0 46 46" fill="none" stroke="#B9965B" stroke-width="1.6"><rect x="9" y="9" width="28" height="28" transform="rotate(45 23 23)"/><path d="M23 12v22M15 34h16M16 18h14"/><path d="M16 18l-3 7h6zM30 18l-3 7h6z"/></svg>
+      <div style="display:{{ txtD }};font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.14em;line-height:1;font-weight:500;color:#F8F7F4">JUSLEGIS</div>
+      <div style="display:{{ txtD }};font-size:8.5px;letter-spacing:.26em;color:#B9965B">INTELIGÊNCIA JURÍDICA</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:1px;flex:1;overflow:auto;padding-bottom:8px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="20">
+        <div>
+          <div style="display:{{ n.hd }};padding:{{ n.hp }};font-size:9.5px;letter-spacing:.14em;color:#6E7075;font-weight:600;border-top:{{ n.hb }}">{{ n.hl }}</div>
+          <button onClick="{{ n.go }}" title="{{ n.label }}" style="display:{{ n.id }};align-items:center;gap:11px;padding:8px 12px;border-radius:9px;font-size:13.5px;justify-content:{{ n.jc }};color:{{ n.color }};background:{{ n.bg }};width:100%" style-hover="background:{{ n.hov }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ n.color }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.d }}"/></svg>
+            <span style="flex:1;display:{{ txtD }}">{{ n.label }}</span>
+          </button>
+        </div>
+      </sc-for>
+    </nav>
+    <button onClick="{{ toggleCol }}" title="{{ colTip }}" style="display:{{ colBtn }};align-items:center;justify-content:{{ colJc }};gap:10px;margin-top:6px;padding:8px 12px;border-top:1px solid #2A2D31;font-size:12.5px;color:#A9ABB0;width:100%" style-hover="color:#B9965B"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ colRot }}deg)"><path d="M3 5h18v14H3zM9 5v14m6-9-2 2 2 2"/></svg><span style="display:{{ txtD }}">Recolher menu</span></button>
+  </aside>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="position:relative;z-index:20;height:68px;display:flex;align-items:center;gap:14px;padding:0 24px;background:#F8F7F4;border-bottom:1px solid #ECE9E2">
+      <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ openDrawer }}" aria-label="Abrir menu" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;box-shadow:0 1px 2px rgba(23,25,28,.08);flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      </sc-if>
+      <button onClick="{{ openSearch }}" style="flex:1;max-width:460px;height:42px;border-radius:10px;background:#fff;display:flex;align-items:center;gap:10px;padding:0 14px;color:#64666B;font-size:14px;border:1px solid #ECE9E2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>
+        <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ searchLabel }}</span>
+      </button>
+      <div style="flex:1"></div>
+      <div style="position:relative">
+        <button onClick="{{ togglePlan }}" style="height:30px;border-radius:999px;border:1px solid #E3D6BC;background:#FBF6EC;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:600;color:#795A38;white-space:nowrap;flex:none">
+          <span>{{ planLabel }}</span>
+        </button>
+        <sc-if value="{{ isPlan }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:50px;width:320px;max-width:calc(100vw - 32px);background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(23,25,28,.18);padding:20px;display:flex;flex-direction:column;gap:12px;z-index:50">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600">Assinatura</div>
+            <div style="font-size:13px;color:#64666B;line-height:1.5">A situação do teste e da assinatura será exibida aqui quando a conta estiver conectada.</div>
+            <button onClick="{{ soonSub }}" style="background:#17191C;color:#fff;border-radius:10px;padding:11px;text-align:center;font-size:13.5px;font-weight:600" style-hover="background:#795A38">Minha assinatura</button>
+          </div>
+        </sc-if>
+      </div>
+      <div style="position:relative">
+        <button onClick="{{ toggleNotif }}" aria-label="Notificações" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;box-shadow:0 1px 2px rgba(23,25,28,.08)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+        </button>
+        <sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:50px;width:300px;max-width:calc(100vw - 32px);background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(23,25,28,.18);padding:20px;z-index:50;text-align:center;line-height:1.5">
+            <div style="font-weight:600;font-size:14px">Nenhuma notificação</div>
+            <div style="font-size:12.5px;color:#64666B;margin-top:4px">Alertas de prazos e análises aparecerão aqui.</div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="position:relative">
+        <button onClick="{{ toggleUser }}" style="display:flex;align-items:center;gap:8px;padding:3px 8px 3px 3px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(23,25,28,.08)">
+          <span style="width:34px;height:34px;border-radius:50%;background:#17191C;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9965B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></span>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;font-weight:600">Minha conta</span></sc-if>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <sc-if value="{{ isUser }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:50px;width:220px;background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(23,25,28,.18);padding:8px;z-index:50">
+            <sc-for list="{{ userMenu }}" as="u" hint-placeholder-count="4">
+              <button onClick="{{ u.go }}" style="display:block;width:100%;padding:10px 12px;border-radius:8px;font-size:13.5px" style-hover="background:#F8F7F4">{{ u.l }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{ anyOverlay }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeOverlay }}" style="position:fixed;inset:0;z-index:10"></div></sc-if>
+
+    <div style="padding:32px 36px 40px;display:flex;flex-direction:column;gap:32px;max-width:1280px;width:100%;margin:0 auto">
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}"><div style="display:contents">
+<section style="position:relative;border-radius:22px;overflow:hidden;background:#17191C;color:#fff;min-height:200px;display:flex;align-items:center">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#1E1B17 0 14px,#25211B 14px 28px)"></div>
+        <sc-if value="{{ bannerImg }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;right:0;top:0;bottom:0;width:40%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8A7550;text-align:center;line-height:1.7;border-left:1px dashed #4A3F2C">[ imagem do banner ]<br>estátua da Justiça em bronze,<br>biblioteca desfocada · 1600×400</div></sc-if>
+        <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(23,25,28,.95) 25%,rgba(23,25,28,.2) 80%)"></div>
+        <div style="position:relative;padding:34px 40px;max-width:560px">
+          <h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(36px,5vw,54px);line-height:1.02">Seu escritório mais produtivo.</h1>
+          <p style="margin:14px 0 0;font-size:16px;line-height:1.5;color:#E9E4DA">Inteligência jurídica, pesquisa e elaboração de peças em uma única plataforma.</p>
+        </div>
+      </section>
+
+      <section style="display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0;font-size:12px;letter-spacing:.14em;color:#64666B;font-weight:600">AÇÕES RÁPIDAS</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+          <sc-for list="{{ actions }}" as="c" hint-placeholder-count="4">
+            <button onClick="{{ c.go }}" style="display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:20px;background:{{ c.bg }};min-height:172px;box-shadow:0 1px 2px rgba(23,25,28,.04)" style-hover="box-shadow:0 10px 24px rgba(23,25,28,.1)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%">
+                <div style="width:46px;height:46px;border-radius:13px;background:{{ c.ic }};display:flex;align-items:center;justify-content:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="{{ c.fg }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.d }}"/></svg></div>
+                
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;flex:1"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1.1">{{ c.t }}</div><div style="font-size:13px;line-height:1.5;color:#4F5156">{{ c.s }}</div></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:{{ c.fg }}">Abrir <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ c.fg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></div>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;align-items:stretch">
+        <sc-for list="{{ panels }}" as="p" hint-placeholder-count="3">
+          <section style="background:#fff;border-radius:20px;padding:22px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:16px;min-height:250px">
+            <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:600">{{ p.t }}</h2>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;border:1px dashed #E3DFD6;border-radius:14px;padding:22px 16px">
+              <div style="width:44px;height:44px;border-radius:50%;background:#F6EFE6;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#795A38" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ p.d }}"/></svg></div>
+              <div style="font-size:14px;color:#4F5156;line-height:1.45">{{ p.e }}</div>
+              <button onClick="{{ p.go }}" style="background:#17191C;color:#fff;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600" style-hover="background:#795A38">{{ p.b }}</button>
+            </div>
+          </section>
+        </sc-for>
+      </div>
+
+      </div></sc-if>
+<sc-if value="{{ isSub }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:20px">
+  <div><h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px">Minha assinatura</h1><p style="margin:6px 0 0;font-size:13.5px;color:#64666B">Plano, pagamentos e cancelamento da sua conta.</p></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+    <section style="background:#fff;border-radius:18px;padding:24px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:11px;letter-spacing:.14em;color:#795A38;font-weight:600">PLANO JUSLEGIS</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.1">Assinatura mensal</div>
+      <div style="font-size:14px;color:#4F5156;line-height:1.55">Acesso ao Assistente IA, petições, análise de documentos, pesquisa, agenda e arquivos, conforme os recursos habilitados pelo administrador da plataforma.</div>
+      <div style="font-size:13.5px"><b>Preço:</b> <span style="color:#64666B">será exibido quando definido pelo administrador</span></div>
+      <button onClick="{{ assinar }}" style="background:#B9965B;color:#17191C;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;align-self:flex-start" style-hover="background:#D2B27A">Assinar</button>
+      <div style="font-size:12px;color:#64666B;line-height:1.5">O pagamento é feito em checkout seguro. Os meios de pagamento são os oferecidos pelo checkout.</div>
+    </section>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <section style="background:#fff;border-radius:18px;padding:24px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600">Situação</h2><div style="font-size:13.5px;color:#4F5156;line-height:1.5">Nenhuma assinatura ativa. O período de teste gratuito (sem cartão e sem cobrança automática) será exibido aqui quando a conta estiver conectada.</div></section>
+      <section style="background:#fff;border-radius:18px;padding:24px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600">Histórico de pagamentos</h2><div style="text-align:center;padding:18px;border:1px dashed #E3DFD6;border-radius:12px;font-size:13.5px;color:#64666B">Nenhum pagamento registrado.</div></section>
+      <section style="background:#fff;border-radius:18px;padding:24px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:10px"><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600">Cancelamento</h2><div style="font-size:13px;color:#64666B;line-height:1.5">Disponível quando houver uma assinatura ativa.</div><button disabled="{{ true }}" style="border:1px solid #DDD9CF;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;color:#A9ABB0;align-self:flex-start;cursor:not-allowed">Cancelar assinatura</button></section>
+    </div>
+  </div></div></sc-if>
+<sc-if value="{{ isUse }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:20px">
+  <div><h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px">Meu consumo</h1><p style="margin:6px 0 0;font-size:13.5px;color:#64666B">Uso dos recursos da sua assinatura.</p></div>
+  <section style="background:#fff;border-radius:18px;padding:24px;box-shadow:0 1px 3px rgba(23,25,28,.06);max-width:640px"><div style="text-align:center;padding:28px;border:1px dashed #E3DFD6;border-radius:12px;font-size:13.5px;color:#64666B;line-height:1.5">Dados ainda não disponíveis.<br>O consumo aparecerá aqui após o uso das ferramentas.</div></section>
+</div></sc-if>
+</div>
+  </main>
+
+  <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:center;align-items:flex-start;padding:90px 16px 16px">
+      <div onClick="{{ closeOverlay }}" style="position:absolute;inset:0;background:rgba(23,25,28,.5)"></div>
+      <div style="position:relative;width:560px;max-width:100%;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(23,25,28,.3);overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #F0EEE9">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>
+          <input value="{{ q }}" onInput="{{ onQ }}" autofocus placeholder="Buscar processos, documentos, petições…" style="flex:1;border:0;outline:0;font-size:16px;height:32px"/>
+          <button onClick="{{ closeOverlay }}" style="font-size:12px;color:#64666B;border:1px solid #ECE9E2;border-radius:6px;padding:3px 8px">Esc</button>
+        </div>
+        <div style="padding:32px 24px;text-align:center;font-size:13.5px;color:#64666B;line-height:1.5">{{ searchMsg }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:80;background:#17191C;color:#F8F7F4;padding:12px 18px;border-radius:12px;font-size:13.5px;box-shadow:0 12px 30px rgba(23,25,28,.3);max-width:calc(100vw - 32px);display:flex;gap:10px;align-items:center;line-height:1.4"><span style="width:8px;height:8px;border-radius:50%;background:#B9965B;flex:none"></span>{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page:'home', col:false, overlay:null, toast:'', w:1440, drawer:false, q:'' };
+  componentDidMount(){ this.rs=()=>this.setState({w:window.innerWidth}); this.rs(); window.addEventListener('resize',this.rs); this.kd=e=>{if(e.key==='Escape')this.setState({overlay:null,drawer:false})}; window.addEventListener('keydown',this.kd); }
+  componentWillUnmount(){ window.removeEventListener('resize',this.rs); window.removeEventListener('keydown',this.kd); clearTimeout(this.tt); }
+  say=(t)=>{ this.setState({toast:t}); clearTimeout(this.tt); this.tt=setTimeout(()=>this.setState({toast:''}),3200); };
+  soon=(n)=>()=>{ this.setState({overlay:null,drawer:false}); this.say('Módulo “'+n+'” será desenhado na próxima etapa.'); };
+  ov=(k)=>()=>this.setState(s=>({overlay:s.overlay===k?null:k}));
+  renderVals(){
+    const s=this.state, narrow=s.w<980, mobile=s.w<640, G='#B9965B', W='#F8F7F4';
+    const I={
+      home:'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
+      spark:'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z',
+      pen:'M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5M14 2v4a2 2 0 0 0 2 2h4M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z',
+      fsearch:'M14 2v4a2 2 0 0 0 2 2h4M4.268 21a2 2 0 0 0 1.727 1H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3M9 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11.1 16.1 13 18',
+      scale:'m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1ZM2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1ZM7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2',
+      search:'m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z',
+      book:'M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z',
+      landmark:'M10 18v-7M14 18v-7M18 18v-7M3 22h18M6 18v-7M12 2 3 7h18z',
+      gavel:'M14 13l-8.38 8.38a1 1 0 0 1-3-3L11 10M16 16l6-6M8 8l6-6M9 7l8 8M21 11l-8-8',
+      cal:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      folder:'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z',
+      files:'M20 7h-3a2 2 0 0 1-2-2V2M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2zM3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8',
+      user:'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+      card:'M2 5h20v14H2zM2 10h20',
+      cog:'M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4',
+      plus:'M5 12h14M12 5v14',bar:'M12 20V10M18 20V4M6 20v-4'
+    };
+    const PEND={'Assistente IA':'IA ainda não conectada','Consulta Processual':'Fonte não configurada','Assinatura':'Pagamento não integrado','Criação de Petições':'Geração por IA não conectada','Análise Documental':'IA ainda não conectada','Pesquisa Jurídica':'Base não conectada','Legislação e Súmulas':'Base não conectada','Jurisprudência':'Base não conectada'};
+    const groups=[['INÍCIO',[['Visão Geral','home']]],['INTELIGÊNCIA JURÍDICA',[['Assistente IA','spark'],['Criação de Petições','pen'],['Análise Documental','fsearch']]],['PESQUISA E PROCESSOS',[['Meus Processos','scale'],['Consulta Processual','search'],['Pesquisa Jurídica','book'],['Legislação e Súmulas','landmark'],['Jurisprudência','gavel']]],['ORGANIZAÇÃO',[['Agenda e Prazos','cal'],['Meus Arquivos','folder'],['Modelos Jurídicos','files']]],['MINHA CONTA',[['Perfil','user'],['Minha Assinatura','card'],['Meu Consumo','bar'],['Configurações Pessoais','cog']]]];
+    const col=!narrow&&s.col;
+    const nav=[]; groups.forEach(([h,items],gi)=>{
+      nav.push({label:h,hl:col?' ':h,hb0:0,hd:(gi||!col)?'block':'none',hb:(col&&gi)?'1px solid #2A2D31':'0',id:'none',hp:col?(gi?'8px 0 0':'0'):(gi?'12px 12px 4px':'0 12px 4px'),d:'',go:()=>{},color:W,bg:'transparent',hov:'transparent',jc:'flex-start'});
+      items.forEach(([l,k])=>{const PG={'Visão Geral':'home','Minha Assinatura':'sub','Meu Consumo':'use'}; const act=PG[l]===s.page; nav.push({label:l,hl:' ',hb:'0',hd:'none',id:'flex',hp:'0',d:I[k],go:PG[l]?()=>{this.setState({drawer:false,page:PG[l]});window.scrollTo({top:0})}:(l==='Assistente IA'?()=>{location.href='JusLegis Workspace.dc.html'}:l==='Criação de Petições'?()=>{location.href='JusLegis Workspace.dc.html#pet'}:this.soon(l)),color:act?'#17191C':W,bg:act?G:'transparent',hov:act?G:'#24272B',jc:col?'center':'flex-start'});});
+    });
+    const P={b:['#EFF3FB','#DCE7F7','#3E5C8F'],g:['#E9F4EE','#D3EADC','#2F6B4C'],e:['#F6EFE6','#EBDDC8','#795A38'],r:['#F8ECEC','#F0D6D6','#9A4A4A']};
+    const ac=(t,s,k,i,n,tag)=>({t,s,d:I[i],bg:P[k][0],ic:P[k][1],fg:P[k][2],go:this.soon(n),tag:tag||'',tg:tag?'inline-block':'none'});
+    const actions=[ac('Assistente IA','Converse, pesquise fundamentos e organize casos.','e','spark','Assistente IA','IA não conectada'),ac('Criar Petição','Elabore a minuta no editor e revise antes de exportar.','b','pen','Criação de Petições'),ac('Analisar Documento','Resumo e pontos de atenção, com o trecho de origem.','g','fsearch','Análise Documental'),ac('Consultar Processo','Busca por número CNJ em fonte autorizada.','r','search','Consulta Processual','Fonte não configurada')];
+    const panels=[
+      {t:'Trabalhos recentes',d:I.pen,e:'Nenhuma petição criada. Nenhuma atividade recente.',b:'Criar petição',go:this.soon('Criação de Petições')},
+      {t:'Próximos compromissos',d:I.cal,e:'Nenhum compromisso registrado.',b:'Registrar compromisso',go:this.soon('Agenda e Prazos')},
+      {t:'Meus processos',d:I.scale,e:'Nenhum processo cadastrado.',b:'Cadastrar processo',go:this.soon('Meus Processos')}
+    ];
+    const o=s.overlay;
+    const ql=s.q.trim();
+    return {
+      nav,actions,panels,narrow,wide:!mobile,
+      txtD:col?'none':'block',colBtn:narrow?'none':'flex',colJc:col?'center':'flex-start',colRot:col?180:0,colTip:col?'Expandir menu':'Recolher menu',toggleCol:()=>this.setState(t=>({col:!t.col})),
+      asideStyle:'width:'+(col?68:216)+'px;transition:width .2s;flex:none;background:#17191C;display:flex;flex-direction:column;padding:18px 8px 10px;'+(narrow?'position:fixed;top:0;bottom:0;left:0;z-index:40;transition:transform .25s;transform:translateX('+((narrow&&s.drawer)?0:-100)+'%);':'position:sticky;top:0;height:100vh;'),
+      showDrawerBg:narrow&&s.drawer,openDrawer:()=>this.setState({drawer:true}),closeDrawer:()=>this.setState({drawer:false}),
+      planLabel:'Teste gratuito',bannerImg:s.w>=1100,searchLabel:s.w<1100?'Buscar…':'Buscar processos, documentos, petições…',
+      isPlan:o==='plan',isNotif:o==='notif',isUser:o==='user',isSearch:o==='search',anyOverlay:!!o&&o!=='search',
+      togglePlan:this.ov('plan'),toggleNotif:this.ov('notif'),toggleUser:this.ov('user'),openSearch:()=>this.setState({overlay:'search',q:''}),closeOverlay:()=>this.setState({overlay:null}),
+      soonSub:()=>this.setState({page:'sub',overlay:null,drawer:false}),isHome:s.page==='home',isSub:s.page==='sub',isUse:s.page==='use',assinar:()=>this.say('O checkout seguro do Mercado Pago ainda não está conectado.'),
+      userMenu:[['Perfil',this.soon('Perfil')],['Minha assinatura',()=>this.setState({page:'sub',overlay:null})],['Meu consumo',()=>this.setState({page:'use',overlay:null})],['Configurações pessoais',this.soon('Configurações Pessoais')],['Sair',()=>{this.setState({overlay:null});this.say('Sem sessão real nesta etapa: login ainda não conectado.')}]].map(([l,go])=>({l,go})),
+      q:s.q,onQ:e=>this.setState({q:e.target.value}),searchMsg:ql?'Nenhum resultado para “'+ql+'”. Ainda não há itens cadastrados.':'Nada para buscar ainda. Cadastre processos e envie documentos para pesquisá-los aqui.',
+      toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

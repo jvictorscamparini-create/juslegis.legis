@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F8F7F4}a{color:#795A38;text-decoration:none}a:hover{color:#B9965B}*{box-sizing:border-box}button{font-family:inherit;cursor:pointer;border:0;background:none;padding:0;color:inherit;text-align:left}button:disabled{cursor:not-allowed}@keyframes jlspin{to{transform:rotate(360deg)}}input,select,textarea{font-family:inherit}</style>
+</helmet>
+<div style="display:flex;min-height:100vh;width:100%;font-family:'Plus Jakarta Sans',sans-serif;color:#17191C;background:#F8F7F4">
+  <sc-if value="{{ drawerBg }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:rgba(23,25,28,.5);z-index:30"></div></sc-if>
+  <aside style="{{ asideStyle }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:2px 0 14px">
+      <svg width="40" height="40" viewBox="0 0 46 46" fill="none" stroke="#B9965B" stroke-width="1.6"><rect x="9" y="9" width="28" height="28" transform="rotate(45 23 23)"/><path d="M23 12v22M15 34h16M16 18h14"/><path d="M16 18l-3 7h6zM30 18l-3 7h6z"/></svg>
+      <div style="display:{{ txtD }};font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.14em;line-height:1;font-weight:500;color:#F8F7F4">JUSLEGIS</div>
+      <div style="display:{{ txtD }};font-size:8.5px;letter-spacing:.26em;color:#B9965B">INTELIGÊNCIA JURÍDICA</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:1px;flex:1;overflow:auto;padding-bottom:8px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="22">
+        <div>
+          <div style="display:{{ n.hd }};padding:{{ n.hp }};font-size:9.5px;letter-spacing:.14em;color:#6E7075;font-weight:600;border-top:{{ n.hb }}">{{ n.hl }}</div>
+          <button onClick="{{ n.go }}" title="{{ n.label }}" style="display:{{ n.id }};align-items:center;gap:11px;padding:8px 12px;border-radius:9px;font-size:13.5px;justify-content:{{ n.jc }};color:{{ n.color }};background:{{ n.bg }};width:100%" style-hover="background:{{ n.hov }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ n.color }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.d }}"/></svg>
+            <span style="flex:1;display:{{ txtD }}">{{ n.label }}</span>
+          </button>
+        </div>
+      </sc-for>
+    </nav>
+    <button onClick="{{ toggleCol }}" title="{{ colTip }}" style="display:{{ colBtn }};align-items:center;justify-content:{{ colJc }};gap:10px;margin-top:6px;padding:8px 12px;border-top:1px solid #2A2D31;font-size:12.5px;color:#A9ABB0;width:100%" style-hover="color:#B9965B"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ colRot }}deg)"><path d="M3 5h18v14H3zM9 5v14m6-9-2 2 2 2"/></svg><span style="display:{{ txtD }}">Recolher menu</span></button>
+  </aside>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:56px;flex:none;display:flex;align-items:center;gap:12px;padding:0 24px;border-bottom:1px solid #ECE9E2;background:#F8F7F4;position:relative;z-index:20">
+      <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}"><button onClick="{{ openDrawer }}" aria-label="Menu" style="width:36px;height:36px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(23,25,28,.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></sc-if>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600">{{ pageTitle }}</div>
+      <div style="flex:1"></div>
+      <div style="position:relative">
+        <button onClick="{{ toggleUser }}" style="display:flex;align-items:center;gap:8px;padding:3px 8px 3px 3px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(23,25,28,.08)"><span style="width:30px;height:30px;border-radius:50%;background:#17191C;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B9965B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></span><span style="font-size:13px;font-weight:600">Minha conta</span></button>
+        <sc-if value="{{ userOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ toggleUser }}" style="position:fixed;inset:0;z-index:40"></div>
+          <div style="position:absolute;right:0;top:44px;width:200px;background:#fff;border-radius:14px;box-shadow:0 16px 40px rgba(23,25,28,.18);padding:6px;z-index:50">
+            <button onClick="{{ soonProfile }}" style="display:block;width:100%;padding:9px 12px;border-radius:8px;font-size:13.5px" style-hover="background:#F8F7F4">Meu perfil</button>
+            <a href="JusLegis Login.dc.html" style="display:block;width:100%;padding:9px 12px;border-radius:8px;font-size:13.5px;color:#17191C" style-hover="background:#F8F7F4">Sair</a>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- ASSISTENTE -->
+    <sc-if value="{{ isAssist }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;height:calc(100vh - 56px);min-height:560px">
+        <section style="display:{{ histD }};width:{{ histW }};flex:none;flex-direction:column;gap:12px;padding:16px;border-right:1px solid #ECE9E2;background:#FBFAF8;overflow:auto">
+          <button onClick="{{ newConv }}" style="background:#17191C;color:#fff;border-radius:10px;padding:10px 14px;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px" style-hover="background:#795A38"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg>Nova conversa</button>
+          <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:10.5px;letter-spacing:.14em;color:#64666B;font-weight:600">CASOS</span><button onClick="{{ toggleNc }}" style="font-size:12px;color:#795A38;font-weight:600">+ Novo caso</button></div>
+          <sc-if value="{{ ncOpen }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:6px"><input value="{{ ncName }}" onInput="{{ onNc }}" onKeyDown="{{ onNcKey }}" placeholder="Nome do caso" style="flex:1;min-width:0;height:34px;border:1px solid #DDD9CF;border-radius:8px;padding:0 10px;font-size:13px;outline:0"/><button onClick="{{ addCase }}" style="background:#B9965B;color:#17191C;border-radius:8px;padding:0 12px;font-size:12.5px;font-weight:600">Criar</button></div></sc-if>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ caseChips }}" as="c" hint-placeholder-count="1"><button onClick="{{ c.go }}" style="padding:5px 11px;border-radius:999px;font-size:12px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for>
+          </div>
+          <sc-if value="{{ noCases }}" hint-placeholder-val="{{ true }}"><div style="font-size:12.5px;color:#64666B;line-height:1.5">Nenhum caso criado. Crie um caso para organizar suas conversas.</div></sc-if>
+          <span style="font-size:10.5px;letter-spacing:.14em;color:#64666B;font-weight:600;margin-top:4px">CONVERSAS</span>
+          <sc-for list="{{ convs }}" as="v" hint-placeholder-count="1">
+            <button onClick="{{ v.go }}" style="padding:9px 11px;border-radius:9px;background:{{ v.bg }};line-height:1.35" style-hover="background:#F1EEE7"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ v.t }}</div><div style="font-size:11.5px;color:#64666B">{{ v.s }}</div></button>
+          </sc-for>
+          <sc-if value="{{ noConvs }}" hint-placeholder-val="{{ true }}"><div style="font-size:12.5px;color:#64666B;line-height:1.5">Nenhuma conversa ainda.</div></sc-if>
+        </section>
+
+        <section style="display:{{ centerD }};flex:1;min-width:0;flex-direction:column;background:#fff">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid #F0EEE9;flex-wrap:wrap">
+            <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}"><button onClick="{{ showHistB }}" style="font-size:12.5px;font-weight:600;border:1px solid #DDD9CF;border-radius:8px;padding:6px 10px">Conversas</button></sc-if>
+            <div style="flex:1;min-width:0;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ convTitle }}</div>
+            <span style="font-size:11.5px;padding:4px 10px;border-radius:999px;background:#EFECE6;color:#4F5156;font-weight:600;white-space:nowrap">IA não conectada</span>
+            <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}"><button onClick="{{ showSrcB }}" style="font-size:12.5px;font-weight:600;border:1px solid #DDD9CF;border-radius:8px;padding:6px 10px">Fontes</button></sc-if>
+          </div>
+          <div style="flex:1;overflow:auto;padding:24px 28px;display:flex;flex-direction:column;gap:18px">
+            <sc-if value="{{ emptyChat }}" hint-placeholder-val="{{ true }}">
+              <div style="margin:auto;max-width:520px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center">
+                <div style="width:52px;height:52px;border-radius:50%;background:#F6EFE6;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="#B9965B"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg></div>
+                <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600">Assistente Jurídico</h2>
+                <p style="margin:0;font-size:13.5px;color:#64666B;line-height:1.6">Pergunte, envie documentos e pesquise fundamentos. Conversas e arquivos ficam restritos à sua conta. O conteúdo da IA é sugestão e exige sua revisão.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+                  <sc-for list="{{ starters }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.go }}" style="border:1px solid #E3DFD6;border-radius:999px;padding:8px 14px;font-size:12.5px;line-height:1.3;white-space:nowrap" style-hover="border-color:#B9965B">{{ x.l }}</button></sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="1">
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ m.al }}">
+                <div style="display:{{ m.uD }};max-width:78%;flex-direction:column;gap:6px">
+                  <span style="font-size:10.5px;letter-spacing:.1em;font-weight:600;color:#3E5C8F;align-self:flex-end">INFORMAÇÃO DO ADVOGADO</span>
+                  <div style="background:#EFF3FB;border-radius:14px 14px 4px 14px;padding:12px 16px;font-size:14px;line-height:1.55;white-space:pre-wrap">{{ m.text }}</div>
+                  <div style="font-size:12px;color:#64666B;align-self:flex-end">{{ m.files }}</div>
+                </div>
+                <div style="display:{{ m.aD }};width:100%;max-width:720px;flex-direction:column;gap:8px">
+                  <span style="font-size:10.5px;letter-spacing:.1em;font-weight:600;color:#795A38">SUGESTÃO DA IA</span>
+                  <div style="border:1px solid #E6D9BC;background:#FBF6EC;border-radius:14px 14px 14px 4px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                    <div style="display:{{ m.ld }};align-items:center;gap:10px;font-size:13.5px;color:#4F5156"><span style="width:14px;height:14px;border-radius:50%;border:2px solid #B9965B;border-top-color:transparent;animation:jlspin 0.8s linear infinite"></span>Consultando o assistente…</div>
+                    <div style="display:{{ m.er }};flex-direction:column;gap:8px">
+                      <div style="font-weight:600;font-size:13.5px;color:#9A3B3B">Assistente indisponível</div>
+                      <div style="font-size:13px;color:#4F5156;line-height:1.55">A API de IA ainda não está conectada. Nenhuma resposta foi gerada e nenhuma fonte jurídica foi consultada. A configuração é feita pelo administrador da plataforma.</div>
+                      <button onClick="{{ m.retry }}" style="align-self:flex-start;border:1px solid #D9C49B;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:600;color:#795A38">Tentar novamente</button>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ aiActs }}" as="a" hint-placeholder-count="3"><button disabled="{{ true }}" title="Disponível quando houver resposta" style="border:1px solid #ECE9E2;border-radius:8px;padding:5px 10px;font-size:12px;color:#A9ABB0">{{ a }}</button></sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:14px 20px 18px;border-top:1px solid #F0EEE9;display:flex;flex-direction:column;gap:8px">
+            <sc-if value="{{ hasFiles }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ files }}" as="f" hint-placeholder-count="1"><span style="display:flex;align-items:center;gap:6px;font-size:12px;background:#EFF3FB;border-radius:8px;padding:5px 10px">{{ f.n }}<button onClick="{{ f.rm }}" aria-label="Remover" style="color:#64666B;font-size:15px;line-height:1">×</button></span></sc-for></div></sc-if>
+            <div style="display:flex;align-items:flex-end;gap:8px;border:1px solid #DDD9CF;border-radius:14px;padding:8px 8px 8px 14px">
+              <textarea value="{{ inp }}" onInput="{{ onInp }}" onKeyDown="{{ onInpKey }}" rows="2" placeholder="Pergunte algo ou descreva a situação…" style="flex:1;min-width:0;border:0;outline:0;resize:none;font-size:14px;line-height:1.5;background:transparent;color:#17191C"></textarea>
+              <input type="file" accept=".pdf,.docx" multiple="{{ true }}" ref="{{ fileRef }}" onChange="{{ onFiles }}" style="display:none"/>
+              <button onClick="{{ pickFiles }}" aria-label="Anexar PDF ou DOCX" title="Anexar PDF ou DOCX" style="width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none" style-hover="background:#F8F7F4"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#64666B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+              <button onClick="{{ send }}" aria-label="Enviar" style="width:40px;height:40px;border-radius:10px;background:{{ sendBg }};display:flex;align-items:center;justify-content:center;flex:none" style-hover="background:#795A38"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></button>
+            </div>
+            <div style="font-size:11.5px;color:#64666B">Aceita PDF e DOCX. Toda resposta é sugestão e deve ser revisada por você.</div>
+          </div>
+        </section>
+
+        <section style="display:{{ srcD }};width:{{ srcW }};flex:none;flex-direction:column;gap:14px;padding:18px;border-left:1px solid #ECE9E2;background:#FBFAF8;overflow:auto">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600">Fontes e fundamentos</span><sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}"><button onClick="{{ hideSrcB }}" style="font-size:12.5px;font-weight:600;color:#795A38">Voltar</button></sc-if></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ legend }}" as="g" hint-placeholder-count="4"><div style="display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.4"><span style="width:10px;height:10px;border-radius:3px;background:{{ g.c }};margin-top:3px;flex:none"></span><span><b>{{ g.l }}</b><br><span style="color:#64666B">{{ g.s }}</span></span></div></sc-for>
+          </div>
+          <div style="border-top:1px solid #ECE9E2;padding-top:12px;font-size:12px;letter-spacing:.1em;font-weight:600;color:#64666B">NESTA CONVERSA</div>
+          <div style="font-size:13px;color:#64666B;line-height:1.55;text-align:center;border:1px dashed #E3DFD6;border-radius:12px;padding:18px 12px">Nenhuma fonte ainda. Os fundamentos de cada resposta aparecerão aqui com fonte, data de consulta e link original.</div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- PETIÇÕES -->
+    <sc-if value="{{ isPet }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px 28px 40px;display:flex;flex-direction:column;gap:18px;width:100%;max-width:1320px;margin:0 auto">
+        <div style="display:flex;gap:6px;overflow:auto;padding-bottom:4px">
+          <sc-for list="{{ steps }}" as="p" hint-placeholder-count="9">
+            <button onClick="{{ p.go }}" style="display:flex;align-items:center;gap:8px;padding:7px 12px 7px 8px;border-radius:999px;border:1px solid {{ p.bd }};background:{{ p.bg }};white-space:nowrap;font-size:12.5px;font-weight:600;color:{{ p.fg }}"><span style="width:20px;height:20px;border-radius:50%;background:{{ p.nb }};color:{{ p.nf }};display:flex;align-items:center;justify-content:center;font-size:11px">{{ p.n }}</span>{{ p.l }}</button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ wiz }}" hint-placeholder-val="{{ true }}">
+          <section style="background:#fff;border-radius:18px;padding:24px 26px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:18px;max-width:880px;width:100%;align-self:center">
+            <div><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600">{{ stepTitle }}</h2><div style="font-size:13px;color:#64666B;margin-top:4px;line-height:1.5">{{ stepHelp }}</div></div>
+
+            <sc-if value="{{ hasChoices }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px">
+                <sc-for list="{{ choices }}" as="o" hint-placeholder-count="8"><button onClick="{{ o.go }}" style="padding:14px 16px;border-radius:12px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};font-size:14px;font-weight:600">{{ o.l }}</button></sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ hasFields }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+                <sc-for list="{{ fields }}" as="f" hint-placeholder-count="4">
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600;grid-column:{{ f.span }}">{{ f.l }}
+                    <sc-if value="{{ f.isIn }}" hint-placeholder-val="{{ true }}"><input value="{{ f.val }}" onInput="{{ f.on }}" placeholder="{{ f.ph }}" style="height:38px;border:1px solid #DDD9CF;border-radius:9px;padding:0 12px;font-size:13.5px;outline:0"/></sc-if>
+                    <sc-if value="{{ f.isSel }}" hint-placeholder-val="{{ false }}"><select value="{{ f.val }}" onChange="{{ f.on }}" style="height:38px;border:1px solid #DDD9CF;border-radius:9px;padding:0 10px;font-size:13.5px;background:#fff"><sc-for list="{{ f.opts }}" as="q" hint-placeholder-count="3"><option value="{{ q.v }}">{{ q.t }}</option></sc-for></select></sc-if>
+                    <sc-if value="{{ f.isArea }}" hint-placeholder-val="{{ false }}"><textarea value="{{ f.val }}" onInput="{{ f.on }}" rows="6" placeholder="{{ f.ph }}" style="border:1px solid #DDD9CF;border-radius:9px;padding:10px 12px;font-size:13.5px;line-height:1.5;outline:0;resize:vertical"></textarea></sc-if>
+                  </label>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ s5 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <input type="file" accept=".pdf,.docx,.txt" multiple="{{ true }}" ref="{{ pfileRef }}" onChange="{{ onPfiles }}" style="display:none"/>
+                <button onClick="{{ pickPfiles }}" style="border:1.5px dashed #CDB78A;border-radius:14px;padding:26px;text-align:center;font-size:13.5px;color:#795A38;font-weight:600;background:#FBF6EC">Selecionar arquivos (PDF, DOCX ou TXT)</button>
+                <sc-for list="{{ pfiles }}" as="d" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #ECE9E2;border-radius:10px;font-size:13px"><span style="flex:1">{{ d.n }}</span><span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#EFF3FB;color:#3E5C8F">Enviado por você</span><button onClick="{{ d.rm }}" style="color:#64666B;font-size:16px;line-height:1">×</button></div></sc-for>
+                <div style="display:{{ noPfiles }};font-size:13px;color:#64666B;text-align:center;padding:6px">Nenhum documento anexado.</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ s6 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="font-size:12.5px;font-weight:600">Fundamentos</div>
+                <div style="border:1px dashed #E3DFD6;border-radius:12px;padding:14px;font-size:13px;color:#64666B;line-height:1.5">A pesquisa em fontes jurídicas verificadas ainda não está conectada. Você pode registrar fundamentos manualmente; eles ficam marcados como não verificados.</div>
+                <div style="display:flex;gap:8px"><input value="{{ fundIn }}" onInput="{{ onFundIn }}" placeholder="Ex.: dispositivo legal, súmula ou precedente que você deseja citar" style="flex:1;min-width:0;height:38px;border:1px solid #DDD9CF;border-radius:9px;padding:0 12px;font-size:13.5px;outline:0"/><button onClick="{{ addFund }}" style="background:#17191C;color:#fff;border-radius:9px;padding:0 16px;font-size:13px;font-weight:600">Adicionar</button></div>
+                <sc-for list="{{ funds }}" as="u" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #ECE9E2;border-radius:10px;font-size:13px"><span style="flex:1">{{ u.t }}</span><span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#EFECE6;color:#4F5156;white-space:nowrap">Não verificado</span><button onClick="{{ u.rm }}" style="color:#64666B;font-size:16px;line-height:1">×</button></div></sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ s7 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="border:1px solid #ECE9E2;border-radius:12px">
+                  <sc-for list="{{ summary }}" as="r" hint-placeholder-count="7"><div style="display:flex;gap:12px;padding:10px 14px;border-top:1px solid #F0EEE9;font-size:13px"><span style="width:150px;flex:none;color:#64666B">{{ r.l }}</span><span style="flex:1;color:{{ r.c }}">{{ r.v }}</span></div></sc-for>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <button onClick="{{ generate }}" style="background:#B9965B;color:#17191C;border-radius:10px;padding:11px 20px;font-size:13.5px;font-weight:600" style-hover="background:#D2B27A">Gerar minuta com IA</button>
+                  <button onClick="{{ openEditor }}" style="border:1px solid #DDD9CF;border-radius:10px;padding:11px 20px;font-size:13.5px;font-weight:600" style-hover="border-color:#B9965B">Abrir estrutura no editor</button>
+                </div>
+                <div style="display:{{ genLoad }};align-items:center;gap:10px;font-size:13.5px;color:#4F5156"><span style="width:14px;height:14px;border-radius:50%;border:2px solid #B9965B;border-top-color:transparent;animation:jlspin 0.8s linear infinite"></span>Gerando minuta…</div>
+                <div style="display:{{ genErr }};background:#FBEFEF;border-radius:10px;padding:12px 14px;font-size:13px;color:#9A3B3B;line-height:1.5">Geração indisponível: a API de IA ainda não está conectada. Nenhum texto foi produzido. Você pode abrir a estrutura da peça no editor e redigir manualmente.</div>
+              </div>
+            </sc-if>
+
+            <div style="display:flex;justify-content:space-between;gap:10px;border-top:1px solid #F0EEE9;padding-top:16px">
+              <button onClick="{{ prev }}" style="padding:10px 16px;font-size:13px;font-weight:600;color:#64666B;visibility:{{ prevV }}">Voltar</button>
+              <button onClick="{{ next }}" style="display:{{ nextD }};background:#17191C;color:#fff;border-radius:10px;padding:10px 22px;font-size:13px;font-weight:600" style-hover="background:#795A38">Continuar</button>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ s8 }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:{{ edCols }};gap:16px;align-items:start">
+            <section style="display:{{ outD }};background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(23,25,28,.06);flex-direction:column;gap:8px">
+              <div style="font-size:10.5px;letter-spacing:.14em;color:#64666B;font-weight:600">ESTRUTURA</div>
+              <sc-for list="{{ outline }}" as="h" hint-placeholder-count="6"><div style="font-size:13px;padding:5px 0;color:#4F5156">{{ h }}</div></sc-for>
+              <div style="border-top:1px solid #F0EEE9;margin-top:8px;padding-top:10px;font-size:12px;color:#64666B;line-height:1.5">Colchetes [ ] indicam campos a completar por você.</div>
+            </section>
+            <section style="min-width:0;display:flex;flex-direction:column;gap:10px">
+              <div style="background:#fff;border-radius:12px;padding:8px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;box-shadow:0 1px 3px rgba(23,25,28,.06)">
+                <select onChange="{{ onBlock }}" style="height:32px;border:1px solid #DDD9CF;border-radius:8px;font-size:12.5px;padding:0 8px;background:#fff"><option value="P">Parágrafo</option><option value="H2">Título</option><option value="H3">Subtítulo</option></select>
+                <sc-for list="{{ tools }}" as="t" hint-placeholder-count="9"><button onMouseDown="{{ noBlur }}" onClick="{{ t.go }}" title="{{ t.tip }}" aria-label="{{ t.tip }}" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center" style-hover="background:#F1EEE7"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"/></svg></button></sc-for>
+                <div style="flex:1"></div>
+                <button onClick="{{ saveVersion }}" style="border:1px solid #DDD9CF;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:600" style-hover="border-color:#B9965B">Salvar versão</button>
+                <button onClick="{{ toExport }}" style="background:#17191C;color:#fff;border-radius:8px;padding:7px 14px;font-size:12.5px;font-weight:600" style-hover="background:#795A38">Exportar</button>
+              </div>
+              <div style="background:#E9E6DF;border-radius:12px;padding:20px 12px;overflow:auto">
+                <div contentEditable="true" suppressContentEditableWarning="{{ true }}" ref="{{ edRef }}" style="background:#fff;width:100%;max-width:794px;min-height:900px;margin:0 auto;padding:56px 64px;font-family:'Times New Roman',Times,serif;font-size:16px;line-height:1.7;color:#17191C;outline:0;box-shadow:0 2px 12px rgba(23,25,28,.12);text-align:justify"></div>
+              </div>
+            </section>
+            <section style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;gap:4px;background:#F8F7F4;border-radius:10px;padding:3px">
+                <sc-for list="{{ rtabs }}" as="b" hint-placeholder-count="3"><button onClick="{{ b.go }}" style="flex:1;text-align:center;padding:7px 4px;border-radius:8px;font-size:12.5px;font-weight:600;background:{{ b.bg }};color:{{ b.fg }}">{{ b.l }}</button></sc-for>
+              </div>
+              <sc-if value="{{ r1 }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ legend }}" as="g" hint-placeholder-count="4"><div style="display:flex;gap:8px;font-size:11.5px;align-items:center"><span style="width:9px;height:9px;border-radius:3px;background:{{ g.c }};flex:none"></span>{{ g.l }}</div></sc-for>
+                  <div style="border-top:1px solid #F0EEE9;padding-top:10px;display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ funds }}" as="u" hint-placeholder-count="1"><div style="border:1px solid #ECE9E2;border-radius:10px;padding:10px;font-size:12.5px;line-height:1.45;display:flex;flex-direction:column;gap:6px"><span>{{ u.t }}</span><span style="font-size:11px;color:#64666B">Informado por você · não verificado</span><button onMouseDown="{{ noBlur }}" onClick="{{ u.ins }}" style="align-self:flex-start;font-size:12px;font-weight:600;color:#795A38">Inserir no texto</button></div></sc-for>
+                    <div style="display:{{ noFunds }};font-size:12.5px;color:#64666B;line-height:1.5">Nenhum fundamento adicionado. Registre-os na etapa 6.</div>
+                  </div>
+                  <button onClick="{{ checkCites }}" style="border:1px solid #DDD9CF;border-radius:9px;padding:9px;font-size:12.5px;font-weight:600;text-align:center" style-hover="border-color:#B9965B">Verificar citações</button>
+                  <div style="display:{{ citeMsgD }};background:#FBEFEF;border-radius:9px;padding:10px;font-size:12px;color:#9A3B3B;line-height:1.5">Verificação indisponível: a base jurídica não está conectada. Nenhuma citação foi confirmada.</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ r2 }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <button onClick="{{ aiAct }}" style="border:1px solid #DDD9CF;border-radius:9px;padding:10px;font-size:12.5px;font-weight:600;text-align:center" style-hover="border-color:#B9965B">Revisar minuta</button>
+                  <button onClick="{{ aiAct }}" style="border:1px solid #DDD9CF;border-radius:9px;padding:10px;font-size:12.5px;font-weight:600;text-align:center" style-hover="border-color:#B9965B">Reescrever trecho selecionado</button>
+                  <div style="display:{{ aiMsgD }};background:#FBEFEF;border-radius:9px;padding:10px;font-size:12px;color:#9A3B3B;line-height:1.5">IA não conectada. Configuração pendente do administrador.</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ r3 }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ versions }}" as="w" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:8px;border:1px solid #ECE9E2;border-radius:10px;padding:9px 10px;font-size:12.5px"><span style="flex:1">{{ w.l }}</span><button onClick="{{ w.go }}" style="font-weight:600;color:#795A38">Restaurar</button></div></sc-for>
+                  <div style="display:{{ noVers };font-size:12.5px;color:#64666B">Nenhuma versão salva.</div>
+                </div>
+              </sc-if>
+              <div style="font-size:11px;color:#64666B;line-height:1.5;border-top:1px solid #F0EEE9;padding-top:10px">Toda minuta exige revisão humana do advogado.</div>
+            </section>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ s9 }}" hint-placeholder-val="{{ false }}">
+          <section style="background:#fff;border-radius:18px;padding:24px 26px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:16px;max-width:880px;width:100%;align-self:center">
+            <div><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600">Salvar e exportar</h2><div style="font-size:13px;color:#64666B;margin-top:4px">Confirme a revisão antes de exportar.</div></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+              <sc-for list="{{ exps }}" as="x" hint-placeholder-count="2"><button onClick="{{ x.go }}" style="border:1.5px solid #E3DFD6;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:6px" style-hover="border-color:#B9965B"><span style="font-weight:600;font-size:15px">{{ x.l }}</span><span style="font-size:12.5px;color:#64666B">{{ x.s }}</span></button></sc-for>
+            </div>
+            <div style="display:{{ expMsgD }};background:#FBEFEF;border-radius:10px;padding:12px 14px;font-size:13px;color:#9A3B3B;line-height:1.5">Exportação indisponível nesta etapa: o arquivo será gerado pelo backend. Nada foi exportado.</div>
+            <div style="font-size:12.5px;color:#64666B;line-height:1.5">Toda minuta deve ser revisada pelo advogado responsável antes do protocolo.</div>
+            <div style="display:flex;justify-content:space-between;border-top:1px solid #F0EEE9;padding-top:16px"><button onClick="{{ backEd }}" style="padding:10px 16px;font-size:13px;font-weight:600;color:#64666B">Voltar ao editor</button></div>
+          </section>
+        </sc-if>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:90;background:#17191C;color:#F8F7F4;padding:12px 18px;border-radius:12px;font-size:13.5px;box-shadow:0 12px 30px rgba(23,25,28,.3);max-width:calc(100vw - 32px);display:flex;gap:10px;align-items:center;line-height:1.4"><span style="width:8px;height:8px;border-radius:50%;background:#B9965B;flex:none"></span>{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page:'assist', col:false, drawer:false, toast:'', w:1440, userOpen:false,
+    hist:false, src:false, cases:[], convs:[], msgs:{}, conv:null, caseF:'all', ncOpen:false, ncName:'', inp:'', files:[],
+    step:1, f:{tipo:'',area:'',trib:'',uf:'',vara:'',cnj:'',autor:'',reu:'',fatos:'',pedidos:''}, pfiles:[], funds:[], fundIn:'', gen:'idle', rtab:1, versions:[], citeMsg:false, aiMsg:false, expMsg:false };
+  fileRef=React.createRef(); pfileRef=React.createRef(); doc=''; nid=1;
+  edRef=(el)=>{ this.ed=el; if(el&&!el._i){ el._i=1; el.innerHTML=this.doc||''; } };
+  componentDidMount(){ this.rs=()=>this.setState({w:window.innerWidth}); this.rs(); window.addEventListener('resize',this.rs); if(location.hash==='#pet')this.setState({page:'pet'}); }
+  componentWillUnmount(){ window.removeEventListener('resize',this.rs); clearTimeout(this.tt); }
+  say=(m)=>{ this.setState({toast:m}); clearTimeout(this.tt); this.tt=setTimeout(()=>this.setState({toast:''}),3200); };
+  soon=(n)=>()=>{ this.setState({drawer:false,userOpen:false}); this.say('“'+n+'” será desenhada em uma próxima etapa.'); };
+  esc=(t)=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  skeleton(){ const f=this.state.f, e=this.esc, H='font-family:Cormorant Garamond,serif;font-size:19px;font-weight:700;margin:22px 0 6px;text-align:left', P='margin:0 0 10px;text-indent:2em';
+    return `<p style="text-align:center;margin:0 0 14px"><b>EXCELENTÍSSIMO(A) SENHOR(A) DOUTOR(A) JUIZ(A) DE DIREITO DA ${e(f.vara)||'[VARA/COMPETÊNCIA]'} — ${e(f.trib)||'[TRIBUNAL]'}${f.uf?' / '+e(f.uf):''}</b></p><p style="margin:0 0 14px">${f.cnj?'Processo nº '+e(f.cnj):'Processo nº [número CNJ, se houver]'}</p><h1 style="text-align:center;font-size:18px;margin:18px 0">${e((f.tipo||'[Tipo de peça]').toUpperCase())}</h1><h2 style="${H}">QUALIFICAÇÃO DAS PARTES</h2><p style="${P}">${e(f.autor)||'[Qualificação do autor/requerente]'}, em face de ${e(f.reu)||'[qualificação do réu/requerido]'}.</p><h2 style="${H}">DOS FATOS</h2><p style="${P}">${e(f.fatos).replace(/\n/g,'<br>')||'[Descrever os fatos]'}</p><h2 style="${H}">DO DIREITO</h2><p style="${P}">[Inserir fundamentos jurídicos verificados, com fonte.]</p><h2 style="${H}">DOS PEDIDOS</h2><p style="${P}">${e(f.pedidos).replace(/\n/g,'<br>')||'[Listar os pedidos]'}</p><p style="${P}">Nestes termos, pede deferimento.</p><p style="${P}">[Local], [data].</p><p style="${P}">[Nome do advogado] — OAB/[UF] [número]</p>`; }
+  setStep=(n)=>()=>{ if(this.ed)this.doc=this.ed.innerHTML; if(n>=8&&!this.doc)this.doc=this.skeleton(); this.setState({step:n}); };
+  cmd=(c,v)=>()=>{ if(this.ed){ this.ed.focus(); document.execCommand(c,false,v); } };
+  newConv=()=>this.setState({conv:null,inp:'',files:[],hist:false});
+  send=()=>{ const s=this.state; const text=s.inp.trim(); if(!text&&!s.files.length){this.say('Escreva uma pergunta ou anexe um arquivo.');return;}
+    let id=s.conv, convs=s.convs; if(id==null){ id=this.nid++; convs=[{id,t:(text||s.files[0]).slice(0,48),c:s.caseF==='all'?null:s.caseF},...convs]; }
+    const arr=(s.msgs[id]||[]).concat([{u:1,text,files:s.files.length?'Anexos: '+s.files.join(', '):''},{u:0,st:'loading'}]);
+    this.setState({convs,conv:id,msgs:{...s.msgs,[id]:arr},inp:'',files:[]}); this.fail(id); };
+  fail=(id)=>setTimeout(()=>this.setState(s=>{ const a=(s.msgs[id]||[]).map(m=>m.st==='loading'?{...m,st:'error'}:m); return {msgs:{...s.msgs,[id]:a}}; }),1200);
+  retry=(id,i)=>()=>{ this.setState(s=>({msgs:{...s.msgs,[id]:s.msgs[id].map((m,j)=>j===i?{...m,st:'loading'}:m)}})); this.fail(id); };
+  renderVals(){
+    const s=this.state, narrow=s.w<980, G='#B9965B', W='#F8F7F4', col=!narrow&&s.col;
+    const I={home:'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',spark:'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z',pen:'M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5M14 2v4a2 2 0 0 0 2 2h4M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z',fsearch:'M14 2v4a2 2 0 0 0 2 2h4M4.268 21a2 2 0 0 0 1.727 1H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3M9 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11.1 16.1 13 18',scale:'m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1ZM2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1ZM7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2',search:'m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z',book:'M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z',landmark:'M10 18v-7M14 18v-7M18 18v-7M3 22h18M6 18v-7M12 2 3 7h18z',gavel:'M14 13l-8.38 8.38a1 1 0 0 1-3-3L11 10M16 16l6-6M8 8l6-6M9 7l8 8M21 11l-8-8',cal:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',folder:'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z',files:'M20 7h-3a2 2 0 0 1-2-2V2M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2zM3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8',user:'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',card:'M2 5h20v14H2zM2 10h20',bar:'M12 20V10M18 20V4M6 20v-4',cog:'M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4'};
+    const groups=[['INÍCIO',[['Visão Geral','home']]],['INTELIGÊNCIA JURÍDICA',[['Assistente IA','spark'],['Criação de Petições','pen'],['Análise Documental','fsearch']]],['PESQUISA E PROCESSOS',[['Meus Processos','scale'],['Consulta Processual','search'],['Pesquisa Jurídica','book'],['Legislação e Súmulas','landmark'],['Jurisprudência','gavel']]],['ORGANIZAÇÃO',[['Agenda e Prazos','cal'],['Meus Arquivos','folder'],['Modelos Jurídicos','files']]],['MINHA CONTA',[['Perfil','user'],['Minha Assinatura','card'],['Meu Consumo','bar'],['Configurações Pessoais','cog']]]];
+    const PG={'Assistente IA':'assist','Criação de Petições':'pet'};
+    const nav=[]; groups.forEach(([h,items],gi)=>{ nav.push({label:h,hl:col?' ':h,hd:(gi||!col)?'block':'none',hb:(col&&gi)?'1px solid #2A2D31':'0',id:'none',hp:col?(gi?'8px 0 0':'0'):(gi?'12px 12px 4px':'0 12px 4px'),d:'',go:()=>{},color:W,bg:'transparent',hov:'transparent',jc:'flex-start'});
+      items.forEach(([l,k])=>{ const act=PG[l]===s.page; nav.push({label:l,hl:' ',hb:'0',hd:'none',id:'flex',hp:'0',d:I[k],go:l==='Visão Geral'?()=>{location.href='JusLegis Dashboard v3.dc.html'}:PG[l]?()=>this.setState({page:PG[l],drawer:false}):this.soon(l),color:act?'#17191C':W,bg:act?G:'transparent',hov:act?G:'#24272B',jc:col?'center':'flex-start'}); }); });
+
+    const cur=s.conv, curMsgs=cur!=null?(s.msgs[cur]||[]):[], curConv=s.convs.find(c=>c.id===cur);
+    const caseName=id=>{const c=s.cases.find(x=>x.id===id);return c?c.n:'Sem caso'};
+    const chips=[{id:'all',n:'Todos'},...s.cases].map(c=>({l:c.n,bg:s.caseF===c.id?'#17191C':'#fff',fg:s.caseF===c.id?'#fff':'#17191C',bd:s.caseF===c.id?'#17191C':'#DDD9CF',go:()=>this.setState({caseF:c.id})}));
+    const convs=s.convs.filter(c=>s.caseF==='all'||c.c===s.caseF).map(c=>({t:c.t,s:caseName(c.c),bg:c.id===cur?'#F1EEE7':'transparent',go:()=>this.setState({conv:c.id,hist:false})}));
+    const msgs=curMsgs.map((m,i)=>({al:m.u?'flex-end':'flex-start',uD:m.u?'flex':'none',aD:m.u?'none':'flex',text:m.text,files:m.files,ld:m.st==='loading'?'flex':'none',er:m.st==='error'?'flex':'none',retry:this.retry(cur,i)}));
+    const fill=t=>()=>this.setState({inp:t});
+    const showH=!narrow||s.hist, showS=!narrow||s.src;
+    const legend=[{l:'Fundamento verificado',s:'Fonte oficial confirmada, com data de consulta e link.',c:'#2F6B4C'},{l:'Informação do advogado',s:'Texto e arquivos enviados por você.',c:'#3E5C8F'},{l:'Sugestão da IA',s:'Conteúdo gerado; exige sua revisão.',c:G},{l:'Referência não confirmada',s:'Citação ainda não verificada.',c:'#9A3B3B'}];
+
+    const setF=(k,v)=>this.setState(t=>({f:{...t.f,[k]:v}}));
+    const fld=(l,k,kind,o={})=>({l,span:o.span||'auto',isIn:kind==='text',isSel:kind==='sel',isArea:kind==='area',ph:o.ph||'',val:s.f[k],opts:(o.opts||[]).map(([v,t])=>({v,t})),on:e=>setF(k,e.target.value)});
+    const TIPOS=['Petição inicial','Contestação','Réplica','Recurso','Manifestação','Cumprimento de sentença','Contrato','Parecer jurídico'];
+    const AREAS=['Cível','Trabalhista','Penal','Tributário','Previdenciário','Consumidor','Administrativo','Família e Sucessões','Empresarial'];
+    const pick=(k,list)=>list.map(l=>({l,bg:s.f[k]===l?'#FBF6EC':'#fff',bd:s.f[k]===l?G:'#E3DFD6',go:()=>setF(k,l)}));
+    const st=s.step;
+    const done=[s.f.tipo,s.f.area,s.f.trib,s.f.fatos,s.pfiles.length,s.funds.length||s.f.pedidos];
+    const SN=['Tipo de peça','Área do Direito','Tribunal','Fatos','Documentos','Fundamentos','Gerar minuta','Revisar','Exportar'];
+    const steps=SN.map((l,i)=>{const n=i+1,a=n===st,d=n<7&&!!done[i];return {n:d&&!a?'✓':n,l,bg:a?'#17191C':'#fff',fg:a?'#fff':'#17191C',bd:a?'#17191C':'#E3DFD6',nb:a?G:d?'#2F6B4C':'#EFECE6',nf:a?'#17191C':d?'#fff':'#64666B',go:this.setStep(n)};});
+    const HELP=['Selecione o modelo de peça a elaborar.','A área orienta a estrutura e os fundamentos.','Informe onde a peça será protocolada.','Informe as partes e descreva os fatos relevantes.','Anexe os documentos de apoio. Eles ficam restritos à sua conta.','Registre pedidos e fundamentos que deseja incluir.','Confira os dados antes de gerar.'];
+    let choices=[],fields=[];
+    if(st===1)choices=pick('tipo',TIPOS); if(st===2)choices=pick('area',AREAS);
+    if(st===3)fields=[fld('Justiça / tribunal','trib','sel',{opts:[['','Selecione'],['Justiça Estadual','Justiça Estadual'],['Justiça Federal','Justiça Federal'],['Justiça do Trabalho','Justiça do Trabalho'],['Tribunais Superiores','Tribunais Superiores']]}),fld('UF / comarca','uf','text',{ph:'Ex.: GO / Goiânia'}),fld('Vara ou competência','vara','text',{ph:'Informe a vara ou o juízo'}),fld('Número CNJ (se houver)','cnj','text',{ph:'0000000-00.0000.0.00.0000'})];
+    if(st===4)fields=[fld('Autor / requerente','autor','text',{ph:'Nome e qualificação'}),fld('Réu / requerido','reu','text',{ph:'Nome e qualificação'}),fld('Fatos relevantes','fatos','area',{span:'1 / -1',ph:'Descreva os fatos com suas palavras.'})];
+    if(st===6)fields=[fld('Pedidos','pedidos','area',{span:'1 / -1',ph:'Liste os pedidos da peça.'})];
+    const row=(l,v)=>({l,v:v||'Não informado',c:v?'#17191C':'#A9ABB0'});
+    const summary=[row('Tipo de peça',s.f.tipo),row('Área do Direito',s.f.area),row('Tribunal',[s.f.trib,s.f.uf].filter(Boolean).join(' · ')),row('Partes',[s.f.autor,s.f.reu].filter(Boolean).join(' × ')),row('Fatos',s.f.fatos?'Informados':''),row('Documentos',s.pfiles.length?s.pfiles.length+' anexado(s)':''),row('Fundamentos',s.funds.length?s.funds.length+' (não verificados)':'')];
+    const tl=(d,tip,c,v)=>({d,tip,go:this.cmd(c,v)});
+    const tools=[tl('M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8','Negrito','bold'),tl('M19 4h-9M14 20H5M15 4 9 20','Itálico','italic'),tl('M6 4v6a6 6 0 0 0 12 0V4M4 20h16','Sublinhado','underline'),tl('M21 5H3M15 12H3M17 19H3','Alinhar à esquerda','justifyLeft'),tl('M21 5H3M17 12H7M19 19H5','Centralizar','justifyCenter'),tl('M3 5h18M3 12h18M3 19h18','Justificar','justifyFull'),tl('M10 12h11M10 18h11M10 6h11M4 10h2M4 6h1v4M6 18H4c0-1 2-2 2-3s-1-1.5-2-1','Lista numerada','insertOrderedList'),tl('M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13','Desfazer','undo'),tl('M21 7v6h-6M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13','Refazer','redo')];
+    const rtabs=[[1,'Fundamentos'],[2,'IA'],[3,'Versões']].map(([k,l])=>({l,bg:s.rtab===k?'#fff':'transparent',fg:s.rtab===k?'#17191C':'#64666B',go:()=>this.setState({rtab:k})}));
+    const ins=(t)=>()=>{ if(this.ed){ this.ed.focus(); document.execCommand('insertText',false,' '+t+' '); } };
+    const two=s.w>=1200;
+    return {
+      nav,narrow,txtD:col?'none':'block',colBtn:narrow?'none':'flex',colJc:col?'center':'flex-start',colRot:col?180:0,colTip:col?'Expandir menu':'Recolher menu',toggleCol:()=>this.setState(t=>({col:!t.col})),
+      asideStyle:'width:'+(col?68:216)+'px;transition:width .2s;flex:none;background:#17191C;display:flex;flex-direction:column;padding:18px 8px 10px;'+(narrow?'position:fixed;top:0;bottom:0;left:0;z-index:40;transition:transform .25s;transform:translateX('+(s.drawer?0:-100)+'%);':'position:sticky;top:0;height:100vh;'),
+      drawerBg:narrow&&s.drawer,openDrawer:()=>this.setState({drawer:true}),closeDrawer:()=>this.setState({drawer:false}),
+      pageTitle:s.page==='assist'?'Assistente Jurídico IA':'Criação de Petições',userOpen:s.userOpen,toggleUser:()=>this.setState(t=>({userOpen:!t.userOpen})),soonProfile:this.soon('Perfil'),
+      isAssist:s.page==='assist',isPet:s.page==='pet',
+      histD:showH?'flex':'none',histW:narrow?'100%':'260px',srcD:showS?'flex':'none',srcW:narrow?'100%':'290px',centerD:(narrow&&(s.hist||s.src))?'none':'flex',
+      showHistB:()=>this.setState({hist:true}),showSrcB:()=>this.setState({src:true}),hideSrcB:()=>this.setState({src:false}),
+      newConv:this.newConv,ncOpen:s.ncOpen,ncName:s.ncName,toggleNc:()=>this.setState(t=>({ncOpen:!t.ncOpen})),onNc:e=>this.setState({ncName:e.target.value}),
+      addCase:()=>{const n=s.ncName.trim(); if(!n)return; const id='c'+this.nid++; this.setState({cases:[...s.cases,{id,n}],caseF:id,ncName:'',ncOpen:false});},onNcKey:e=>{if(e.key==='Enter'){const n=s.ncName.trim(); if(!n)return; const id='c'+this.nid++; this.setState({cases:[...s.cases,{id,n}],caseF:id,ncName:'',ncOpen:false});}},
+      caseChips:chips,noCases:s.cases.length===0,convs,noConvs:convs.length===0,
+      convTitle:curConv?curConv.t:'Nova conversa',emptyChat:curMsgs.length===0,msgs,
+      starters:['Resumir um documento enviado','Pesquisar fundamentos para um tema','Estruturar uma petição'].map(l=>({l,go:fill(l)})),
+      aiActs:['Copiar','Salvar em documento','Usar na petição','Ver fundamentos'],
+      inp:s.inp,onInp:e=>this.setState({inp:e.target.value}),onInpKey:e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();this.send();}},send:this.send,sendBg:(s.inp.trim()||s.files.length)?'#795A38':G,
+      fileRef:this.fileRef,pickFiles:()=>this.fileRef.current&&this.fileRef.current.click(),onFiles:e=>{const n=Array.from(e.target.files||[]).map(f=>f.name); this.setState(t=>({files:[...t.files,...n]})); e.target.value='';},
+      hasFiles:s.files.length>0,files:s.files.map((n,i)=>({n,rm:()=>this.setState(t=>({files:t.files.filter((_,j)=>j!==i)}))})),legend,
+      steps,wiz:st<=7,stepTitle:SN[st-1],stepHelp:HELP[st-1]||'',hasChoices:choices.length>0,choices,hasFields:fields.length>0,fields,
+      s5:st===5,s6:st===6,s7:st===7,s8:st===8,s9:st===9,
+      pfileRef:this.pfileRef,pickPfiles:()=>this.pfileRef.current&&this.pfileRef.current.click(),onPfiles:e=>{const n=Array.from(e.target.files||[]).map(f=>f.name); this.setState(t=>({pfiles:[...t.pfiles,...n]})); e.target.value='';},
+      pfiles:s.pfiles.map((n,i)=>({n,rm:()=>this.setState(t=>({pfiles:t.pfiles.filter((_,j)=>j!==i)}))})),noPfiles:s.pfiles.length?'none':'block',
+      fundIn:s.fundIn,onFundIn:e=>this.setState({fundIn:e.target.value}),addFund:()=>{const t=s.fundIn.trim(); if(t)this.setState({funds:[...s.funds,t],fundIn:''});},
+      funds:s.funds.map((t,i)=>({t,rm:()=>this.setState(x=>({funds:x.funds.filter((_,j)=>j!==i)})),ins:ins(t)})),noFunds:s.funds.length?'none':'block',
+      summary,generate:()=>{this.setState({gen:'load'});setTimeout(()=>this.setState({gen:'err'}),1300);},openEditor:this.setStep(8),genLoad:s.gen==='load'?'flex':'none',genErr:s.gen==='err'?'block':'none',
+      prev:()=>this.setStep(Math.max(1,st-1))(),prevV:st>1?'visible':'hidden',next:()=>this.setStep(st+1)(),nextD:st<7?'block':'none',
+      edCols:two?'190px minmax(0,1fr) 290px':'minmax(0,1fr)',outD:two?'flex':'none',outline:['Endereçamento','Qualificação das partes','Dos fatos','Do direito','Dos pedidos','Fechamento'],
+      tools,noBlur:e=>e.preventDefault(),onBlock:e=>{ if(this.ed){this.ed.focus();document.execCommand('formatBlock',false,e.target.value);} },edRef:this.edRef,
+      saveVersion:()=>{ if(this.ed)this.doc=this.ed.innerHTML; const d=new Date(); const l='Versão '+(s.versions.length+1)+' · '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); this.setState({versions:[{l,html:this.doc},...s.versions]}); this.say('Versão salva neste navegador (protótipo).'); },
+      toExport:this.setStep(9),rtabs,r1:s.rtab===1,r2:s.rtab===2,r3:s.rtab===3,
+      checkCites:()=>this.setState({citeMsg:true}),citeMsgD:s.citeMsg?'block':'none',aiAct:()=>this.setState({aiMsg:true}),aiMsgD:s.aiMsg?'block':'none',
+      versions:s.versions.map(v=>({l:v.l,go:()=>{this.doc=v.html; if(this.ed)this.ed.innerHTML=v.html; this.say('Versão restaurada.');}})),noVers:s.versions.length?'none':'block',
+      exps:[['Documento Word (DOCX)','Editável, para ajustes finais.'],['PDF','Pronto para leitura e protocolo após revisão.']].map(([l,t])=>({l,s:t,go:()=>this.setState({expMsg:true})})),expMsgD:s.expMsg?'block':'none',backEd:this.setStep(8),
+      toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

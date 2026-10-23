@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#17191C}a{color:#795A38;text-decoration:none}a:hover{color:#B9965B}*{box-sizing:border-box}button{font-family:inherit;cursor:pointer;border:0;background:none;padding:0;color:inherit;text-align:left}input{font-family:inherit}</style>
+</helmet>
+<div style="min-height:100vh;display:grid;grid-template-columns:{{ cols }};font-family:'Plus Jakarta Sans',sans-serif;color:#17191C">
+  <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+    <div style="position:relative;background:#17191C;color:#F8F7F4;display:flex;flex-direction:column;justify-content:space-between;padding:48px;overflow:hidden">
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#1B1A17 0 14px,#211E19 14px 28px)"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,25,28,.2),rgba(23,25,28,.9))"></div>
+      <div style="position:relative;display:flex;align-items:center;gap:12px"><svg width="36" height="36" viewBox="0 0 46 46" fill="none" stroke="#B9965B" stroke-width="1.6"><rect x="9" y="9" width="28" height="28" transform="rotate(45 23 23)"/><path d="M23 12v22M15 34h16M16 18h14"/><path d="M16 18l-3 7h6zM30 18l-3 7h6z"/></svg><span style="font-family:'Cormorant Garamond',serif;font-size:28px;letter-spacing:.14em">JUSLEGIS</span></div>
+      <div style="position:relative;display:flex;flex-direction:column;gap:14px;max-width:460px">
+        <div style="font-family:monospace;font-size:11px;color:#8A7550">[ imagem: estátua da Justiça, bronze, biblioteca desfocada ]</div>
+        <h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:48px;line-height:1.05">Inteligência jurídica para uma advocacia mais eficiente.</h1>
+        <p style="margin:0;color:#CFCABF;font-size:15px;line-height:1.6">Petições, análise de documentos e pesquisa em uma única plataforma.</p>
+      </div>
+    </div>
+  </sc-if>
+  <div style="background:#F8F7F4;display:flex;align-items:center;justify-content:center;padding:32px 24px">
+    <div style="width:400px;max-width:100%;display:flex;flex-direction:column;gap:20px">
+      <div style="display:{{ stepAuth }};flex-direction:column;gap:20px">
+        <div><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600">{{ title }}</h2><div style="font-size:13.5px;color:#64666B;margin-top:6px;line-height:1.5">{{ lead }}</div></div>
+        <button onClick="{{ google }}" style="height:46px;border:1px solid #DDD9CF;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:600" style-hover="border-color:#B9965B"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Continuar com Google</button>
+        <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:#64666B"><span style="flex:1;height:1px;background:#E3DFD6"></span>ou<span style="flex:1;height:1px;background:#E3DFD6"></span></div>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600">E-mail<input value="{{ email }}" onInput="{{ onEmail }}" placeholder="seu@email.com.br" type="email" style="height:44px;border:1px solid #DDD9CF;border-radius:11px;padding:0 14px;font-size:14px;outline:0;background:#fff"/></label>
+        <div style="display:{{ errD }};font-size:12.5px;color:#9A3B3B">{{ err }}</div>
+        <button onClick="{{ sendCode }}" style="height:46px;border-radius:11px;background:#17191C;color:#fff;font-size:14px;font-weight:600;text-align:center" style-hover="background:#795A38">Enviar código por e-mail</button>
+        <div style="font-size:13px;color:#4F5156;text-align:center">{{ switchQ }} <button onClick="{{ toggleMode }}" style="color:#795A38;font-weight:600">{{ switchL }}</button></div>
+        <div style="font-size:12px;color:#64666B;text-align:center;line-height:1.5">Sem CPF, telefone ou endereço. Teste gratuito de 7 dias, sem cartão.</div>
+      </div>
+
+      <div style="display:{{ stepCode };flex-direction:column;gap:18px">
+        <div><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600">Confirme seu e-mail</h2><div style="font-size:13.5px;color:#64666B;margin-top:6px;line-height:1.5">Informe o código de verificação enviado para <b style="color:#17191C">{{ email }}</b>.</div></div>
+        <input value="{{ code }}" onInput="{{ onCode }}" maxlength="6" placeholder="000000" inputmode="numeric" style="height:52px;border:1px solid #DDD9CF;border-radius:11px;text-align:center;font-size:24px;letter-spacing:.4em;outline:0;background:#fff"/>
+        <button onClick="{{ verify }}" style="height:46px;border-radius:11px;background:#17191C;color:#fff;font-size:14px;font-weight:600;text-align:center" style-hover="background:#795A38">Verificar código</button>
+        <div style="display:{{ codeErrD }};background:#FBEFEF;border-radius:10px;padding:11px 13px;font-size:12.5px;color:#9A3B3B;line-height:1.5">Autenticação ainda não conectada. Nenhum código foi enviado ou verificado. O login real será feito pelo Supabase Auth.</div>
+        <button onClick="{{ back }}" style="font-size:13px;color:#64666B;text-align:center">Usar outro e-mail</button>
+      </div>
+
+      <div style="display:{{ stepDemo };flex-direction:column;gap:14px">
+        <div><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600">Pré-visualizar destinos</h2><div style="font-size:13.5px;color:#64666B;margin-top:6px;line-height:1.5">Após o login real, o servidor identificará a permissão da conta e redirecionará. Estes atalhos apenas demonstram os destinos.</div></div>
+        <a href="JusLegis Workspace.dc.html" style="border:1px solid #DDD9CF;background:#fff;border-radius:12px;padding:14px 16px;font-size:14px;font-weight:600;color:#17191C" style-hover="border-color:#B9965B">Advogado → Workspace</a>
+        <a href="JusLegis Admin.dc.html" style="border:1px solid #DDD9CF;background:#fff;border-radius:12px;padding:14px 16px;font-size:14px;font-weight:600;color:#17191C" style-hover="border-color:#B9965B">Administrador Geral → JusLegis Admin</a>
+        <a href="JusLegis Acesso Negado.dc.html" style="border:1px solid #DDD9CF;background:#fff;border-radius:12px;padding:14px 16px;font-size:14px;font-weight:600;color:#17191C" style-hover="border-color:#B9965B">Advogado tentando abrir o Admin → Acesso negado</a>
+        <button onClick="{{ back }}" style="font-size:13px;color:#64666B;text-align:center">Voltar ao login</button>
+      </div>
+      <div style="font-size:11.5px;color:#64666B;text-align:center"><button onClick="{{ toDemo }}" style="color:#795A38">Protótipo visual · ver destinos por tipo de conta</button></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { mode:'in', step:'auth', email:'', code:'', err:'', codeErr:false, w:1440 };
+  componentDidMount(){ this.rs=()=>this.setState({w:window.innerWidth}); this.rs(); window.addEventListener('resize',this.rs); }
+  componentWillUnmount(){ window.removeEventListener('resize',this.rs); }
+  renderVals(){
+    const s=this.state, up=s.mode==='up';
+    return { wide:s.w>=900, cols:s.w>=900?'1.1fr 1fr':'1fr',
+      title:up?'Criar conta':'Entrar', lead:up?'Comece o teste gratuito de 7 dias em poucos segundos.':'Acesse seu workspace jurídico.',
+      switchQ:up?'Já tem conta?':'Ainda não tem conta?', switchL:up?'Entrar':'Criar conta', toggleMode:()=>this.setState({mode:up?'in':'up'}),
+      stepAuth:s.step==='auth'?'flex':'none', stepCode:s.step==='code'?'flex':'none', stepDemo:s.step==='demo'?'flex':'none',
+      email:s.email, onEmail:e=>this.setState({email:e.target.value,err:''}), err:s.err, errD:s.err?'block':'none',
+      google:()=>this.setState({step:'code',email:s.email||'sua conta Google',codeErr:false}),
+      sendCode:()=>{ if(!/^\S+@\S+\.\S+$/.test(s.email)){this.setState({err:'Informe um e-mail válido.'});return;} this.setState({step:'code',codeErr:false,code:''}); },
+      code:s.code, onCode:e=>this.setState({code:e.target.value.replace(/\D/g,'')}), verify:()=>this.setState({codeErr:true}), codeErrD:s.codeErr?'block':'none',
+      back:()=>this.setState({step:'auth',codeErr:false}), toDemo:()=>this.setState({step:'demo'}) };
+  }
+}
+</script>
+</body>
+</html>

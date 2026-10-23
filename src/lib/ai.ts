@@ -1,0 +1,106 @@
+import "server-only";
+import { openAiKey } from "@/lib/env";
+import type { Settings } from "@/lib/settings";
+
+// Integração com a OpenAI pela Responses API. A chave nunca sai do servidor.
+
+export type AiInputPart =
+  | { type: "input_text"; text: string }
+  | { type: "input_file"; filename: string; file_data: string };
+
+export type AiMessage =
+  | { role: "user"; content: AiInputPart[] }
+  | { role: "assistant"; content: string };
+
+export type AiErrorCode = "not_configured" | "no_model" | "auth" | "model" | "quota" | "upstream" | "network";
+
+export type AiResult =
+  | { ok: true; text: string; model: string; inputTokens: number; outputTokens: number }
+  | { ok: false; code: AiErrorCode; message: string };
+
+export const DEFAULT_INSTRUCTIONS =
+  "Você é o assistente jurídico da JusLegis, apoiando advogados brasileiros. Responda em português do Brasil, " +
+  "de forma objetiva e técnica. Nunca invente leis, súmulas, julgados ou números de processo: quando não tiver " +
+  "certeza de uma fonte, diga isso claramente e indique que a referência precisa ser verificada. " +
+  "Todo conteúdo é uma sugestão e deve ser revisado pelo advogado responsável.";
+
+const ERROR_MESSAGES: Record<AiErrorCode, string> = {
+  not_configured:
+    "A API de IA ainda não está conectada. Nenhuma resposta foi gerada. A configuração é feita pelo administrador da plataforma.",
+  no_model: "Nenhum modelo de IA foi autorizado pelo administrador. Nenhuma resposta foi gerada.",
+  auth: "A credencial da OpenAI foi recusada. Nenhuma resposta foi gerada.",
+  model: "O modelo configurado não está disponível para esta credencial. Nenhuma resposta foi gerada.",
+  quota: "Limite de uso da OpenAI atingido. Tente novamente mais tarde.",
+  upstream: "A OpenAI retornou um erro. Nenhuma resposta foi gerada.",
+  network: "Não foi possível contatar a OpenAI. Nenhuma resposta foi gerada.",
+};
+
+export function aiError(code: AiErrorCode): AiResult {
+  return { ok: false, code, message: ERROR_MESSAGES[code] };
+}
+
+type ResponsesApiOutput = {
+  model?: string;
+  output?: { type: string; content?: { type: string; text?: string }[] }[];
+  usage?: { input_tokens?: number; output_tokens?: number };
+  error?: { message?: string; code?: string } | null;
+};
+
+export function extractOutputText(data: ResponsesApiOutput) {
+  return (data.output ?? [])
+    .filter((item) => item.type === "message")
+    .flatMap((item) => item.content ?? [])
+    .filter((c) => c.type === "output_text" && typeof c.text === "string")
+    .map((c) => c.text)
+    .join("\n")
+    .trim();
+}
+
+export async function generate(opts: {
+  config: Settings["ai_model"];
+  instructions?: string;
+  input: AiMessage[];
+  fetchImpl?: typeof fetch;
+}): Promise<AiResult> {
+  const key = openAiKey();
+  if (!key) return aiError("not_configured");
+  if (!opts.config.model) return aiError("no_model");
+
+  const body: Record<string, unknown> = {
+    model: opts.config.model,
+    instructions: opts.instructions || DEFAULT_INSTRUCTIONS,
+    input: opts.input,
+    temperature: opts.config.temperature,
+    store: false,
+  };
+  if (opts.config.max_output_tokens) body.max_output_tokens = opts.config.max_output_tokens;
+
+  let res: Response;
+  try {
+    res = await (opts.fetchImpl ?? fetch)("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(120_000),
+    });
+  } catch {
+    return aiError("network");
+  }
+
+  const data = (await res.json().catch(() => ({}))) as ResponsesApiOutput;
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) return aiError("auth");
+    if (res.status === 404 || data.error?.code === "model_not_found") return aiError("model");
+    if (res.status === 429) return aiError("quota");
+    return aiError("upstream");
+  }
+  const text = extractOutputText(data);
+  if (!text) return aiError("upstream");
+  return {
+    ok: true,
+    text,
+    model: data.model ?? opts.config.model,
+    inputTokens: data.usage?.input_tokens ?? 0,
+    outputTokens: data.usage?.output_tokens ?? 0,
+  };
+}

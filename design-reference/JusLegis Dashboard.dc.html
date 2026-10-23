@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F8F7F4}a{color:#795A38;text-decoration:none}a:hover{color:#B9965B}*{box-sizing:border-box}</style>
+</helmet>
+<div style="display:flex;min-height:1024px;width:100%;min-width:1280px;font-family:'Plus Jakarta Sans',sans-serif;color:#17191C;background:#17191C">
+  <aside style="width:256px;flex:none;background:#17191C;display:flex;flex-direction:column;padding:28px 12px 16px;gap:4px;color:#F8F7F4">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 0 28px">
+      <svg width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="#B9965B" stroke-width="1.6"><rect x="9" y="9" width="28" height="28" transform="rotate(45 23 23)"/><path d="M23 12v22M15 34h16M16 18h14"/><path d="M16 18l-3 7h6zM30 18l-3 7h6z"/></svg>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:34px;letter-spacing:.14em;line-height:1;font-weight:500">JUSLEGIS</div>
+      <div style="font-size:10px;letter-spacing:.28em;color:#B9965B">INTELIGÊNCIA JURÍDICA</div>
+    </div>
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="11">
+      <a href="#" style="display:flex;align-items:center;gap:16px;padding:11px 16px;border-radius:10px;font-size:14.5px;line-height:1.25;color:{{ n.color }};background:{{ n.bg }}" style-hover="background:#24272B">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ n.color }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.d }}"/></svg>
+        <span>{{ n.label }}</span>
+      </a>
+    </sc-for>
+    <div style="flex:1"></div>
+    <div style="border:1px solid #2E3135;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:11px;letter-spacing:.14em;color:#B9965B">TESTE GRATUITO</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;line-height:1.1">5 de 7 dias restantes</div>
+      <div style="height:4px;border-radius:4px;background:#2E3135"><div style="width:71%;height:100%;border-radius:4px;background:#B9965B"></div></div>
+      <div style="font-size:12px;color:#A9ABB0">Consumo de IA: 38% do limite</div>
+    </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;background:#F8F7F4;display:flex;flex-direction:column">
+    <header style="position:relative;height:250px;background:#17191C;overflow:hidden;color:#fff">
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#1E1B17 0 14px,#25211B 14px 28px)"></div>
+      <div style="position:absolute;right:300px;top:0;bottom:0;width:380px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8A7550;text-align:center;line-height:1.6;border-left:1px dashed #4A3F2C;border-right:1px dashed #4A3F2C">[ imagem do banner ]<br>estátua da Justiça, bronze,<br>biblioteca ao fundo — 1600×500</div>
+      <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(23,25,28,.92) 20%,rgba(23,25,28,.1) 70%)"></div>
+      <div style="position:absolute;left:40px;top:56px;max-width:520px">
+        <h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:60px;line-height:1.02">Seu escritório mais produtivo.</h1>
+        <p style="margin:14px 0 0;font-size:17px;line-height:1.4;color:#E9E4DA;max-width:380px">Inteligência artificial e ferramentas jurídicas em um só lugar.</p>
+      </div>
+      <div style="position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:22px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M6 8a6 6 0 0112 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 004 0"/></svg>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:44px;height:44px;border-radius:50%;background:#B9965B;color:#17191C;display:flex;align-items:center;justify-content:center;font-weight:600">DS</div>
+          <div style="line-height:1.3"><div style="font-size:14px;font-weight:600">Dra. Ana Souza</div><div style="font-size:12px;color:#CFCABF">Advogada · demonstração</div></div>
+        </div>
+      </div>
+      <div style="position:absolute;right:28px;top:100px;width:300px;height:50px;border-radius:10px;background:#fff;display:flex;align-items:center;gap:12px;padding:0 16px;color:#64666B;font-size:14px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Buscar no sistema…
+      </div>
+    </header>
+
+    <div style="margin-top:-8px;border-radius:24px 0 0 0;background:#F8F7F4;padding:16px;display:flex;flex-direction:column;gap:16px;flex:1;position:relative">
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+        <sc-for list="{{ cards }}" as="c" hint-placeholder-count="8">
+          <a href="#" style="display:flex;gap:16px;padding:20px;border-radius:18px;background:{{ c.bg }};color:#17191C;min-height:152px;position:relative;box-shadow:0 1px 2px rgba(23,25,28,.04)" style-hover="box-shadow:0 8px 20px rgba(23,25,28,.1)">
+            <div style="width:50px;height:50px;border-radius:12px;background:{{ c.ic }};display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{ c.fg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.d }}"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding-right:18px">
+              <div style="font-weight:600;font-size:16px;line-height:1.2">{{ c.t }}</div>
+              <div style="font-size:13px;line-height:1.45;color:#64666B">{{ c.s }}</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" style="position:absolute;right:18px;bottom:16px"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.15fr 1fr 1.15fr;gap:16px">
+        <section style="background:#fff;border-radius:18px;padding:20px 22px;box-shadow:0 1px 3px rgba(23,25,28,.06)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px"><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600">Agenda de hoje</h2><a href="#" style="font-size:13px">Ver todos →</a></div>
+          <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="4">
+            <div style="display:flex;gap:14px;padding:9px 0;align-items:flex-start">
+              <div style="width:44px;font-size:14px;color:#17191C;padding-top:1px">{{ a.h }}</div>
+              <div style="width:10px;height:10px;border-radius:50%;background:#795A38;margin-top:5px;flex:none"></div>
+              <div style="line-height:1.35"><div style="font-weight:600;font-size:14.5px">{{ a.t }}</div><div style="font-size:13px;color:#64666B">{{ a.s }}</div></div>
+            </div>
+          </sc-for>
+        </section>
+        <section style="background:#fff;border-radius:18px;padding:20px 22px;box-shadow:0 1px 3px rgba(23,25,28,.06)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600">Calendário</h2><span style="font-weight:600;font-size:14px">{{ monthLabel }}</span></div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:13px;row-gap:4px">
+            <sc-for list="{{ dows }}" as="w" hint-placeholder-count="7"><div style="color:#64666B;font-weight:600;padding-bottom:4px">{{ w }}</div></sc-for>
+            <sc-for list="{{ days }}" as="d" hint-placeholder-count="35">
+              <div style="height:30px;display:flex;align-items:center;justify-content:center;position:relative"><span style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ d.bg }};color:{{ d.fg }};font-weight:{{ d.w }}">{{ d.n }}</span></div>
+            </sc-for>
+          </div>
+        </section>
+        <section style="background:#fff;border-radius:18px;padding:20px 22px;box-shadow:0 1px 3px rgba(23,25,28,.06)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600">Meus processos</h2><a href="#" style="font-size:13px">Ver todos →</a></div>
+          <sc-for list="{{ procs }}" as="p" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0EEE9">
+              <div style="width:8px;height:8px;border-radius:50%;background:{{ p.dot }};flex:none"></div>
+              <div style="flex:1;min-width:0;line-height:1.35"><div style="font-size:13.5px;font-weight:500">{{ p.n }}</div><div style="font-size:12.5px;color:#64666B">{{ p.t }}</div></div>
+              <span style="font-size:11.5px;padding:4px 10px;border-radius:8px;background:{{ p.bg }};color:#17191C;white-space:nowrap">{{ p.s }}</span>
+            </div>
+          </sc-for>
+          <div style="font-size:11px;color:#64666B;padding-top:8px">Dados fictícios para demonstração.</div>
+        </section>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.15fr 1fr 1.15fr;gap:16px;align-items:stretch">
+        <section style="background:#fff;border-radius:18px;padding:18px 22px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:10px">
+          <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600">Trabalhos e documentos recentes</h2>
+          <sc-for list="{{ recents }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;gap:8px"><span style="font-weight:500">{{ r.t }}</span><span style="color:#64666B;white-space:nowrap">{{ r.s }}</span></div>
+          </sc-for>
+        </section>
+        <section style="background:#17191C;color:#F8F7F4;border-radius:18px;padding:18px 22px;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="font-size:11px;letter-spacing:.14em;color:#B9965B">MINHA ASSINATURA</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:24px">Período de teste · 5 dias</div>
+          <div style="font-size:12.5px;color:#A9ABB0">Sem cobrança automática. Planos em breve.</div>
+          <a href="#" style="margin-top:4px;align-self:flex-start;background:#B9965B;color:#17191C;font-weight:600;font-size:13px;padding:9px 16px;border-radius:9px" style-hover="background:#D2B27A;color:#17191C">Contratar assinatura</a>
+        </section>
+        <section style="display:flex;flex-direction:column;gap:10px;justify-content:space-between">
+          <div style="background:#fff;border-radius:14px;height:56px;display:flex;align-items:center;gap:12px;padding:0 8px 0 18px;box-shadow:0 1px 3px rgba(23,25,28,.06)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#B9965B"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg>
+            <span style="flex:1;color:#64666B;font-size:13.5px">Pergunte algo ao seu Assistente Jurídico…</span>
+            <div style="width:42px;height:42px;border-radius:10px;background:#795A38;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="font-size:12.5px;font-weight:600;width:100%">Acesso rápido</span>
+            <sc-for list="{{ quick }}" as="q" hint-placeholder-count="3"><a href="#" style="background:#fff;border-radius:999px;padding:9px 14px;font-size:12.5px;color:#17191C;box-shadow:0 1px 3px rgba(23,25,28,.08)">{{ q }}</a></sc-for>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const G='#B9965B', W='#F8F7F4';
+    const ic = {
+      home:'M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10',
+      chat:'M4 5h16v11H9l-5 4zM9 10h.01M12 10h.01M15 10h.01',
+      doc:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7',
+      scan:'M6 3h9l4 4v14H6zM9 12l2 2 4-4',
+      search:'M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-5-5',
+      book:'M3 5c3-1 6-1 9 1v14c-3-2-6-2-9-1zM21 5c-3-1-6-1-9 1v14c3-2 6-2 9-1z',
+      cal:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+      calg:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01',
+      folder:'M3 6h6l2 2h10v11H3z',
+      tpl:'M5 3h14v18H5zM9 8h6M9 12h6M9 16h4',
+      card:'M3 6h18v12H3zM3 10h18',
+      cog:'M12 9a3 3 0 100 6 3 3 0 000-6zM19 12l2-1-1-3-2 .5-1.5-1.5.5-2-3-1-1 2h-2l-1-2-3 1 .5 2L6 8.500 4 8l-1 3 2 1v0l-2 1 1 3 2-.5L7.500 17l-.5 2 3 1 1-2h2l1 2 3-1-.5-2 1.500-1.500 2 .5 1-3z'
+    };
+    const nav=[['Início','home'],['Assistente Jurídico IA','chat'],['Criação de Petições','doc'],['Análise de Documentos','scan'],['Consulta Processual','search'],['Leis, Súmulas e Jurisprudência','book'],['Agenda','cal'],['Calendário','calg'],['Meus Arquivos','folder'],['Modelos Jurídicos','tpl'],['Minha Assinatura','card'],['Configurações','cog']]
+      .map(([label,k],i)=>({label,d:ic[k],color:i==0?'#17191C':W,bg:i==0?G:'transparent'}));
+    const P={b:['#EFF3FB','#DCE7F7','#3E5C8F'],g:['#E9F4EE','#D3EADC','#3F7A5A'],l:['#F0ECF7','#E1D9F0','#5E4B8B'],e:['#F6EFE6','#EBDDC8','#795A38'],r:['#F8ECEC','#F0D6D6','#9A4A4A']};
+    const cd=(t,s,k,i)=>({t,s,d:ic[i],bg:P[k][0],ic:P[k][1],fg:P[k][2]});
+    const cards=[cd('Assistente Jurídico IA','Tire dúvidas, pesquise fundamentos e organize sua rotina.','e','chat'),cd('Criação de Petições','Gere minutas com apoio de IA, sempre sujeitas à sua revisão.','b','doc'),cd('Análise de Documentos','Resuma e revise contratos, petições e outros arquivos.','g','scan'),cd('Consulta Processual','Consulta por número CNJ. Fonte ainda não configurada.','r','search'),cd('Legislação e Jurisprudência','Pesquise leis, súmulas e precedentes com fonte e data.','l','book'),cd('Agenda','Organize compromissos e tarefas informados por você.','e','cal'),cd('Calendário','Visualize audiências e prazos cadastrados.','g','calg'),cd('Meus Arquivos','Pastas por caso, de forma segura e organizada.','r','folder')];
+    const agenda=[['09:00','Audiência','Processo nº 0000000-00.0000.0.00.0000'],['10:30','Reunião com cliente','Contrato empresarial'],['14:00','Prazo processual','Resposta à contestação (informado)'],['16:00','Estudo de caso','Revisão de jurisprudência']].map(([h,t,s])=>({h,t,s}));
+    const now=new Date(2026,9,23), y=2026, m=9, first=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate(), prev=new Date(y,m,0).getDate();
+    const days=[]; for(let i=0;i<42;i++){const n=i-first+1; if(i>=35&&n>dim)break; const out=n<1||n>dim; days.push({n:n<1?prev+n:n>dim?n-dim:n,fg:out?'#B5B6BA':'#17191C',bg:!out&&n==23?G:(!out&&[14,28].includes(n)?'#F1E6D3':'transparent'),w:!out&&n==23?600:400});}
+    const S={a:['#DCE7F7','Em andamento','#3E5C8F'],c:['#D3EADC','Concluído','#3F7A5A'],w:['#F6E7C8','Aguardando prazo','#C58A1E']};
+    const procs=[['0000001-00.2026.8.09.0001','Ação de Indenização','a'],['0000002-00.2026.8.09.0002','Ação Trabalhista','c'],['0000003-00.2026.8.09.0003','Ação de Cobrança','w'],['0000004-00.2026.8.09.0004','Inventário','a']].map(([n,t,k])=>({n,t,bg:S[k][0],s:S[k][1],dot:S[k][2]}));
+    const recents=[['Contestação — Caso Silva','há 2 h'],['Contrato de prestação.pdf','ontem'],['Parecer — Caso Costa','há 3 dias']].map(([t,s])=>({t,s}));
+    return {nav,cards,agenda,days,dows:['D','S','T','Q','Q','S','S'],monthLabel:'Outubro 2026',procs,recents,quick:['Modelos de petições','Calculadoras','Links úteis']};
+  }
+}
+</script>
+</body>
+</html>

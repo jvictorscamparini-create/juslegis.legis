@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F8F7F4}a{color:#795A38;text-decoration:none}a:hover{color:#B9965B}*{box-sizing:border-box}button{font-family:inherit;cursor:pointer;border:0;background:none;padding:0;color:inherit;text-align:left}input,select{font-family:inherit}</style>
+</helmet>
+<div style="display:flex;min-height:100vh;width:100%;font-family:'Plus Jakarta Sans',sans-serif;color:#17191C;background:#F8F7F4">
+  <sc-if value="{{ drawerBg }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:rgba(23,25,28,.5);z-index:30"></div></sc-if>
+
+  <aside style="{{ asideStyle }}">
+    <div style="display:flex;align-items:center;gap:10px;padding:2px 8px 16px">
+      <svg width="30" height="30" viewBox="0 0 46 46" fill="none" stroke="#B9965B" stroke-width="1.7" style="flex:none"><rect x="9" y="9" width="28" height="28" transform="rotate(45 23 23)"/><path d="M23 12v22M15 34h16M16 18h14"/><path d="M16 18l-3 7h6zM30 18l-3 7h6z"/></svg>
+      <div style="line-height:1.1"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:.12em;color:#F8F7F4">JUSLEGIS</div><div style="font-size:9px;letter-spacing:.3em;color:#B9965B;font-weight:600">ADMIN</div></div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:1px;flex:1;overflow:auto">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="26">
+        <div>
+          <div style="display:{{ n.hd }};padding:{{ n.hp }};font-size:9.5px;letter-spacing:.14em;color:#6E7075;font-weight:600">{{ n.label }}</div>
+          <button onClick="{{ n.go }}" style="display:{{ n.id }};align-items:center;gap:11px;padding:7px 10px;border-radius:8px;font-size:13px;color:{{ n.color }};background:{{ n.bg }};width:100%" style-hover="background:{{ n.hov }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ n.color }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.d }}"/></svg><span>{{ n.label }}</span>
+          </button>
+        </div>
+      </sc-for>
+    </nav>
+    <a href="JusLegis Dashboard v3.dc.html" style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px;border-top:1px solid #2A2D31;font-size:12.5px;color:#A9ABB0" style-hover="color:#B9965B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Voltar ao workspace</a>
+  </aside>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:56px;display:flex;align-items:center;gap:12px;padding:0 28px;border-bottom:1px solid #ECE9E2;position:sticky;top:0;background:#F8F7F4;z-index:20">
+      <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}"><button onClick="{{ openDrawer }}" aria-label="Menu" style="width:36px;height:36px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(23,25,28,.08)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></sc-if>
+      <div style="font-size:12.5px;color:#64666B">{{ crumb }}</div>
+      <div style="flex:1"></div>
+      <sc-if value="{{ showProto }}" hint-placeholder-val="{{ true }}"><span style="font-size:11.5px;padding:5px 10px;border-radius:999px;background:#EFECE6;color:#4F5156;font-weight:600;white-space:nowrap">Protótipo visual · nada é salvo</span></sc-if>
+      <span style="width:32px;height:32px;border-radius:50%;background:#17191C;display:flex;align-items:center;justify-content:center" title="Administrador"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B9965B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></span>
+    </div>
+
+    <div style="padding:28px 36px 48px;max-width:1180px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+      <div>
+        <h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1">{{ title }}</h1>
+        <p style="margin:6px 0 0;font-size:13.5px;color:#64666B;line-height:1.5;max-width:720px">{{ sub }}</p>
+      </div>
+      <sc-if value="{{ hasTabs }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:4px;border-bottom:1px solid #E6E2D9;overflow-x:auto;overflow-y:hidden">
+          <sc-for list="{{ tabs }}" as="b" hint-placeholder-count="4">
+            <button onClick="{{ b.go }}" style="padding:10px 14px;font-size:13px;font-weight:600;white-space:nowrap;color:{{ b.fg }};border-bottom:2px solid {{ b.bd }};margin-bottom:-1px">{{ b.l }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="2">
+        <section style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:16px">
+          <div style="display:{{ sec.hd }};justify-content:space-between;align-items:flex-start;gap:12px">
+            <div><h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600">{{ sec.title }}</h2><div style="font-size:12.5px;color:#64666B;margin-top:3px;line-height:1.5">{{ sec.desc }}</div></div>
+            <span style="display:{{ sec.tg }};font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid #D9C49B;color:#795A38;font-weight:600;white-space:nowrap">{{ sec.tag }}</span>
+          </div>
+
+          <sc-if value="{{ sec.isTiles }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+              <sc-for list="{{ sec.tiles }}" as="t" hint-placeholder-count="4">
+                <div style="border:1px solid #ECE9E2;border-radius:12px;padding:14px 16px"><div style="font-size:12px;color:#64666B">{{ t.l }}</div><div style="font-family:'Cormorant Garamond',serif;font-size:30px;line-height:1.2;color:#B5B6BA">—</div><div style="font-size:11.5px;color:#64666B">Dados ainda não disponíveis</div></div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sec.isStatus }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #F0EEE9;font-size:13.5px"><span style="flex:1;font-weight:500">{{ r.n }}</span><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;background:#EFECE6;color:#4F5156">{{ r.s }}</span><button onClick="{{ r.go }}" style="font-size:12.5px;color:#795A38;font-weight:600">Configurar</button></div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sec.isSecrets }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <sc-for list="{{ sec.rows }}" as="r" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #F0EEE9;font-size:13px;flex-wrap:wrap"><span style="flex:1;min-width:200px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px">{{ r.n }}</span><span style="font-size:11.5px;color:#64666B">{{ r.k }}</span><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;background:#EFECE6;color:#4F5156">{{ r.s }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sec.isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center;padding:26px 12px;border:1px dashed #E3DFD6;border-radius:12px;font-size:13.5px;color:#64666B">{{ sec.empty }}</div>
+          </sc-if>
+
+          <sc-if value="{{ sec.isForm }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">
+              <sc-for list="{{ sec.fields }}" as="f" hint-placeholder-count="4">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600">{{ f.l }}
+                  <sc-if value="{{ f.isIn }}" hint-placeholder-val="{{ true }}"><input type="{{ f.type }}" value="{{ f.val }}" onInput="{{ f.on }}" placeholder="{{ f.ph }}" disabled="{{ f.dis }}" style="height:38px;border:1px solid #DDD9CF;border-radius:9px;padding:0 12px;font-size:13.5px;background:#fff;outline:0;color:#17191C"/></sc-if>
+                  <sc-if value="{{ f.isSel }}" hint-placeholder-val="{{ false }}"><select value="{{ f.val }}" onChange="{{ f.on }}" style="height:38px;border:1px solid #DDD9CF;border-radius:9px;padding:0 10px;font-size:13.5px;background:#fff;color:#17191C"><sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}" disabled="{{ o.d }}">{{ o.t }}</option></sc-for></select></sc-if>
+                  <sc-if value="{{ f.isRange }}" hint-placeholder-val="{{ false }}"><input type="range" min="0" max="1" step="0.1" value="{{ f.val }}" onInput="{{ f.on }}" style="accent-color:#B9965B;height:38px"/></sc-if>
+                  <span style="font-weight:400;color:#64666B;font-size:11.5px;line-height:1.4">{{ f.hint }}</span>
+                </label>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sec.isToggles }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <sc-for list="{{ sec.toggles }}" as="g" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:14px;padding:11px 0;border-top:1px solid #F0EEE9">
+                  <div style="flex:1;font-size:13.5px;line-height:1.4"><span style="font-weight:500">{{ g.l }}</span><div style="font-size:11.5px;color:#64666B">{{ g.hint }}</div></div>
+                  <button onClick="{{ g.go }}" aria-label="{{ g.l }}" style="width:38px;height:22px;border-radius:999px;background:{{ g.bg }};position:relative;flex:none;opacity:{{ g.op }}"><span style="position:absolute;top:2px;left:{{ g.left }}px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s"></span></button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sec.isTable }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-if value="{{ sec.hasToolbar }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;gap:10px">
+                  <sc-for list="{{ sec.fields }}" as="f" hint-placeholder-count="3">
+                    <sc-if value="{{ f.isIn }}" hint-placeholder-val="{{ true }}"><input value="{{ f.val }}" onInput="{{ f.on }}" placeholder="{{ f.ph }}" style="height:36px;border:1px solid #DDD9CF;border-radius:9px;padding:0 12px;font-size:13px;min-width:220px;outline:0"/></sc-if>
+                    <sc-if value="{{ f.isSel }}" hint-placeholder-val="{{ false }}"><select value="{{ f.val }}" onChange="{{ f.on }}" style="height:36px;border:1px solid #DDD9CF;border-radius:9px;padding:0 10px;font-size:13px;background:#fff"><sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.t }}</option></sc-for></select></sc-if>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="overflow:auto"><div style="min-width:560px;display:grid;grid-template-columns:{{ sec.grid }};gap:12px;padding:10px 14px;background:#F8F7F4;border-radius:9px;font-size:11.5px;font-weight:600;color:#64666B;letter-spacing:.04em">
+                <sc-for list="{{ sec.cols }}" as="c" hint-placeholder-count="5"><span>{{ c }}</span></sc-for></div></div>
+              <div style="text-align:center;padding:26px 12px;font-size:13.5px;color:#64666B;display:flex;flex-direction:column;align-items:center;gap:12px">{{ sec.empty }}
+                <sc-if value="{{ sec.hasBtn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ sec.btnGo }}" style="background:#17191C;color:#fff;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600" style-hover="background:#795A38">{{ sec.btn }}</button></sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sec.isCards }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">
+              <sc-for list="{{ sec.cards }}" as="k" hint-placeholder-count="5">
+                <div style="border:1px solid #ECE9E2;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div style="font-weight:600;font-size:15px">{{ k.name }}</div><div style="font-size:12px;color:#64666B;margin-top:2px;line-height:1.4">{{ k.desc }}</div></div><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;background:#EFECE6;color:#4F5156;white-space:nowrap">{{ k.status }}</span></div>
+                  <div style="display:{{ k.envD }};gap:4px;background:#F8F7F4;border-radius:9px;padding:3px;align-self:flex-start">
+                    <sc-for list="{{ k.envs }}" as="e" hint-placeholder-count="2"><button onClick="{{ e.go }}" style="padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;background:{{ e.bg }};color:{{ e.fg }}">{{ e.l }}</button></sc-for>
+                  </div>
+                  <div style="font-size:12px;color:#64666B">{{ k.last }}</div>
+                  <div style="display:{{ k.msgD }};font-size:12px;color:#9A3B3B;background:#FBEFEF;border-radius:8px;padding:8px 10px;line-height:1.45">{{ k.msg }}</div>
+                  <div style="display:flex;gap:8px">
+                    <button onClick="{{ k.test }}" style="display:{{ k.testD }};border:1px solid #DDD9CF;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600" style-hover="border-color:#B9965B">{{ k.testL }}</button>
+                    <button onClick="{{ k.cfg }}" style="border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;color:#795A38" style-hover="background:#F8F7F4">Configurar</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:{{ sec.actD }};gap:10px;flex-wrap:wrap;align-items:center">
+            <sc-for list="{{ sec.actions }}" as="a" hint-placeholder-count="2"><button onClick="{{ a.go }}" style="background:{{ a.bg }};color:{{ a.fg }};border:1px solid {{ a.bd }};border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;white-space:nowrap;line-height:1.3">{{ a.l }}</button></sc-for>
+            <span style="font-size:12.5px;color:#9A3B3B">{{ sec.note }}</span>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+  </main>
+
+  <sc-if value="{{ modal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div onClick="{{ closeModal }}" style="position:absolute;inset:0;background:rgba(23,25,28,.5)"></div>
+      <div style="position:relative;width:440px;max-width:100%;background:#fff;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(23,25,28,.3)">
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600">Criar plano</h2>
+        <sc-for list="{{ modalFields }}" as="f" hint-placeholder-count="3">
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600">{{ f.l }}
+            <sc-if value="{{ f.isIn }}" hint-placeholder-val="{{ true }}"><input type="{{ f.type }}" value="{{ f.val }}" onInput="{{ f.on }}" placeholder="{{ f.ph }}" style="height:38px;border:1px solid #DDD9CF;border-radius:9px;padding:0 12px;font-size:13.5px;outline:0"/></sc-if>
+            <sc-if value="{{ f.isSel }}" hint-placeholder-val="{{ false }}"><select value="{{ f.val }}" onChange="{{ f.on }}" style="height:38px;border:1px solid #DDD9CF;border-radius:9px;padding:0 10px;font-size:13.5px;background:#fff"><sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.t }}</option></sc-for></select></sc-if>
+          </label>
+        </sc-for>
+        <div style="display:flex;justify-content:flex-end;gap:10px"><button onClick="{{ closeModal }}" style="padding:9px 16px;font-size:13px;font-weight:600;color:#64666B">Cancelar</button><button onClick="{{ createPlan }}" style="background:#17191C;color:#fff;border-radius:9px;padding:9px 18px;font-size:13px;font-weight:600">Criar plano</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ conf }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div onClick="{{ closeConf }}" style="position:absolute;inset:0;background:rgba(23,25,28,.55)"></div>
+      <div style="position:relative;width:420px;max-width:100%;background:#fff;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px rgba(23,25,28,.3)">
+        <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600">Confirmar alteração crítica</h2>
+        <p style="margin:0;font-size:13.5px;color:#4F5156;line-height:1.55">{{ confMsg }}</p>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px"><button onClick="{{ closeConf }}" style="padding:9px 16px;font-size:13px;font-weight:600;color:#64666B">Cancelar</button><button onClick="{{ doConf }}" style="background:#795A38;color:#fff;border-radius:9px;padding:9px 18px;font-size:13px;font-weight:600">Confirmar</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:90;background:#17191C;color:#F8F7F4;padding:12px 18px;border-radius:12px;font-size:13.5px;box-shadow:0 12px 30px rgba(23,25,28,.3);max-width:calc(100vw - 32px);display:flex;gap:10px;align-items:center;line-height:1.4"><span style="width:8px;height:8px;border-radius:50%;background:#B9965B;flex:none"></span>{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startPage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;api&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;dash&quot;,&quot;api&quot;,&quot;ia&quot;,&quot;mp&quot;,&quot;users&quot;,&quot;plans&quot;],&quot;section&quot;:&quot;Navegação&quot;},&quot;showProto&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Interface&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B9965B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#B9965B&quot;,&quot;#C9A66B&quot;,&quot;#9C7A45&quot;,&quot;#A88B5E&quot;],&quot;section&quot;:&quot;Interface&quot;}}">
+class Component extends DCLogic {
+  state = { page:this.props.startPage||'dash', tab:'', drawer:false, toast:'', conf:null, modal:false, tests:{}, env:'test', w:1440,
+    f:{prov:'openai',model:'',temp:0.2,maxOut:'',ulD:'',ulM:'',costM:'',alert:'80',trialDays:'7',trialReq:'',trialDocs:'',trialPet:'',trialMax:'',trialExp:'block',q:'',fs:'all',fp:'all',pname:'',pprice:'',pper:'mensal',whUrl:'',whSecret:'',jprov:'',jcontract:'nc',pavail:'off',pren:'auto',ptok:'',pacc:''},
+    t:{} };
+  componentDidMount(){ this.rs=()=>this.setState({w:window.innerWidth}); this.rs(); window.addEventListener('resize',this.rs); this.kd=e=>{if(e.key==='Escape')this.setState({conf:null,modal:false,drawer:false})}; window.addEventListener('keydown',this.kd); }
+  componentWillUnmount(){ window.removeEventListener('resize',this.rs); window.removeEventListener('keydown',this.kd); clearTimeout(this.tt); }
+  say=(m)=>{ this.setState({toast:m}); clearTimeout(this.tt); this.tt=setTimeout(()=>this.setState({toast:''}),3400); };
+  go=(page,tab)=>()=>this.setState({page,tab:tab||'',drawer:false});
+  soon=(n)=>()=>{ this.setState({drawer:false}); this.say('“'+n+'” será desenhada em uma próxima etapa.'); };
+  runTest=(id)=>()=>{ this.setState(s=>({tests:{...s.tests,[id]:'run'}})); setTimeout(()=>{ const d=new Date(); const at=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); this.setState(s=>({tests:{...s.tests,[id]:{at}}})); },1100); };
+  renderVals(){
+    const s=this.state, narrow=s.w<980, G=this.props.accent||'#B9965B', W='#F8F7F4';
+    const I={home:'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',act:'M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2',cpu:'M4 4h16v16H4zM9 9h6v6H9zM9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2',cog:'M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4',term:'M12 19h8M4 17l6-6-6-6',bar:'M12 20V10M18 20V4M6 20v-4',plug:'M12 22v-5M9 8V2M15 8V2M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8z',card:'M2 5h20v14H2zM2 10h20',land:'M10 18v-7M14 18v-7M18 18v-7M3 22h18M6 18v-7M12 2 3 7h18z',link:'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',users:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',key:'M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4',tag:'M12 2H2v10l9.29 9.29a1 1 0 0 0 1.42 0l6.58-6.58a1 1 0 0 0 0-1.42zM7 7h.01',clock:'M12 6v6l4 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z',tog:'M16 5H8a7 7 0 0 0 0 14h8a7 7 0 0 0 0-14zM16 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',pal:'M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z',sh:'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z',doc:'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7ZM14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8'};
+    const groups=[['VISÃO GERAL',[['Dashboard','home','dash',''],['Monitoramento','act']]],['INTELIGÊNCIA ARTIFICIAL',[['Modelos de IA','cpu','ia','modelo'],['Configurações','cog','ia','limites'],['Prompts','term','ia','prompts'],['Consumo e custos','bar']]],['INTEGRAÇÕES',[['Gerenciamento de APIs','plug','api',''],['Mercado Pago','card','mp','planos'],['Fontes jurídicas','land','api','jur'],['Webhooks','link','mp','webhooks']]],['GESTÃO',[['Usuários','users','users',''],['Permissões','key'],['Plano padrão','tag','plans','planos'],['Assinaturas','card','mp','assinaturas'],['Teste gratuito','clock','plans','trial']]],['SISTEMA',[['Funcionalidades','tog','ia','recursos'],['Aparência','pal'],['Segurança','sh'],['Logs','doc'],['Configurações gerais','cog']]]];
+    const nav=[]; groups.forEach(([h,items],gi)=>{ nav.push({label:h,hd:'block',id:'none',hp:gi?'12px 10px 4px':'0 10px 4px',d:'',go:()=>{},color:W,bg:'transparent',hov:'transparent'});
+      items.forEach(([l,k,pg,tb])=>{ const act=pg&&s.page===pg&&s.tab===tb; nav.push({label:l,hd:'none',id:'flex',hp:'0',d:I[k],go:pg?this.go(pg,tb):this.soon(l),color:act?'#17191C':W,bg:act?G:'transparent',hov:act?G:'#24272B'}); }); });
+
+    const setF=(k,v)=>this.setState(t=>({f:{...t.f,[k]:v}}));
+    const fld=(l,k,kind,o={})=>({l,hint:o.hint||'',isSel:kind==='sel',isRange:kind==='range',isIn:kind==='text'||kind==='num',type:kind==='num'?'number':'text',ph:o.ph||'',val:s.f[k],dis:!!o.dis,opts:(o.opts||[]).map(([v,t,d])=>({v,t,d:!!d})),on:e=>setF(k,e.target.value)});
+    const act=(l,go,p)=>({l,go,bg:p?'#17191C':'#fff',fg:p?'#fff':'#17191C',bd:p?'#17191C':'#DDD9CF'});
+    const ask=(msg)=>()=>this.setState({conf:msg});
+    const sec=(kind,o)=>({title:'',desc:'',tag:'',tiles:[],rows:[],fields:[],toggles:[],cols:[],cards:[],actions:[],note:'',empty:'',btn:'',...o,isTiles:kind==='tiles',isStatus:kind==='status',isEmpty:kind==='empty',isForm:kind==='form',isToggles:kind==='toggles',isTable:kind==='table',isCards:kind==='cards',isSecrets:kind==='secrets',hd:o.title?'flex':'none',tg:o.tag?'inline-block':'none',actD:((o.actions&&o.actions.length)||o.note)?'flex':'none',grid:'repeat('+((o.cols||[]).length||1)+',minmax(0,1fr))',hasToolbar:!!(o.fields&&o.fields.length),hasBtn:!!o.btn,btnGo:o.btnGo||(()=>{})});
+    const save=(what)=>act('Salvar alterações',ask('Você está prestes a alterar '+what+'. Em produção, a alteração será validada e gravada pelo backend, aplicada apenas às novas requisições e registrada no log administrativo.'),true);
+    const mods=[['Assistente jurídico','Conversa e pesquisa de fundamentos'],['Criação de petições','Editor e geração de minutas'],['Análise de documentos','Resumo e extração com referência ao trecho'],['Consulta processual','Depende de fornecedor autorizado'],['Pesquisa legislativa','Depende de fonte jurídica verificada'],['Jurisprudência','Depende de fonte jurídica verificada'],['Agenda e arquivos','Organização do advogado']];
+    const toggles=(pre,list)=>list.map(([l,h],i)=>{const on=!!s.t[pre+i]; return {l,hint:h,bg:on?G:'#D6D3CB',left:on?18:2,op:1,go:()=>this.setState(x=>({t:{...x.t,[pre+i]:!on}}))};});
+    const testCard=(id,name,desc,o={})=>{ const r=s.tests[id]; return {name,desc,status:o.status||'Não configurada',envD:o.env?'flex':'none',envs:o.env?[['test','Teste'],['prod','Produção']].map(([v,l])=>({l,bg:s.env===v?'#fff':'transparent',fg:s.env===v?'#17191C':'#64666B',go:()=>this.setState({env:v})})):[],last:(r&&r!=='run')?'Última verificação: hoje, '+r.at+' (falhou)':'Última verificação: nunca',msgD:(r&&r!=='run')?'block':'none',msg:o.msg||'Falha: credencial não encontrada no servidor. Defina o segredo nas variáveis protegidas da Vercel.',test:this.runTest(id),testL:r==='run'?'Testando…':'Testar conexão',testD:o.noTest?'none':'block',cfg:o.cfg||(()=>this.say('Segredos são definidos nas variáveis protegidas do backend, nunca nesta tela.'))}; };
+    const tabsOf=(list)=>list.map(([k,l])=>({l,fg:s.tab===k?'#17191C':'#64666B',bd:s.tab===k?G:'transparent',go:()=>this.setState({tab:k})}));
+    const tbl=(title,desc,cols,empty,o={})=>sec('table',{title,desc,cols,empty,...o});
+    let title='',sub='',tabs=[],sections=[],crumb='';
+    const p=s.page,t=s.tab;
+    if(p==='dash'){ title='Visão geral'; sub='Estado da plataforma. Os indicadores serão preenchidos quando o backend estiver conectado.'; crumb='JusLegis Admin';
+      sections=[sec('tiles',{tiles:[{l:'Usuários cadastrados'},{l:'Assinaturas ativas'},{l:'Consumo de IA no mês'},{l:'Custo estimado de IA'}]}),
+        sec('status',{title:'Estado das integrações',desc:'Estado real: nenhuma integração está conectada neste protótipo.',rows:[['OpenAI','Não configurada'],['Mercado Pago','Não configurada'],['Supabase','Não configurada'],['Fontes jurídicas','Nenhuma fonte'],['Consulta processual','Fornecedor não definido']].map(([n,st])=>({n,s:st,go:this.go('api','')}))}),
+        sec('empty',{title:'Alertas',empty:'Nenhum alerta.'}),sec('empty',{title:'Acesso administrativo',empty:'Somente a conta administrativa autorizada acessa este painel. A permissão será verificada no backend.'}),sec('empty',{title:'Atividade administrativa',empty:'Nenhum registro.'})]; }
+    else if(p==='ia'){ title=t==='prompts'?'Prompts':t==='recursos'?'Funcionalidades':'Modelos de IA'; crumb='Inteligência artificial'; sub='Configuração central da IA, aplicada a todos os assinantes. Trocar fornecedor ou modelo não exige nenhuma ação deles. Alterações serão validadas pelo backend.';
+      tabs=tabsOf([['modelo','Modelo e parâmetros'],['limites','Limites'],['recursos','Recursos'],['prompts','Prompts']]);
+      const r=s.tests.ia; const note=r&&r!=='run'?'Diagnóstico: credencial da OpenAI não encontrada no servidor ('+r.at+').':'';
+      if(t==='modelo') sections=[sec('form',{title:'Fornecedor e modelo',desc:'Somente a OpenAI será ativada inicialmente. Os demais fornecedores são previsão futura e não estão integrados.',tag:'Requer backend',fields:[fld('Fornecedor principal','prov','sel',{opts:[['openai','OpenAI'],['g','Gemini — futuro',1],['c','Claude — futuro',1],['o','OpenRouter — futuro',1]]}),fld('Modelo ativo','model','sel',{opts:[['','Nenhum modelo autorizado']],hint:'A lista virá dos modelos autorizados pelo administrador no backend.'}),fld('Temperatura','temp','range',{hint:'Valor: '+s.f.temp}),fld('Limite máximo de saída (tokens)','maxOut','num',{ph:'Ex.: definir pelo custo'})],actions:[act(r==='run'?'Testando…':'Testar conexão',this.runTest('ia')),save('o modelo e os parâmetros de IA')],note})];
+      else if(t==='limites') sections=[sec('form',{title:'Limites de consumo e custo',desc:'Aplicados no servidor a cada requisição.',tag:'Requer backend',fields:[fld('Tokens por usuário / dia','ulD','num'),fld('Tokens por usuário / mês','ulM','num'),fld('Limite de custo mensal (R$)','costM','num'),fld('Alertar ao atingir (%)','alert','num')],actions:[save('os limites de consumo')]})];
+      else if(t==='recursos') sections=[sec('toggles',{title:'Módulos habilitados',desc:'Define quais módulos ficam disponíveis. A disponibilidade por plano será configurada em Planos.',tag:'Requer backend',toggles:toggles('m',mods),actions:[save('os módulos habilitados')]})];
+      else sections=[tbl('Prompts de sistema versionados','Cada alteração gera uma nova versão com registro no log.',['Nome','Versão','Estado','Atualizado em'],'Nenhum prompt criado.',{btn:'Criar prompt',btnGo:()=>this.say('Editor de prompts será desenhado em uma próxima etapa.')})]; }
+    else if(p==='api'){ title='Integrações e APIs'; crumb='Integrações'; sub='Painel exclusivo do Administrador Geral. Credenciais ficam em variáveis secretas da Vercel, lidas só pelo backend; aqui aparecem apenas estado e configurações operacionais. A conexão efetiva será feita na fase Next.js.';
+      tabs=tabsOf([['','Visão geral'],['openai','OpenAI'],['mp','Mercado Pago'],['mcp','Mercado Pago MCP'],['sb','Supabase'],['jur','APIs jurídicas']]);
+      const to=(pg,tb)=>()=>this.setState({page:pg,tab:tb});
+      const sc=(rows)=>sec('secrets',{title:'Credenciais',desc:'Definidas nas variáveis secretas da Vercel. Esta tela não exibe nem grava valores.',tag:'Somente backend',rows:rows.map(([n,k])=>({n,k,s:'Não definida'}))});
+      const ro=(l,ph)=>fld(l,'whUrl','text',{dis:1,ph});
+      const tst=(id,lbl)=>act(s.tests[id]==='run'?'Testando…':(lbl||'Testar conexão'),this.runTest(id));
+      const tm=(id)=>{const r=s.tests[id]; return (r&&r!=='run')?'Falha às '+r.at+': credencial não encontrada no servidor.':'';};
+      if(t==='') sections=[sec('cards',{cards:[testCard('openai','OpenAI','Modelos de linguagem do assistente e das minutas.',{cfg:to('api','openai')}),testCard('mp','Mercado Pago PJ','Conta recebedora única e assinatura mensal.',{cfg:to('api','mp')}),testCard('mcp','Mercado Pago MCP','Ferramentas de desenvolvimento, separadas da API de pagamentos.',{status:'Não conectado',noTest:1,cfg:to('api','mcp')}),testCard('sb','Supabase','Autenticação, banco PostgreSQL e arquivos privados.',{cfg:to('api','sb')}),testCard('jur','APIs jurídicas','Fornecedor futuro de legislação, jurisprudência e processos.',{status:'Nenhum fornecedor',msg:'Falha: nenhum fornecedor jurídico configurado.',cfg:to('api','jur')})]})];
+      else if(t==='openai') sections=[sec('form',{title:'Configuração operacional',desc:'Modelo, limites e custos são editados em Modelos de IA.',fields:[ro('Provedor','OpenAI (único fornecedor inicial)'),ro('Modelo ativo','Nenhum modelo selecionado'),ro('Limite de custo mensal','Não definido'),ro('Consumo e custo no mês','Dados ainda não disponíveis'),ro('Conexão','Não configurada')],actions:[tst('openai'),act('Abrir Modelos de IA',to('ia','modelo')),act('Limites e custos',to('ia','limites'))],note:tm('openai')}),sc([['OPENAI_API_KEY','Secreta']])];
+      else if(t==='mp') sections=[sec('form',{title:'Configuração operacional',desc:'Todos os pagamentos vão para a única conta empresarial PJ do proprietário. Assinantes não configuram gateway.',fields:[ro('Conta recebedora','Conta PJ do proprietário — não conectada'),ro('Plano mensal padrão','Não sincronizado'),ro('Ambiente ativo','Teste (padrão até a validação completa)'),ro('Webhook','Endpoint não configurado'),ro('Situação','Não configurada')],actions:[tst('mp'),act('Plano padrão',to('plans','planos')),act('Webhooks',to('mp','webhooks'))],note:tm('mp')}),sc([['MP_ACCESS_TOKEN_TEST','Secreta · teste'],['MP_ACCESS_TOKEN_PROD','Secreta · produção'],['MP_WEBHOOK_SECRET','Secreta']])];
+      else if(t==='mcp') sections=[sec('form',{title:'Mercado Pago MCP',desc:'Ferramentas de desenvolvimento do Mercado Pago (documentação e apoio a testes). Independente da API de pagamentos, não é usado em produção nem pelos assinantes.',tag:'Desenvolvimento',fields:[ro('Finalidade','Apoio ao desenvolvimento'),ro('Forma de conexão','OAuth oficial, autorizado no Claude Code'),ro('Estado','Não conectado')],actions:[act('Como conectar',()=>this.say('A autorização é feita no Claude Code pelo fluxo OAuth oficial do Mercado Pago, não nesta tela.'))]}),sec('empty',{title:'Credenciais',empty:'Nenhuma credencial é guardada aqui: a conexão por OAuth é gerenciada pelo Claude Code.'})];
+      else if(t==='sb') sections=[sec('form',{title:'Configuração operacional',desc:'Isolamento por RLS obrigatório nas tabelas de dados dos advogados.',fields:[ro('Autenticação (Google e e-mail com código)','Não conectada'),ro('Banco PostgreSQL','Não conectado'),ro('Armazenamento privado','Não conectado'),ro('Usuários cadastrados','Dados ainda não disponíveis')],actions:[tst('sb')],note:tm('sb')}),sc([['NEXT_PUBLIC_SUPABASE_URL','Pública'],['NEXT_PUBLIC_SUPABASE_ANON_KEY','Pública'],['SUPABASE_SERVICE_ROLE_KEY','Secreta']])];
+      else sections=[sec('form',{title:'Fornecedor e contrato',desc:'Nenhuma fonte jurídica é apresentada como disponível até a conexão e a licença estarem confirmadas.',fields:[fld('Fornecedor','jprov','sel',{opts:[['','Nenhum fornecedor selecionado'],['oficial','Fontes oficiais (acesso público)'],['lic','Fornecedor licenciado']]}),fld('Contrato / licença','jcontract','sel',{opts:[['nc','Sem contrato'],['neg','Em negociação'],['at','Contrato ativo']]}),ro('Estado da conexão','Não configurada')],actions:[tst('jur'),save('o fornecedor jurídico')],note:tm('jur')}),sec('toggles',{title:'Fontes a habilitar',toggles:toggles('jr',[['Legislação','Exige fonte oficial'],['Súmulas','Exige fonte oficial'],['Jurisprudência','Exige fonte verificável'],['Doutrina licenciada','Exige licença'],['Consulta processual','Exige fornecedor autorizado']])}),sc([['LEGAL_DATA_API_KEY','Secreta']])]; }
+    else if(p==='mp'){ title='Mercado Pago'; crumb='Integrações'; sub='Assinaturas mensais. O acesso só é liberado após confirmação do pagamento no servidor. Nenhuma transação é simulada.';
+      tabs=tabsOf([['planos','Plano e conta'],['assinaturas','Assinaturas'],['cobrancas','Cobranças'],['webhooks','Webhooks'],['ambiente','Ambiente']]);
+      if(t==='planos') sections=[sec('form',{title:'Conta recebedora',desc:'Todas as assinaturas são pagas à única conta empresarial PJ do proprietário. Clientes não configuram gateway, tokens ou webhooks.',tag:'Requer backend',fields:[fld('Conta recebedora','pacc','text',{dis:1,ph:'Conta PJ do proprietário — não conectada'}),fld('Meios de pagamento','pacc','text',{dis:1,ph:'Definidos pelo checkout configurado'})]}),tbl('Plano no Mercado Pago','Plano padrão sincronizado com a API de Assinaturas.',['Plano','Valor','Periodicidade','Status','ID externo'],'Plano ainda não sincronizado.',{btn:'Sincronizar plano',btnGo:()=>this.say('A sincronização será feita pelo backend após conectar a conta.')})];
+      else if(t==='assinaturas') sections=[tbl('Assinaturas','Renovação, cancelamento e falhas de cobrança.',['E-mail','Plano','Status','Próxima cobrança','Atualizado'],'Nenhuma assinatura registrada.')];
+      else if(t==='cobrancas') sections=[tbl('Cobranças','Status confirmado pelo servidor.',['Data','E-mail','Valor','Status','ID do pagamento'],'Nenhuma cobrança registrada.')];
+      else if(t==='webhooks') sections=[sec('form',{title:'Endpoint de webhooks',desc:'Disponível após o deploy do backend na Vercel.',tag:'Requer backend',fields:[fld('URL do endpoint','whUrl','text',{dis:1,ph:'Gerada após o deploy'}),fld('Segredo de assinatura','whSecret','text',{dis:1,ph:'Gerenciado no servidor — não exibido'})]}),
+        sec('toggles',{title:'Regras de segurança',desc:'Obrigatórias na implementação.',toggles:['Validar a assinatura de cada evento no servidor','Ignorar eventos duplicados (idempotência)','Confirmar o pagamento no servidor antes de liberar acesso','Registrar todos os eventos no log'].map(l=>({l,hint:'',bg:G,left:18,op:.55,go:()=>this.say('Regra obrigatória: não pode ser desativada.')}))}),
+        tbl('Histórico de eventos','',['Data','Tipo','ID do evento','Resultado'],'Nenhum evento recebido.')];
+      else sections=[sec('cards',{title:'Ambientes',desc:'Inicie em teste; produção só após validar o fluxo completo.',cards:[testCard('mpt','Teste','Credenciais de sandbox.'),testCard('mpp','Produção','Credenciais reais — exige confirmação ao ativar.')]})]; }
+    else if(p==='users'){ title='Usuários'; crumb='Gestão'; sub='Contas, acesso, plano e consumo. Registros virão do Supabase.';
+      sections=[tbl('','',['E-mail','Cadastro','Situação','Plano','Teste','Consumo de IA'],'Nenhum usuário cadastrado.',{fields:[fld('','q','text',{ph:'Buscar por e-mail'}),fld('','fs','sel',{opts:[['all','Todas as situações'],['a','Ativo'],['b','Bloqueado']]}),fld('','fp','sel',{opts:[['all','Todos os planos'],['t','Teste gratuito']]})]})]; }
+    else if(p==='plans'){ title=t==='trial'?'Teste gratuito':'Plano padrão'; crumb='Gestão'; sub='Único plano comercial da JusLegis. O advogado apenas assina e usa; valor, limites e recursos são definidos aqui e verificados no servidor.';
+      tabs=tabsOf([['planos','Plano padrão'],['trial','Teste gratuito']]);
+      if(t==='trial') sections=[sec('form',{title:'Regras do teste',desc:'Sem cartão de crédito. Sem cobrança automática ao expirar.',tag:'Requer backend',fields:[fld('Duração (dias)','trialDays','num'),fld('Solicitações de IA permitidas','trialReq','num'),fld('Limite de análises documentais','trialDocs','num'),fld('Limite de petições geradas','trialPet','num'),fld('Consumo máximo (tokens)','trialMax','num'),fld('Ao expirar','trialExp','sel',{opts:[['block','Bloquear novas operações pagas'],['view','Somente leitura dos dados']]})],actions:[save('as regras do teste gratuito')]})];
+      else sections=[sec('form',{title:'Assinatura mensal',desc:'Preço e regras exibidos ao advogado na página Minha assinatura. Ele não pode alterá-los.',tag:'Requer backend',fields:[fld('Valor mensal (R$)','pprice','num'),fld('Limite de tokens por assinante / mês','ptok','num'),fld('Renovação','pren','sel',{opts:[['auto','Automática mensal'],['man','Manual']]}),fld('Disponibilidade do plano','pavail','sel',{opts:[['off','Indisponível para novas assinaturas'],['on','Disponível']]})],actions:[save('o plano padrão')]}),sec('toggles',{title:'Funcionalidades incluídas',desc:'Módulos liberados a quem assina.',toggles:toggles('pm',mods),actions:[save('as funcionalidades do plano')]})]; }
+    return { showProto:this.props.showProto??true, nav,title,sub,tabs,hasTabs:tabs.length>0,sections,crumb,narrow,
+      asideStyle:'width:224px;flex:none;background:#17191C;display:flex;flex-direction:column;padding:18px 8px 8px;'+(narrow?'position:fixed;top:0;bottom:0;left:0;z-index:40;transition:transform .25s;transform:translateX('+(s.drawer?0:-100)+'%);':'position:sticky;top:0;height:100vh;'),
+      drawerBg:narrow&&s.drawer,openDrawer:()=>this.setState({drawer:true}),closeDrawer:()=>this.setState({drawer:false}),
+      modal:s.modal,closeModal:()=>this.setState({modal:false}),modalFields:[fld('Nome do plano','pname','text'),fld('Preço mensal (R$)','pprice','num'),fld('Periodicidade','pper','sel',{opts:[['mensal','Mensal']]})],
+      createPlan:()=>this.setState({modal:false,conf:'Você está prestes a criar um plano. Em produção, o plano será validado e gravado pelo backend e sincronizado com o Mercado Pago.'}),
+      conf:!!s.conf,confMsg:s.conf||'',closeConf:()=>this.setState({conf:null}),doConf:()=>{this.setState({conf:null});this.say('Protótipo: nada foi salvo. Em produção, a alteração seria gravada e registrada no log.')},
+      toast:s.toast };
+  }
+}
+</script>
+</body>
+</html>

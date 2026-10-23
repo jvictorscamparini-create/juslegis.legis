@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F8F7F4}a{color:#795A38;text-decoration:none}a:hover{color:#B9965B}*{box-sizing:border-box}button{font-family:inherit;cursor:pointer;border:0;background:none;padding:0;color:inherit;text-align:left}input{font-family:inherit}</style>
+</helmet>
+<div style="display:flex;min-height:100vh;width:100%;font-family:'Plus Jakarta Sans',sans-serif;color:#17191C;background:#F8F7F4;position:relative">
+
+  <sc-if value="{{ showDrawerBg }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:rgba(23,25,28,.5);z-index:30"></div></sc-if>
+
+  <aside style="{{ asideStyle }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 0 24px">
+      <svg width="42" height="42" viewBox="0 0 46 46" fill="none" stroke="#B9965B" stroke-width="1.6"><rect x="9" y="9" width="28" height="28" transform="rotate(45 23 23)"/><path d="M23 12v22M15 34h16M16 18h14"/><path d="M16 18l-3 7h6zM30 18l-3 7h6z"/></svg>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:32px;letter-spacing:.14em;line-height:1;font-weight:500;color:#F8F7F4">JUSLEGIS</div>
+      <div style="font-size:9.5px;letter-spacing:.28em;color:#B9965B">INTELIGÊNCIA JURÍDICA</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px;flex:1;overflow:auto">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="12">
+        <button onClick="{{ n.go }}" style="display:flex;align-items:center;gap:14px;padding:10px 14px 10px {{ n.pl }};border-radius:10px;font-size:{{ n.fs }};color:{{ n.color }};background:{{ n.bg }};width:100%" style-hover="background:{{ n.hov }}">
+          <svg width="{{ n.sz }}" height="{{ n.sz }}" viewBox="0 0 24 24" fill="none" stroke="{{ n.color }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.d }}"/></svg>
+          <span style="flex:1">{{ n.label }}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8C91" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:{{ n.chev }};transform:rotate({{ n.rot }}deg);transition:transform .2s"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="border-top:1px solid #2A2D31;margin-top:12px;padding:14px 6px 0;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#A9ABB0"><span>Consumo de IA</span><span style="color:#F8F7F4">38%</span></div>
+      <div style="height:4px;border-radius:4px;background:#2A2D31"><div style="width:38%;height:100%;border-radius:4px;background:#B9965B"></div></div>
+      <div style="font-size:11px;color:#8A8C91">Valores de demonstração</div>
+    </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="position:relative;z-index:20;height:68px;display:flex;align-items:center;gap:14px;padding:0 24px;background:#F8F7F4;border-bottom:1px solid #ECE9E2">
+      <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ openDrawer }}" aria-label="Abrir menu" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;box-shadow:0 1px 2px rgba(23,25,28,.08)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      </sc-if>
+      <button onClick="{{ openSearch }}" style="flex:1;max-width:460px;height:42px;border-radius:10px;background:#fff;display:flex;align-items:center;gap:10px;padding:0 14px;color:#64666B;font-size:14px;box-shadow:0 1px 2px rgba(23,25,28,.06);border:1px solid #ECE9E2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>
+        <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ searchLabel }}</span>
+      </button>
+      <div style="flex:1"></div>
+      <div style="position:relative">
+        <button onClick="{{ togglePlan }}" style="height:40px;border-radius:999px;border:1px solid #D9C49B;background:#FBF6EC;display:flex;align-items:center;gap:8px;padding:0 14px;font-size:13px;font-weight:600;color:#795A38;white-space:nowrap;flex:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#795A38" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z"/></svg>
+          <span>{{ planLabel }}</span>
+        </button>
+        <sc-if value="{{ isPlan }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:50px;width:320px;max-width:calc(100vw - 32px);background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(23,25,28,.18);padding:20px;display:flex;flex-direction:column;gap:12px;z-index:50">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600">Teste gratuito</div>
+            <div style="font-size:13px;color:#64666B;line-height:1.45">5 de 7 dias restantes. Sem cartão cadastrado e sem cobrança automática.</div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px"><span>Consumo de IA (exemplo)</span><b>38%</b></div>
+            <div style="height:6px;border-radius:6px;background:#EFECE6"><div style="width:38%;height:100%;border-radius:6px;background:#B9965B"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px"><span>Documentos analisados (exemplo)</span><b>6 / 20</b></div>
+            <button onClick="{{ goPlans }}" style="background:#17191C;color:#fff;border-radius:10px;padding:11px;text-align:center;font-size:13.5px;font-weight:600" style-hover="background:#795A38">Ver planos</button>
+          </div>
+        </sc-if>
+      </div>
+      <div style="position:relative">
+        <button onClick="{{ toggleNotif }}" aria-label="Notificações" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;box-shadow:0 1px 2px rgba(23,25,28,.08);position:relative">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+          <span style="position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:#B9965B;border:2px solid #fff"></span>
+        </button>
+        <sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:50px;width:340px;max-width:calc(100vw - 32px);background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(23,25,28,.18);padding:12px;z-index:50">
+            <div style="padding:8px 10px 10px;font-weight:600;font-size:14px">Notificações <span style="font-weight:400;color:#64666B;font-size:12px">· exemplos</span></div>
+            <sc-for list="{{ notifs }}" as="x" hint-placeholder-count="3">
+              <div style="display:flex;gap:12px;padding:10px;border-radius:10px" >
+                <div style="width:8px;height:8px;border-radius:50%;background:{{ x.c }};margin-top:6px;flex:none"></div>
+                <div style="line-height:1.4"><div style="font-size:13.5px;font-weight:500">{{ x.t }}</div><div style="font-size:12px;color:#64666B">{{ x.s }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div style="position:relative">
+        <button onClick="{{ toggleUser }}" style="display:flex;align-items:center;gap:10px;padding:3px 8px 3px 3px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(23,25,28,.08)">
+          <span style="width:34px;height:34px;border-radius:50%;background:#B9965B;color:#17191C;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px">AS</span>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;font-weight:600;line-height:1.2">Dra. Ana Souza<br><span style="font-weight:400;color:#64666B;font-size:11.5px">Advogada</span></span></sc-if>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <sc-if value="{{ isUser }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:50px;width:240px;background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(23,25,28,.18);padding:8px;z-index:50">
+            <div style="padding:10px 12px;border-bottom:1px solid #F0EEE9;margin-bottom:6px;line-height:1.4"><div style="font-weight:600;font-size:14px">Dra. Ana Souza</div><div style="font-size:12px;color:#64666B">ana@exemplo.com.br</div></div>
+            <sc-for list="{{ userMenu }}" as="u" hint-placeholder-count="4">
+              <button onClick="{{ u.go }}" style="display:block;width:100%;padding:10px 12px;border-radius:8px;font-size:13.5px" style-hover="background:#F8F7F4">{{ u.l }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{ anyOverlay }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeOverlay }}" style="position:fixed;inset:0;z-index:10;background:{{ backdrop }}"></div></sc-if>
+
+    <div style="padding:24px;display:flex;flex-direction:column;gap:24px;max-width:1240px;width:100%;margin:0 auto">
+      <section style="position:relative;border-radius:22px;overflow:hidden;background:#17191C;color:#fff;min-height:220px;display:flex;align-items:center">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#1E1B17 0 14px,#25211B 14px 28px)"></div>
+        <sc-if value="{{ bannerImg }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;right:0;top:0;bottom:0;width:40%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8A7550;text-align:center;line-height:1.7;border-left:1px dashed #4A3F2C">[ imagem do banner ]<br>estátua da Justiça em bronze,<br>biblioteca desfocada · 1600×440</div></sc-if>
+        <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(23,25,28,.95) 25%,rgba(23,25,28,.2) 80%)"></div>
+        <div style="position:relative;padding:36px 40px;max-width:560px">
+          <div style="font-size:11px;letter-spacing:.2em;color:#B9965B;margin-bottom:12px">BOM DIA, DRA. ANA</div>
+          <h1 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(38px,5vw,56px);line-height:1.02">Seu escritório mais produtivo.</h1>
+          <p style="margin:14px 0 0;font-size:16px;line-height:1.5;color:#E9E4DA">Inteligência jurídica, pesquisa e elaboração de peças em uma única plataforma.</p>
+        </div>
+      </section>
+
+      <section style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+          <sc-for list="{{ actions }}" as="c" hint-placeholder-count="4">
+            <button onClick="{{ c.go }}" style="display:flex;flex-direction:column;gap:16px;padding:22px;border-radius:20px;background:{{ c.bg }};min-height:176px;box-shadow:0 1px 2px rgba(23,25,28,.04)" style-hover="box-shadow:0 10px 24px rgba(23,25,28,.1)">
+              <div style="width:48px;height:48px;border-radius:13px;background:{{ c.ic }};display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{ c.fg }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.d }}"/></svg></div>
+              <div style="display:flex;flex-direction:column;gap:6px;flex:1"><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1.1">{{ c.t }}</div><div style="font-size:13px;line-height:1.5;color:#4F5156">{{ c.s }}</div></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:{{ c.fg }}">Abrir <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ c.fg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></div>
+            </button>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+          <span style="font-size:12px;letter-spacing:.1em;color:#64666B;margin-right:4px">OUTRAS FERRAMENTAS</span>
+          <sc-for list="{{ tools }}" as="t" hint-placeholder-count="5">
+            <button onClick="{{ t.go }}" style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #ECE9E2;border-radius:999px;padding:8px 14px;font-size:13px" style-hover="border-color:#B9965B">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#795A38" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.d }}"/></svg>{{ t.l }}
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start">
+        <section style="background:#fff;border-radius:20px;padding:22px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;background:#F8F7F4;border-radius:12px;padding:4px;align-self:flex-start">
+            <sc-for list="{{ tabs }}" as="b" hint-placeholder-count="3">
+              <button onClick="{{ b.go }}" style="padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;background:{{ b.bg }};color:{{ b.fg }};box-shadow:{{ b.sh }}">{{ b.l }}</button>
+            </sc-for>
+          </div>
+          <div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+              <button onClick="{{ r.go }}" style="display:flex;align-items:center;gap:14px;padding:12px 6px;border-bottom:1px solid #F0EEE9;width:100%" style-hover="background:#FBFAF8">
+                <div style="width:38px;height:38px;border-radius:10px;background:{{ r.ib }};display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="{{ r.ic }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.d }}"/></svg></div>
+                <div style="flex:1;min-width:0;line-height:1.4"><div style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.t }}</div><div style="font-size:12.5px;color:#64666B">{{ r.s }}</div></div>
+                <span style="font-size:11.5px;padding:4px 10px;border-radius:8px;background:{{ r.bg }};white-space:nowrap">{{ r.tag }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="font-size:11.5px;color:#64666B">Exemplos fictícios de demonstração. Nenhuma consulta processual real foi feita.</div>
+        </section>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <section style="background:#fff;border-radius:20px;padding:20px 22px;box-shadow:0 1px 3px rgba(23,25,28,.06)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600">{{ monthLabel }}</h2>
+              <div style="display:flex;gap:4px">
+                <button onClick="{{ prevMonth }}" aria-label="Mês anterior" style="width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center" style-hover="background:#F8F7F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+                <button onClick="{{ nextMonth }}" aria-label="Próximo mês" style="width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center" style-hover="background:#F8F7F4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12.5px;row-gap:2px">
+              <sc-for list="{{ dows }}" as="w" hint-placeholder-count="7"><div style="color:#64666B;font-weight:600;padding-bottom:4px">{{ w }}</div></sc-for>
+              <sc-for list="{{ days }}" as="d" hint-placeholder-count="35">
+                <button onClick="{{ d.go }}" style="height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:50%;width:34px;margin:0 auto;background:{{ d.bg }};color:{{ d.fg }};box-shadow:{{ d.ring }};font-size:12.5px;text-align:center">
+                  <span>{{ d.n }}</span><span style="width:4px;height:4px;border-radius:50%;background:{{ d.dot }}"></span>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+          <section style="background:#fff;border-radius:20px;padding:20px 22px;box-shadow:0 1px 3px rgba(23,25,28,.06)">
+            <h2 style="margin:0 0 10px;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600">{{ agendaTitle }}</h2>
+            <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="3">
+              <div style="display:flex;gap:12px;padding:8px 0;align-items:flex-start">
+                <div style="width:42px;font-size:13px;font-weight:600;padding-top:1px">{{ a.h }}</div>
+                <div style="width:8px;height:8px;border-radius:50%;background:#795A38;margin-top:6px;flex:none"></div>
+                <div style="line-height:1.4"><div style="font-weight:600;font-size:14px">{{ a.t }}</div><div style="font-size:12.5px;color:#64666B">{{ a.s }}</div></div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ agendaEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#64666B;padding:10px 0;line-height:1.5">Nenhum compromisso cadastrado neste dia.</div></sc-if>
+          </section>
+        </div>
+      </div>
+
+      <section style="background:#fff;border-radius:20px;padding:14px 14px 14px 20px;box-shadow:0 1px 3px rgba(23,25,28,.06);display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#B9965B" style="flex:none"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg>
+          <input value="{{ ask }}" onInput="{{ onAsk }}" onKeyDown="{{ onKey }}" placeholder="Pergunte algo ao seu Assistente Jurídico…" style="flex:1;min-width:0;border:0;outline:0;font-size:14.5px;background:transparent;color:#17191C;height:40px"/>
+          <input type="file" ref="{{ fileRef }}" onChange="{{ onFile }}" style="display:none"/>
+          <button onClick="{{ pickFile }}" aria-label="Anexar arquivo" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center" style-hover="background:#F8F7F4"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64666B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+          <button onClick="{{ send }}" aria-label="Enviar" style="width:44px;height:44px;border-radius:12px;background:{{ sendBg }};display:flex;align-items:center;justify-content:center" style-hover="background:#795A38"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></button>
+        </div>
+        <sc-if value="{{ hasFile }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px;font-size:12.5px;background:#F8F7F4;border-radius:8px;padding:6px 10px;align-self:flex-start">Anexo (demonstração): <b>{{ fileName }}</b><button onClick="{{ clearFile }}" aria-label="Remover" style="color:#64666B;font-size:16px;line-height:1">×</button></div></sc-if>
+      </section>
+      <div style="font-size:11.5px;color:#64666B;text-align:center;padding-bottom:8px">Protótipo visual · IA, consulta processual e pagamentos ainda não estão conectados · Toda minuta exige revisão do advogado.</div>
+    </div>
+  </main>
+
+  <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:center;align-items:flex-start;padding:90px 16px 16px">
+      <div onClick="{{ closeOverlay }}" style="position:absolute;inset:0;background:rgba(23,25,28,.5)"></div>
+      <div style="position:relative;width:560px;max-width:100%;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(23,25,28,.3);overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #F0EEE9">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#17191C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/></svg>
+          <input value="{{ q }}" onInput="{{ onQ }}" autofocus placeholder="Buscar nos dados de exemplo…" style="flex:1;border:0;outline:0;font-size:16px;height:32px"/>
+          <button onClick="{{ closeOverlay }}" style="font-size:12px;color:#64666B;border:1px solid #ECE9E2;border-radius:6px;padding:3px 8px">Esc</button>
+        </div>
+        <div style="padding:8px;max-height:340px;overflow:auto">
+          <sc-for list="{{ results }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.go }}" style="display:flex;justify-content:space-between;gap:12px;width:100%;padding:12px;border-radius:10px;font-size:14px" style-hover="background:#F8F7F4"><span style="font-weight:500">{{ s.t }}</span><span style="color:#64666B;font-size:12.5px">{{ s.k }}</span></button>
+          </sc-for>
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:24px;text-align:center;font-size:13.5px;color:#64666B">Nenhum resultado para esta busca.</div></sc-if>
+        </div>
+        <div style="padding:10px 20px;background:#FBFAF8;font-size:11.5px;color:#64666B">Busca demonstrativa sobre dados fictícios.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:80;background:#17191C;color:#F8F7F4;padding:12px 18px;border-radius:12px;font-size:13.5px;box-shadow:0 12px 30px rgba(23,25,28,.3);max-width:calc(100vw - 32px);display:flex;gap:10px;align-items:center;line-height:1.4"><span style="width:8px;height:8px;border-radius:50%;background:#B9965B;flex:none"></span>{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { exp:{pesq:false,agenda:false}, tab:'trab', overlay:null, toast:'', ask:'', file:'', y:2026, m:9, sel:23, w:1440, drawer:false, q:'' };
+  fileRef = React.createRef();
+  componentDidMount(){ this.rs=()=>this.setState({w:window.innerWidth}); this.rs(); window.addEventListener('resize',this.rs); this.kd=e=>{if(e.key==='Escape')this.setState({overlay:null,drawer:false})}; window.addEventListener('keydown',this.kd); }
+  componentWillUnmount(){ window.removeEventListener('resize',this.rs); window.removeEventListener('keydown',this.kd); clearTimeout(this.tt); }
+  say=(t)=>{ this.setState({toast:t}); clearTimeout(this.tt); this.tt=setTimeout(()=>this.setState({toast:''}),3200); };
+  soon=(n)=>()=>{ this.setState({overlay:null,drawer:false}); this.say('“'+n+'” será desenhada na próxima etapa.'); };
+  ov=(k)=>()=>this.setState(s=>({overlay:s.overlay===k?null:k}));
+  renderVals(){
+    const s=this.state, narrow=s.w<980, mobile=s.w<640, G='#B9965B', W='#F8F7F4';
+    const I={
+      home:'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
+      spark:'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z',
+      pen:'M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5M14 2v4a2 2 0 0 0 2 2h4M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z',
+      fsearch:'M14 2v4a2 2 0 0 0 2 2h4M4.268 21a2 2 0 0 0 1.727 1H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3M9 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11.1 16.1 13 18',
+      scale:'m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1ZM2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1ZM7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2',
+      search:'m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z',
+      book:'M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z',
+      cal:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      folder:'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z',
+      files:'M20 7h-3a2 2 0 0 1-2-2V2M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2zM3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8',
+      text:'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7ZM14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8',
+      card:'M2 5h20v14H2zM2 10h20',
+      cog:'M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4',
+      pin:'M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z'
+    };
+    const mk=(label,k,o={})=>({label,d:I[k],go:o.go||this.soon(label),pl:(o.child?'42px':'14px'),fs:o.child?'13.5px':'14.5px',sz:o.child?16:20,color:o.active?'#17191C':(o.child?'#C9CACD':W),bg:o.active?G:'transparent',hov:o.active?G:'#24272B',chev:o.parent?'block':'none',rot:o.open?180:0});
+    const nav=[mk('Visão Geral','home',{active:true,go:()=>{this.setState({drawer:false});window.scrollTo({top:0,behavior:'smooth'})}}),mk('Assistente IA','spark'),mk('Petições','pen'),mk('Análise de Documentos','fsearch'),mk('Processos','scale'),
+      mk('Pesquisa Jurídica','book',{parent:true,open:s.exp.pesq,go:()=>this.setState(t=>({exp:{...t.exp,pesq:!t.exp.pesq}}))}),
+      ...(s.exp.pesq?['Legislação','Súmulas','Jurisprudência'].map(n=>mk(n,'text',{child:true})):[]),
+      mk('Agenda e Calendário','cal',{parent:true,open:s.exp.agenda,go:()=>this.setState(t=>({exp:{...t.exp,agenda:!t.exp.agenda}}))}),
+      ...(s.exp.agenda?['Agenda','Calendário'].map(n=>mk(n,'text',{child:true})):[]),
+      mk('Meus Arquivos','folder'),mk('Modelos','files'),mk('Assinatura','card'),mk('Configurações','cog')];
+    const P={b:['#EFF3FB','#DCE7F7','#3E5C8F'],g:['#E9F4EE','#D3EADC','#2F6B4C'],l:['#F0ECF7','#E1D9F0','#5E4B8B'],e:['#F6EFE6','#EBDDC8','#795A38'],r:['#F8ECEC','#F0D6D6','#9A4A4A']};
+    const ac=(t,s,k,i,n)=>({t,s,d:I[i],bg:P[k][0],ic:P[k][1],fg:P[k][2],go:this.soon(n||t)});
+    const actions=[ac('Consultar Assistente IA','Tire dúvidas e pesquise fundamentos com fonte indicada.','e','spark','Assistente IA'),ac('Criar Petição','Monte a minuta no editor e revise antes de exportar.','b','pen','Petições'),ac('Analisar Documento','Resumo e pontos de atenção, com o trecho de origem.','g','fsearch','Análise de Documentos'),ac('Consultar Processo','Busca por número CNJ. Fonte ainda não configurada.','r','search','Processos')];
+    const tools=[['Pesquisa Jurídica','book'],['Agenda','cal'],['Calendário','cal'],['Meus Arquivos','folder'],['Modelos','files']].map(([l,k])=>({l,d:I[k],go:this.soon(l)}));
+    const T={trab:'Trabalhos recentes',doc:'Documentos recentes',proc:'Processos salvos'};
+    const tabs=Object.keys(T).map(k=>({l:T[k],bg:s.tab===k?'#fff':'transparent',fg:s.tab===k?'#17191C':'#64666B',sh:s.tab===k?'0 1px 3px rgba(23,25,28,.12)':'none',go:()=>this.setState({tab:k})}));
+    const S={a:['#DCE7F7','Em andamento'],c:['#D3EADC','Concluído'],w:['#F6E7C8','Aguardando'],d:['#EFECE6','Minuta'],r:['#F0ECF7','Revisado']};
+    const ROW={
+      trab:[['Contestação — Caso Silva (exemplo)','Editada há 2 h · Petições','d','pen'],['Parecer — Caso Costa (exemplo)','Editado há 3 dias · Petições','r','pen'],['Pesquisa sobre prescrição (exemplo)','Assistente IA · há 4 dias','d','spark']],
+      doc:[['Contrato de prestação.pdf (exemplo)','Analisado ontem · 14 páginas','r','text'],['Procuração.docx (exemplo)','Enviado há 3 dias','d','text'],['Notificação extrajudicial.pdf (exemplo)','Enviado há 6 dias','d','text']],
+      proc:[['0000001-00.2026.8.09.0001','Ação de Indenização · exemplo','a','scale'],['0000002-00.2026.8.09.0002','Ação Trabalhista · exemplo','c','scale'],['0000003-00.2026.8.09.0003','Ação de Cobrança · exemplo','w','scale']]
+    };
+    const rows=ROW[s.tab].map(([t,sub,k,i])=>({t,s:sub,tag:S[k][1],bg:S[k][0],d:I[i],ib:'#F6EFE6',ic:'#795A38',go:this.soon(t)}));
+    const evs={'2026-9-23':[['09:00','Audiência','Processo de exemplo nº 0000000-00'],['10:30','Reunião com cliente','Contrato empresarial'],['14:00','Prazo (informado por você)','Resposta à contestação'],['16:00','Estudo de caso','Revisão de jurisprudência']],'2026-9-28':[['11:00','Reunião interna','Evento de exemplo']],'2026-9-14':[['15:00','Audiência','Evento de exemplo']]};
+    const key=n=>s.y+'-'+s.m+'-'+n;
+    const first=new Date(s.y,s.m,1).getDay(), dim=new Date(s.y,s.m+1,0).getDate(), prev=new Date(s.y,s.m,0).getDate();
+    const days=[]; for(let i=0;i<42;i++){const n=i-first+1; if(i>=35&&n>dim)break; const out=n<1||n>dim; const real=!out; const sel=real&&n===s.sel, today=real&&s.y===2026&&s.m===9&&n===23;
+      days.push({n:n<1?prev+n:n>dim?n-dim:n,fg:out?'#B5B6BA':sel?'#fff':'#17191C',bg:sel?'#17191C':'transparent',ring:today&&!sel?'inset 0 0 0 1.5px '+G:'none',dot:real&&evs[key(n)]?(sel?G:'#795A38'):'transparent',go:real?()=>this.setState({sel:n}):()=>{}});}
+    const ag=(evs[key(s.sel)]||[]).map(([h,t,sub])=>({h,t,s:sub}));
+    const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const ch=d=>()=>this.setState(t=>{let m=t.m+d,y=t.y; if(m<0){m=11;y--} if(m>11){m=0;y++} return {m,y,sel:1}});
+    const pad=n=>String(n).padStart(2,'0');
+    const ql=s.q.trim().toLowerCase();
+    const all=[['Contestação — Caso Silva','Petição'],['Parecer — Caso Costa','Petição'],['Contrato de prestação.pdf','Documento'],['Procuração.docx','Documento'],['0000001-00.2026.8.09.0001','Processo'],['Modelo de petição inicial','Modelo']];
+    const results=all.filter(x=>!ql||x[0].toLowerCase().includes(ql)).map(([t,k])=>({t,k,go:this.soon(t)}));
+    const doSend=()=>{ if(!s.ask.trim()&&!s.file){this.say('Escreva uma pergunta para começar.');return} this.setState({ask:'',file:''}); this.say('Demonstração: a IA ainda não está conectada. Nada foi enviado.'); };
+    const o=s.overlay, any=!!o&&o!=='search';
+    const drawerOpen=narrow&&s.drawer;
+    return {
+      nav,actions,tools,tabs,rows,days,agenda:ag,agendaEmpty:ag.length===0,dows:['D','S','T','Q','Q','S','S'],
+      monthLabel:MN[s.m]+' '+s.y, agendaTitle:(s.y===2026&&s.m===9&&s.sel===23)?'Agenda de hoje':'Agenda de '+pad(s.sel)+'/'+pad(s.m+1),
+      prevMonth:ch(-1), nextMonth:ch(1), narrow, wide:!mobile, cols:narrow?'minmax(0,1fr)':'minmax(0,1.5fr) minmax(0,1fr)',
+      asideStyle:'width:256px;flex:none;background:#17191C;display:flex;flex-direction:column;padding:24px 12px 16px;'+(narrow?'position:fixed;top:0;bottom:0;left:0;z-index:40;transition:transform .25s;transform:translateX('+(drawerOpen?0:-100)+'%);':'position:sticky;top:0;height:100vh;'),
+      showDrawerBg:drawerOpen, openDrawer:()=>this.setState({drawer:true}), closeDrawer:()=>this.setState({drawer:false}),
+      planLabel:s.w<1100?'5 dias':'Teste gratuito · 5 dias', bannerImg:s.w>=1100, searchLabel:s.w<1100?'Buscar…':'Buscar processos, documentos, modelos…',
+      isPlan:o==='plan',isNotif:o==='notif',isUser:o==='user',isSearch:o==='search',anyOverlay:any,backdrop:'transparent',
+      togglePlan:this.ov('plan'),toggleNotif:this.ov('notif'),toggleUser:this.ov('user'),openSearch:()=>this.setState({overlay:'search',q:''}),
+      closeOverlay:()=>this.setState({overlay:null}),
+      goPlans:()=>{this.setState({overlay:null});this.say('A área de planos vem na próxima etapa. Pagamento ainda não integrado.')},
+      notifs:[{t:'Prazo informado por você se aproxima',s:'Exemplo · Resposta à contestação',c:G},{t:'Análise de documento concluída',s:'Exemplo · Contrato de prestação.pdf',c:'#3F7A5A'},{t:'Teste gratuito: 5 dias restantes',s:'Exemplo',c:'#64666B'}],
+      userMenu:[['Meu perfil',()=>this.soon('Meu perfil')()],['Assinatura',()=>this.soon('Assinatura')()],['Configurações',()=>this.soon('Configurações')()],['Sair',()=>{this.setState({overlay:null});this.say('Saída simulada: nenhuma sessão real nesta demonstração.')}]].map(([l,go])=>({l,go})),
+      q:s.q,onQ:e=>this.setState({q:e.target.value}),results,noResults:results.length===0,
+      ask:s.ask,onAsk:e=>this.setState({ask:e.target.value}),onKey:e=>{if(e.key==='Enter')doSend()},
+      send:doSend,
+      sendBg:(s.ask.trim()||s.file)?'#795A38':'#B9965B',
+      fileRef:this.fileRef,pickFile:()=>this.fileRef.current&&this.fileRef.current.click(),
+      onFile:e=>{const f=e.target.files&&e.target.files[0]; if(f)this.setState({file:f.name}); e.target.value='';},
+      hasFile:!!s.file,fileName:s.file,clearFile:()=>this.setState({file:''}),
+      toast:s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
