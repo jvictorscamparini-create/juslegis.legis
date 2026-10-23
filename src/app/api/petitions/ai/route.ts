@@ -119,7 +119,11 @@ export async function POST(request: Request) {
   if (
     !sourcesRow ||
     !categories.length ||
-    !categories.every((category) => settings.legal.sources[category]) ||
+    !categories.every(
+      (category) =>
+        settings.legal.sources[category] &&
+        (category === "legislation" ? settings.features.legislation : settings.features.case_law),
+    ) ||
     !Array.isArray(sourcesRow.sources) ||
     !sourcesRow.sources.length ||
     sourcesRow.request_hash !== expectedHash ||

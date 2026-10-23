@@ -6,6 +6,8 @@ import { loadAccess, loadAllSettings, loadUsage, recordUsage } from "@/lib/runti
 import { legalResearchHash, searchOfficialLegalSources, type LegalSourceCategory, type VerifiedLegalResearch } from "@/lib/legal-research";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const maxDuration = 120;
+
 const bodySchema = z.object({
   petitionId: z.uuid(),
   topic: z.string().trim().min(3).max(300),
@@ -25,7 +27,9 @@ export async function POST(request: Request) {
     return jsonError(409, "Selecione Fontes oficiais no painel administrativo para pesquisar.");
   }
   const categories = (["legislation", "summaries", "case_law"] as const).filter(
-    (category) => settings.legal.sources[category],
+    (category) =>
+      settings.legal.sources[category] &&
+      (category === "legislation" ? settings.features.legislation : settings.features.case_law),
   ) as LegalSourceCategory[];
   if (!categories.length) return jsonError(409, "Nenhuma fonte oficial compatível está habilitada pelo administrador.");
 

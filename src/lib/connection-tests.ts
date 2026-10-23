@@ -1,5 +1,6 @@
 import "server-only";
 import { mpWebhookSecret, openAiKey, type MpEnvironment } from "@/lib/env";
+import { generate } from "@/lib/ai";
 import { mpRequest } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { searchOfficialLegalSources } from "@/lib/legal-research";
@@ -38,6 +39,19 @@ export async function testOpenAI(configuredModel: string, fetchImpl: typeof fetc
   } catch {
     return { ok: false, detail: "Não foi possível contatar a OpenAI." };
   }
+}
+
+export async function testOpenAIResponses(configuredModel: string, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
+  if (!openAiKey()) return { ok: false, detail: "OPENAI_API_KEY não definida no servidor." };
+  if (!configuredModel) return { ok: false, detail: "Selecione um modelo para testar a Responses API." };
+  const result = await generate({
+    config: { provider: "openai", model: configuredModel, temperature: 0, max_output_tokens: 8 },
+    input: [{ role: "user", content: [{ type: "input_text", text: "Responda apenas: OK." }] }],
+    fetchImpl,
+  });
+  return result.ok
+    ? { ok: true, detail: `Responses API respondeu usando o modelo "${result.model}".` }
+    : { ok: false, detail: result.message };
 }
 
 export async function testMercadoPago(env: MpEnvironment, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
@@ -91,7 +105,7 @@ export async function testLegal(configuredModel: string): Promise<CheckResult> {
 export async function runCheck(service: Service, configuredModel: string): Promise<CheckResult> {
   switch (service) {
     case "openai":
-      return testOpenAI(configuredModel);
+      return testOpenAIResponses(configuredModel);
     case "mp_test":
       return testMercadoPago("test");
     case "mp_prod":

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { generate } from "@/lib/ai";
-import { testOpenAI } from "@/lib/connection-tests";
+import { testOpenAIResponses } from "@/lib/connection-tests";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 
 const cfg = { ...DEFAULT_SETTINGS.ai_model, model: "modelo-x" };
@@ -31,16 +31,18 @@ describe("generate (OpenAI)", () => {
   });
 });
 
-describe("testOpenAI (nunca simula sucesso)", () => {
+describe("testOpenAIResponses (nunca simula sucesso)", () => {
   it("sem chave → falha", async () => {
     vi.stubEnv("OPENAI_API_KEY", "");
-    expect((await testOpenAI("")).ok).toBe(false);
+    expect((await testOpenAIResponses("")).ok).toBe(false);
   });
-  it("401 → falha; modelo ausente → falha; modelo presente → ok", async () => {
+  it("testa a Responses API e o modelo configurado", async () => {
     vi.stubEnv("OPENAI_API_KEY", "k");
-    expect((await testOpenAI("", reply(401, {}))).ok).toBe(false);
-    const list = reply(200, { data: [{ id: "a" }] });
-    expect((await testOpenAI("b", list)).ok).toBe(false);
-    expect((await testOpenAI("a", reply(200, { data: [{ id: "a" }] }))).ok).toBe(true);
+    expect((await testOpenAIResponses("a", reply(401, {}))).ok).toBe(false);
+    expect((await testOpenAIResponses("b", reply(404, { error: { code: "model_not_found" } }))).ok).toBe(false);
+    expect((await testOpenAIResponses("a", reply(200, {
+      model: "a",
+      output: [{ type: "message", content: [{ type: "output_text", text: "OK" }] }],
+    }))).ok).toBe(true);
   });
 });

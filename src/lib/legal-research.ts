@@ -108,7 +108,11 @@ async function verifySourceUrl(value: string, domains: string[], fetchImpl: type
     if (response.status < 300 || response.status > 399 || redirects === 3) return false;
     const location = response.headers.get("location");
     if (!location) return false;
-    url = officialUrl(new URL(location, url).toString(), domains);
+    try {
+      url = officialUrl(new URL(location, url).toString(), domains);
+    } catch {
+      return false;
+    }
     if (!url) return false;
   }
   return false;
@@ -160,11 +164,12 @@ export async function searchOfficialLegalSources(opts: {
   try {
     response = await (opts.fetchImpl ?? fetch)("https://api.openai.com/v1/responses", {
       method: "POST",
-      headers: { Authorization: `****** "Content-Type": "application/json" },
+      headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: opts.model,
         input,
         tools: [{ type: "web_search", filters: { allowed_domains: domains } }],
+        tool_choice: "required",
         store: false,
       }),
       signal: AbortSignal.timeout(120_000),
@@ -177,17 +182,20 @@ export async function searchOfficialLegalSources(opts: {
   const data = (await response.json().catch(() => ({}))) as ResearchResponse;
   const citations = citationsFrom(data).filter((source) => officialUrl(source.url, domains));
   const seen = new Set<string>();
-  const verified: VerifiedLegalSource[] = [];
-  for (const source of citations) {
+  const candidates = citations.filter((source) => {
     const url = officialUrl(source.url, domains);
-    if (!url || seen.has(url.toString()) || verified.length >= 8) continue;
+    if (!url || seen.has(url.toString()) || seen.size >= 8) return false;
     seen.add(url.toString());
-    if (!(await verifySourceUrl(url.toString(), domains, opts.fetchImpl ?? fetch))) continue;
+    return true;
+  });
+  const verified = (await Promise.all(candidates.map(async (source) => {
+    const url = officialUrl(source.url, domains);
+    if (!url || !(await verifySourceUrl(url.toString(), domains, opts.fetchImpl ?? fetch))) return null;
     const category = opts.categories.some((candidate) => candidate !== "legislation" && OFFICIAL_DOMAINS[candidate].some((domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`)))
       ? "case_law"
       : "legislation";
-    verified.push({ title: source.title.slice(0, 300), url: url.toString(), category, verified_at: new Date().toISOString() });
-  }
+    return { title: source.title.slice(0, 300), url: url.toString(), category, verified_at: new Date().toISOString() } as VerifiedLegalSource;
+  }))).filter((source): source is VerifiedLegalSource => !!source);
   if (!verified.length) return { ok: false, code: "no_sources" };
 
   return {
