@@ -4,6 +4,7 @@ import { checkAiAllowed } from "@/lib/access";
 import { apiRequireUser, jsonError } from "@/lib/auth";
 import { loadAccess, loadAllSettings, loadUsage, recordUsage } from "@/lib/runtime";
 import { legalResearchHash, searchOfficialLegalSources, type LegalSourceCategory, type VerifiedLegalResearch } from "@/lib/legal-research";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const bodySchema = z.object({
   petitionId: z.uuid(),
@@ -76,7 +77,20 @@ export async function POST(request: Request) {
     consulted_at: consultedAt,
     sources: result.sources,
   };
-  const { error } = await supabase.from("petitions").update({ verified_sources: research }).eq("id", petition.id);
+  const admin = createAdminClient();
+  if (!admin) return jsonError(503, "Servidor sem configuração completa.");
+  const { error } = await admin.from("petition_verified_sources").upsert(
+    {
+      petition_id: petition.id,
+      user_id: user.id,
+      topic: research.topic,
+      categories: research.categories,
+      request_hash: research.request_hash,
+      consulted_at: research.consulted_at,
+      sources: research.sources,
+    },
+    { onConflict: "petition_id" },
+  );
   if (error) return jsonError(500, "Não foi possível salvar as fontes verificadas.");
 
   await recordUsage({

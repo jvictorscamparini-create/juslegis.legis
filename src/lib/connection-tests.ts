@@ -1,7 +1,8 @@
 import "server-only";
-import { legalDataKey, mpWebhookSecret, openAiKey, type MpEnvironment } from "@/lib/env";
+import { mpWebhookSecret, openAiKey, type MpEnvironment } from "@/lib/env";
 import { mpRequest } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { searchOfficialLegalSources } from "@/lib/legal-research";
 
 // Testes de conexão reais: cada um chama o serviço de verdade e só reporta sucesso se ele responder.
 
@@ -65,9 +66,26 @@ export async function testSupabase(): Promise<CheckResult> {
   return { ok: true, detail: "Banco, Auth e armazenamento privado respondendo." };
 }
 
-export async function testLegal(): Promise<CheckResult> {
-  if (!legalDataKey()) return { ok: false, detail: "Nenhum fornecedor jurídico configurado." };
-  return { ok: false, detail: "Credencial definida, mas nenhum fornecedor jurídico está integrado nesta versão." };
+export async function testLegal(configuredModel: string): Promise<CheckResult> {
+  if (!openAiKey()) return { ok: false, detail: "OPENAI_API_KEY não definida no servidor." };
+  if (!configuredModel) return { ok: false, detail: "Selecione um modelo OpenAI antes de testar a pesquisa oficial." };
+  const result = await searchOfficialLegalSources({
+    model: configuredModel,
+    topic: "Lei nº 8.078 de 1990 Código de Defesa do Consumidor",
+    petitionType: "pesquisa de integração",
+    area: "Direito do consumidor",
+    categories: ["legislation"],
+    foundations: [],
+  });
+  if (!result.ok) {
+    return {
+      ok: false,
+      detail: result.code === "no_sources"
+        ? "A pesquisa não retornou links oficiais válidos."
+        : `A pesquisa oficial via OpenAI falhou (${result.code}).`,
+    };
+  }
+  return { ok: true, detail: `${result.sources.length} fonte(s) oficial(is) encontradas e com URL respondendo.` };
 }
 
 export async function runCheck(service: Service, configuredModel: string): Promise<CheckResult> {
@@ -81,6 +99,6 @@ export async function runCheck(service: Service, configuredModel: string): Promi
     case "supabase":
       return testSupabase();
     case "legal":
-      return testLegal();
+      return testLegal(configuredModel);
   }
 }

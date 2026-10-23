@@ -6,6 +6,7 @@ import { useToast } from "@/components/Toast";
 import { LEGEND } from "@/components/workspace/legend";
 import { removeDocument, uploadDocument, type UploadedDoc } from "@/components/workspace/uploads";
 import { createClient } from "@/lib/supabase/client";
+import type { VerifiedLegalResearch } from "@/lib/legal-research";
 import { aiTextToHtml, EMPTY_FORM, skeleton, type PetitionForm } from "./skeleton";
 
 type Version = { id: string; label: string; content_html: string };
@@ -49,6 +50,10 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
   const [funds, setFunds] = useState<string[]>([]);
   const [fundIn, setFundIn] = useState("");
+  const [legalTopic, setLegalTopic] = useState("");
+  const [verifiedResearch, setVerifiedResearch] = useState<VerifiedLegalResearch | null>(null);
+  const [researchBusy, setResearchBusy] = useState(false);
+  const [researchError, setResearchError] = useState("");
   const [versions, setVersions] = useState<Version[]>([]);
   const [gen, setGen] = useState<"idle" | "load" | "err">("idle");
   const [genMsg, setGenMsg] = useState("");
@@ -76,6 +81,22 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
       setStepState(p.step ?? 1);
       docHtml.current = p.content_html ?? "";
       if (ed.current) ed.current.innerHTML = docHtml.current;
+      const { data: sourceRecord } = await supabase
+        .from("petition_verified_sources")
+        .select("topic,categories,request_hash,consulted_at,sources")
+        .eq("petition_id", p.id)
+        .maybeSingle();
+      const research = sourceRecord
+        ? {
+            topic: sourceRecord.topic,
+            categories: sourceRecord.categories,
+            request_hash: sourceRecord.request_hash,
+            consulted_at: sourceRecord.consulted_at,
+            sources: sourceRecord.sources,
+          } as VerifiedLegalResearch
+        : null;
+      setVerifiedResearch(research);
+      setLegalTopic(research?.topic ?? "");
       if (p.document_ids?.length) {
         const { data: d } = await supabase.from("documents").select("id,name,storage_path").in("id", p.document_ids);
         setDocs((d ?? []) as UploadedDoc[]);
@@ -137,6 +158,9 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
     setId(null);
     setF(EMPTY_FORM);
     setFunds([]);
+    setLegalTopic("");
+    setVerifiedResearch(null);
+    setResearchError("");
     setDocs([]);
     setVersions([]);
     setStepState(1);
@@ -151,10 +175,33 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
     const res = await fetch("/api/petitions/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ petitionId: pid, action, selection, currentText: ed.current?.innerText ?? "" }),
+      body: JSON.stringify({ petitionId: pid, action, selection, currentText: ed.current?.innerText ?? "", topic: legalTopic.trim() }),
     }).catch(() => null);
     const data = res ? await res.json().catch(() => ({})) : { error: "Sem conexão com o servidor." };
     return res?.ok ? { ok: true as const, text: data.text as string } : { ok: false as const, text: (data.error as string) ?? "Falha na IA." };
+  }
+
+  async function researchSources() {
+    if (researchBusy) return;
+    const topic = legalTopic.trim();
+    if (topic.length < 3) return setResearchError("Informe o tema jurídico sem nomes ou dados pessoais.");
+    const pid = await persist();
+    if (!pid) return;
+    setResearchBusy(true);
+    setResearchError("");
+    const res = await fetch("/api/legal/research", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ petitionId: pid, topic }),
+    }).catch(() => null);
+    const data = res ? await res.json().catch(() => ({})) : { error: "Sem conexão com o servidor." };
+    setResearchBusy(false);
+    if (!res?.ok) {
+      setResearchError(data.error ?? "Não foi possível pesquisar fontes oficiais.");
+      return;
+    }
+    setVerifiedResearch(data.research as VerifiedLegalResearch);
+    say("Fontes oficiais localizadas e URLs verificadas.");
   }
 
   async function generate() {
@@ -371,8 +418,34 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ fontSize: 12.5, fontWeight: 600 }}>Fundamentos</div>
                 <div style={{ border: "1px dashed var(--chip)", borderRadius: 12, padding: 14, fontSize: 13, color: "var(--muted)", lineHeight: 1.5 }}>
-                  A pesquisa em fontes jurídicas verificadas ainda não está conectada. Você pode registrar fundamentos manualmente; eles ficam marcados como não verificados.
+                  Fundamentos informados por você continuam marcados como não verificados. A IA só poderá elaborar ou revisar a minuta depois que uma fonte oficial compatível for localizada e seu link responder.
                 </div>
+                <label className="field">
+                  Tema jurídico para pesquisar (sem nomes ou dados pessoais)
+                  <input className="input" value={legalTopic} onChange={(e) => setLegalTopic(e.target.value)} maxLength={300} placeholder="Ex.: responsabilidade civil por falha na prestação de serviço" />
+                </label>
+                <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.45 }}>
+                  O tema, a área, o tipo de peça e os fundamentos informados serão enviados à OpenAI para busca limitada a domínios oficiais. Fatos, partes e documentos da petição não são enviados nesta pesquisa.
+                </div>
+                <button className="btn btn-outline" onClick={researchSources} disabled={researchBusy || legalTopic.trim().length < 3} style={{ alignSelf: "flex-start" }}>
+                  {researchBusy && <span className="spinner" />}
+                  {researchBusy ? "Pesquisando fontes oficiais…" : "Pesquisar e validar fontes"}
+                </button>
+                {researchError && <div className="alert-err" role="status">{researchError}</div>}
+                {verifiedResearch && (
+                  <div style={{ border: "1px solid var(--line)", borderRadius: 12, padding: 14, display: "flex", flexDirection: "column", gap: 9 }}>
+                    <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                      {verifiedResearch.sources.length} fonte(s) oficial(is) com URL respondendo · consultadas em {new Date(verifiedResearch.consulted_at).toLocaleString("pt-BR")}
+                    </div>
+                    {verifiedResearch.sources.map((source, i) => (
+                      <div key={`${source.url}-${i}`} style={{ fontSize: 12.5, lineHeight: 1.45 }}>
+                        <span style={{ fontWeight: 600 }}>[{i + 1}] {source.title}</span>
+                        <div><a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--blue)", overflowWrap: "anywhere" }}>{source.url}</a></div>
+                      </div>
+                    ))}
+                    {legalTopic.trim() !== verifiedResearch.topic && <div className="alert-err">O tema mudou. Pesquise novamente antes de gerar ou revisar a minuta.</div>}
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: 8 }}>
                   <input className="input" value={fundIn} onChange={(e) => setFundIn(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && fundIn.trim()) { setFunds((x) => [...x, fundIn.trim()]); setFundIn(""); } }} placeholder="Ex.: dispositivo legal, súmula ou precedente que você deseja citar" style={{ flex: 1, minWidth: 0 }} />
                   <button className="btn btn-dark" style={{ padding: "0 16px", fontSize: 13, borderRadius: 9 }} onClick={() => { if (fundIn.trim()) { setFunds((x) => [...x, fundIn.trim()]); setFundIn(""); } }}>
@@ -402,7 +475,7 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
                 ))}
               </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <button className="btn btn-gold" onClick={generate} disabled={gen === "load"} title={aiReady ? "" : "IA não conectada"}>
+                <button className="btn btn-gold" onClick={generate} disabled={gen === "load" || !verifiedResearch || verifiedResearch.topic !== legalTopic.trim()} title={aiReady ? "" : "IA não conectada"}>
                   Gerar minuta com IA
                 </button>
                 <button className="btn btn-outline" onClick={() => goStep(8)}>

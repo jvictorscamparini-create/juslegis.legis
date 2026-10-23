@@ -1,6 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { legalDataKey, mpAccessToken, mpWebhookSecret, openAiKey, serviceRoleKey, supabasePublicConfig } from "@/lib/env";
+import { mpAccessToken, mpWebhookSecret, openAiKey, serviceRoleKey, supabasePublicConfig } from "@/lib/env";
 import { mergeSettings, type Settings } from "@/lib/settings";
 import type { CheckInfo } from "@/components/admin/kit";
 
@@ -26,5 +26,5 @@ export const secretsPresent = {
   mpWebhook: () => !!mpWebhookSecret(),
   supabaseUrl: () => !!supabasePublicConfig(),
   serviceRole: () => !!serviceRoleKey(),
-  legal: () => !!legalDataKey(),
+  legal: () => !!openAiKey(),
 };
