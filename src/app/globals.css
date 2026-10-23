@@ -26,8 +26,8 @@
   --ai-bg: #fbf6ec;
   --ai-line: #e6d9bc;
   --shadow-card: 0 1px 3px rgba(23, 25, 28, 0.06);
-  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond Variable", "Cormorant Garamond", Georgia, serif;
 }
 
 * { box-sizing: border-box; }

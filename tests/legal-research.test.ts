@@ -37,7 +37,6 @@ describe("pesquisa de fontes jurídicas", () => {
       petitionType: "Petição inicial",
       area: "Consumidor",
       categories: [...categories],
-      foundations: [],
       fetchImpl,
     });
 
@@ -57,7 +56,6 @@ describe("pesquisa de fontes jurídicas", () => {
       petitionType: "",
       area: "",
       categories: [...categories],
-      foundations: [],
       fetchImpl,
     });
     expect(result).toEqual({ ok: false, code: "no_sources" });
@@ -77,7 +75,6 @@ describe("pesquisa de fontes jurídicas", () => {
       petitionType: "",
       area: "",
       categories: [...categories],
-      foundations: [],
       fetchImpl,
     });
     expect(result).toEqual({ ok: false, code: "no_sources" });

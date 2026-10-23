@@ -53,7 +53,6 @@ export async function POST(request: Request) {
     petitionType: form.tipo ?? "",
     area: form.area ?? "",
     categories,
-    foundations,
   });
   if (!result.ok) {
     const status = result.code === "no_model" || result.code === "not_configured" ? 503 : result.code === "no_sources" ? 422 : 502;

@@ -425,7 +425,7 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
                   <input className="input" value={legalTopic} onChange={(e) => setLegalTopic(e.target.value)} maxLength={300} placeholder="Ex.: responsabilidade civil por falha na prestação de serviço" />
                 </label>
                 <div style={{ fontSize: 11.5, color: "var(--muted)", lineHeight: 1.45 }}>
-                  O tema, a área, o tipo de peça e os fundamentos informados serão enviados à OpenAI para busca limitada a domínios oficiais. Fatos, partes e documentos da petição não são enviados nesta pesquisa.
+                  O tema, a área e o tipo de peça serão enviados à OpenAI para busca limitada a domínios oficiais. Fundamentos, fatos, partes e documentos da petição não são enviados nesta pesquisa.
                 </div>
                 <button className="btn btn-outline" onClick={researchSources} disabled={researchBusy || legalTopic.trim().length < 3} style={{ alignSelf: "flex-start" }}>
                   {researchBusy && <span className="spinner" />}
@@ -548,7 +548,7 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
           </section>
           <section style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", gap: 4, background: "var(--paper)", borderRadius: 10, padding: 3 }}>
-              {(["Fundamentos", "IA", "Versões"] as const).map((l, i) => (
+              {(["Fundamentos", "IA", "Versões", "Fontes"] as const).map((l, i) => (
                 <button key={l} onClick={() => setRtab(i + 1)} style={{ flex: 1, textAlign: "center", padding: "7px 4px", borderRadius: 8, fontSize: 12.5, fontWeight: 600, background: rtab === i + 1 ? "#fff" : "transparent", color: rtab === i + 1 ? "var(--ink)" : "var(--muted)" }}>
                   {l}
                 </button>
@@ -608,6 +608,19 @@ export default function PetitionsView({ userId, aiReady, initialId }: { userId: 
                   </div>
                 ))}
                 {!versions.length && <div style={{ fontSize: 12.5, color: "var(--muted)" }}>Nenhuma versão salva.</div>}
+              </div>
+            )}
+            {rtab === 4 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {verifiedResearch?.sources.map((source, i) => (
+                  <div key={`${source.url}-${i}`} style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 10, fontSize: 12, lineHeight: 1.45 }}>
+                    <div style={{ fontWeight: 600 }}>[{i + 1}] {source.title}</div>
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--blue)", overflowWrap: "anywhere" }}>{source.url}</a>
+                    <div style={{ marginTop: 4, color: "var(--muted)" }}>URL oficial respondendo em {new Date(source.verified_at).toLocaleString("pt-BR")}</div>
+                  </div>
+                ))}
+                {!verifiedResearch?.sources.length && <div style={{ fontSize: 12.5, color: "var(--muted)" }}>Nenhuma fonte oficial validada para esta petição.</div>}
+                <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.45 }}>A verificação confirma domínio oficial e resposta do link, não a vigência nem a aplicabilidade jurídica da fonte.</div>
               </div>
             )}
             <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.5, borderTop: "1px solid var(--line-2)", paddingTop: 10 }}>Toda minuta exige revisão humana do advogado.</div>

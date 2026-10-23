@@ -142,7 +142,6 @@ export async function searchOfficialLegalSources(opts: {
   petitionType: string;
   area: string;
   categories: LegalSourceCategory[];
-  foundations: string[];
   fetchImpl?: typeof fetch;
 }): Promise<LegalResearchResult> {
   const key = openAiKey();
@@ -156,7 +155,6 @@ export async function searchOfficialLegalSources(opts: {
     "Não responda com aconselhamento jurídico, não invente normas ou precedentes e não trate consulta processual.",
     `Área: ${opts.area || "não informada"}. Tipo de peça: ${opts.petitionType || "não informado"}.`,
     `Tema jurídico (sem dados pessoais): ${opts.topic.trim()}`,
-    `Fundamentos fornecidos pelo advogado: ${opts.foundations.length ? opts.foundations.join("; ") : "nenhum"}.`,
     "Retorne uma breve indicação do material oficial encontrado com citações de URL.",
   ].join("\n");
 

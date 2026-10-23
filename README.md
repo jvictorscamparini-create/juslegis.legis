@@ -26,7 +26,7 @@ Sem credenciais, o build não precisa de serviços externos, mas login e integra
 
 ## Deploy na Vercel
 
-O repositório já contém a aplicação Next.js; não crie um projeto novo. Ao importar no dashboard da Vercel, use **Root Directory `.`** (raiz do repositório), framework preset **Next.js** e os comandos detectados pelo `package.json` (`npm run build` para build).
+O repositório já contém a aplicação Next.js; não crie um projeto novo. As fontes Cormorant Garamond e Plus Jakarta Sans são empacotadas localmente, então o build não precisa buscar fontes externas. Ao importar no dashboard da Vercel, use **Root Directory `.`** (raiz do repositório), framework preset **Next.js** e os comandos detectados pelo `package.json` (`npm run build` para build).
 
 Antes do primeiro deploy:
 

@@ -89,7 +89,6 @@ export async function testLegal(configuredModel: string): Promise<CheckResult> {
     petitionType: "pesquisa de integração",
     area: "Direito do consumidor",
     categories: ["legislation"],
-    foundations: [],
   });
   if (!result.ok) {
     return {
