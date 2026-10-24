@@ -36,6 +36,8 @@ Antes do primeiro deploy:
 4. Em `/admin/apis`, teste a Responses API e a pesquisa oficial. Esses testes fazem chamadas reais à OpenAI e podem gerar uso faturável.
 5. Em `/admin/ia`, selecione um modelo permitido pela conta OpenAI. Fontes jurídicas iniciam desabilitadas; habilite apenas as categorias oficiais que pretende oferecer.
 
+O teste é de 72 horas por padrão e começa na primeira ativação autenticada do workspace. A migração `20261023020000_trial_activation.sql` registra uma única ativação e congela a duração por usuário; contas já existentes são migradas com o período calculado pela configuração vigente, para preservar o acesso atual. Se o RPC dessa migração não estiver instalado, o acesso ao teste falha fechado.
+
 **Não configure cobranças reais nesta etapa.** Mantenha `BILLING_ENABLED=false`; Mercado Pago, checkout e webhooks são etapas posteriores. A Vercel não executa migrações remotas automaticamente.
 
 ### Variáveis da Vercel

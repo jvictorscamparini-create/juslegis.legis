@@ -1,4 +1,5 @@
 import { isSupabaseConfigured } from "@/lib/env";
+import { safeInternalPath } from "@/lib/safe-redirect";
 import { LogoMark } from "@/components/icons";
 import LoginForm from "./LoginForm";
 
@@ -12,7 +13,7 @@ const ERRORS: Record<string, string> = {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erro?: string; next?: string }> }) {
   const { erro, next } = await searchParams;
   const configured = isSupabaseConfigured();
-  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/app";
+  const safeNext = safeInternalPath(next);
 
   return (
     <div className="login-grid" style={{ minHeight: "100vh", display: "grid" }}>

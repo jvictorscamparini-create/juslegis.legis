@@ -335,6 +335,6 @@ insert into public.admin_settings (key, value) values
   ('ai_limits', '{"tokens_user_day":null,"tokens_user_month":null,"cost_month_brl":null,"alert_pct":80}'),
   ('features', '{"assistant":true,"petitions":true,"documents":true,"process_lookup":false,"legislation":false,"case_law":false,"agenda_files":false}'),
   ('plan', '{"price_brl":null,"tokens_month":null,"renewal":"auto","available":false,"mp_plan_id":null,"features":{"assistant":true,"petitions":true,"documents":true,"process_lookup":false,"legislation":false,"case_law":false,"agenda_files":false}}'),
-  ('trial', '{"days":7,"ai_requests":null,"documents":null,"petitions":null,"max_tokens":null,"on_expire":"block"}'),
+  ('trial', '{"days":3,"ai_requests":null,"documents":null,"petitions":null,"max_tokens":null,"on_expire":"block"}'),
   ('legal', '{"provider":"","contract":"nc","sources":{"legislation":false,"summaries":false,"case_law":false,"doctrine":false,"process_lookup":false}}')
 on conflict (key) do nothing;

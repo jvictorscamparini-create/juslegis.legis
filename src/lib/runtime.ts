@@ -35,15 +35,29 @@ export async function loadPublicSettings(supabase: SupabaseClient): Promise<Publ
   };
 }
 
-export async function loadAccess(supabase: SupabaseClient, userId: string, profileCreatedAt: string, trialDays: number): Promise<Access> {
-  const { data } = await supabase
-    .from("subscriptions")
-    .select("status")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle<{ status: string }>();
-  return computeAccess({ profileCreatedAt, trialDays, subscriptionStatus: data?.status });
+export async function loadAccess(supabase: SupabaseClient, userId: string, _profileCreatedAt: string, _trialDays: number): Promise<Access> {
+  const [{ data: subscription }, { data: activation, error }] = await Promise.all([
+    supabase
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<{ status: string }>(),
+    supabase.rpc("activate_trial"),
+  ]);
+  if (subscription?.status === "authorized") {
+    return { kind: "subscription", trialEndsAt: new Date(0) };
+  }
+  const trial = Array.isArray(activation) ? activation[0] : activation;
+  if (error || !trial?.trial_started_at || typeof trial.trial_duration_hours !== "number") {
+    return { kind: "expired", trialEndsAt: new Date(0) };
+  }
+  return computeAccess({
+    profileCreatedAt: trial.trial_started_at,
+    trialDays: trial.trial_duration_hours / 24,
+    subscriptionStatus: subscription?.status,
+  });
 }
 
 export async function loadUsage(supabase: SupabaseClient, userId: string): Promise<Usage> {

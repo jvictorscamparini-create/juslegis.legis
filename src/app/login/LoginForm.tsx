@@ -96,7 +96,7 @@ export default function LoginForm({ configured, initialError, next }: { configur
               {up ? "Criar conta" : "Entrar"}
             </h2>
             <div style={{ fontSize: 13.5, color: "var(--muted)", marginTop: 6, lineHeight: 1.5 }}>
-              {up ? "Comece o teste gratuito de 7 dias em poucos segundos." : "Acesse seu workspace jurídico."}
+              {up ? "Comece um teste gratuito de 72 horas, sem cartão e sem cobrança automática." : "Acesse seu workspace jurídico."}
             </div>
           </div>
           <button
@@ -149,7 +149,7 @@ export default function LoginForm({ configured, initialError, next }: { configur
             </button>
           </div>
           <div style={{ fontSize: 12, color: "var(--muted)", textAlign: "center", lineHeight: 1.5 }}>
-            Sem CPF, telefone ou endereço. Teste gratuito de 7 dias, sem cartão.
+            Sem CPF, telefone ou endereço. Teste gratuito de 72 horas, sem cartão.
           </div>
         </>
       ) : (

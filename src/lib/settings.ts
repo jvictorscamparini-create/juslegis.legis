@@ -93,7 +93,7 @@ export const DEFAULT_SETTINGS: Settings = {
     mp_plan_id: null,
     features: allFeatures(["assistant", "petitions", "documents"]),
   },
-  trial: { days: 7, ai_requests: null, documents: null, petitions: null, max_tokens: null, on_expire: "block" },
+  trial: { days: 3, ai_requests: null, documents: null, petitions: null, max_tokens: null, on_expire: "block" },
   legal: {
     provider: "",
     contract: "nc",
