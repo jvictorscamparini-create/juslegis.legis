@@ -22,7 +22,7 @@ describe("pesquisa de fontes jurídicas", () => {
   it("só retorna citações de domínios oficiais cujo link responde", async () => {
     vi.stubEnv("OPENAI_API_KEY", "k");
     const fetchImpl = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      if (String(input).includes("api.openai.com")) {
+      if (String(input) === "https://api.openai.com/v1/responses") {
         const body = JSON.parse(String(init?.body));
         expect(body.tools[0].filters.allowed_domains).toContain("planalto.gov.br");
         expect(body.store).toBe(false);
@@ -46,7 +46,7 @@ describe("pesquisa de fontes jurídicas", () => {
   it("descarta citações fora da lista oficial e links sem resposta", async () => {
     vi.stubEnv("OPENAI_API_KEY", "k");
     const fetchImpl = vi.fn(async (input: RequestInfo | URL) =>
-      String(input).includes("api.openai.com")
+      String(input) === "https://api.openai.com/v1/responses"
         ? openAiReply("https://example.org/lei")
         : new Response("", { status: 404 }),
     ) as unknown as typeof fetch;
@@ -65,7 +65,7 @@ describe("pesquisa de fontes jurídicas", () => {
   it("não segue redirecionamento para domínio externo", async () => {
     vi.stubEnv("OPENAI_API_KEY", "k");
     const fetchImpl = vi.fn(async (input: RequestInfo | URL) =>
-      String(input).includes("api.openai.com")
+      String(input) === "https://api.openai.com/v1/responses"
         ? openAiReply(sourceUrl)
         : new Response("", { status: 302, headers: { location: "https://example.org/redirect" } }),
     ) as unknown as typeof fetch;
