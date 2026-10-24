@@ -9,3 +9,7 @@ export function passwordRecoveryRedirect(origin: string) {
   destination.searchParams.set("next", "/login?recovery=1");
   return destination.toString();
 }
+
+export function isPasswordRecoveryPath(pathname: string, searchParams: URLSearchParams) {
+  return pathname === "/login" && searchParams.get("recovery") === "1";
+}

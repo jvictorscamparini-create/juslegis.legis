@@ -186,7 +186,7 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
                 setEmail(e.target.value);
                 setError(null);
               }}
-              onKeyDown={(e) => e.key === "Enter" && sendCode()}
+              onKeyDown={(e) => e.key === "Enter" && (up || emailMethod === "code" ? sendCode() : signInWithPassword())}
               placeholder="seu@email.com.br"
               type="email"
               autoComplete="email"

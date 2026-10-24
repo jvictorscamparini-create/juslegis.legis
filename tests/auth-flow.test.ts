@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
+import { isPasswordRecoveryPath, passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
 import { safeInternalPath } from "@/lib/safe-redirect";
 
 describe("password auth flow", () => {
@@ -12,6 +12,12 @@ describe("password auth flow", () => {
     expect(passwordRecoveryRedirect("https://juslegis.vercel.app")).toBe(
       "https://juslegis.vercel.app/auth/callback?next=%2Flogin%3Frecovery%3D1",
     );
+  });
+
+  it("keeps an authenticated recovery session on the password reset form", () => {
+    expect(isPasswordRecoveryPath("/login", new URLSearchParams("recovery=1"))).toBe(true);
+    expect(isPasswordRecoveryPath("/login", new URLSearchParams())).toBe(false);
+    expect(isPasswordRecoveryPath("/app", new URLSearchParams("recovery=1"))).toBe(false);
   });
 
   it("does not permit an external post-auth redirect", () => {

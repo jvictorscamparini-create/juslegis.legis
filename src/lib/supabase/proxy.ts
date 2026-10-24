@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabasePublicConfig } from "@/lib/env";
+import { isPasswordRecoveryPath } from "@/lib/auth-flow";
 
 const PROTECTED = ["/app", "/admin"];
 
@@ -41,7 +42,7 @@ export async function updateSession(request: NextRequest) {
     url.searchParams.set("next", path);
     return NextResponse.redirect(url);
   }
-  if (user && path === "/login") {
+  if (user && path === "/login" && !isPasswordRecoveryPath(path, request.nextUrl.searchParams)) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
   return response;
