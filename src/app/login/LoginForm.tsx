@@ -33,8 +33,8 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
   const supabase = configured ? createClient() : null;
   const validEmail = /^\S+@\S+\.\S+$/.test(email.trim());
 
-  function finishLogin() {
-    router.replace(next);
+  function finishLogin(destination = next) {
+    router.replace(destination);
     router.refresh();
   }
 
@@ -130,7 +130,7 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
       setError("Não foi possível atualizar a senha. Solicite um novo link de recuperação.");
       return;
     }
-    finishLogin();
+    finishLogin("/app");
   }
 
   async function verify() {
