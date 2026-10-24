@@ -1,7 +1,8 @@
 import { requireUser } from "@/lib/auth";
-import { isBillingEnabled } from "@/lib/env";
+import { isBillingEnabled, mpEnvironment } from "@/lib/env";
 import { loadAccess, loadPublicSettings } from "@/lib/runtime";
 import SubscribeButton from "./SubscribeButton";
+import CancelSubscriptionButton from "./CancelSubscriptionButton";
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const STATUS: Record<string, string> = { authorized: "Ativa", pending: "Aguardando pagamento", paused: "Pausada", cancelled: "Cancelada" };
@@ -74,12 +75,10 @@ export default async function SubscriptionPage() {
             <h2 className="h-card">Cancelamento</h2>
             <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.5 }}>
               {access.kind === "subscription"
-                ? "O cancelamento pela plataforma ainda depende de integração. Enquanto isso, cancele pela sua conta do Mercado Pago."
+                ? "O cancelamento automático está disponível apenas para assinaturas de teste; uma assinatura de produção não será alterada por este ambiente."
                 : "Disponível quando houver uma assinatura ativa."}
             </div>
-            <button disabled className="btn btn-outline" style={{ color: "var(--faint)", alignSelf: "flex-start", fontSize: 13, padding: "9px 16px" }}>
-              Cancelar assinatura
-            </button>
+            <CancelSubscriptionButton available={sub?.status === "authorized" && sub.environment === "test" && mpEnvironment() === "test"} />
           </section>
         </div>
       </div>

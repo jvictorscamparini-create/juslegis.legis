@@ -13,6 +13,9 @@ export async function POST() {
   if (!isBillingEnabled()) {
     return jsonError(409, "Cobranças desativadas no servidor (BILLING_ENABLED). Nada foi enviado ao Mercado Pago.");
   }
+  if (mpEnvironment() !== "test") {
+    return jsonError(409, "A sincronização está limitada ao ambiente de teste.");
+  }
   const { data } = await supabase.from("admin_settings").select("key,value");
   const settings = mergeSettings(data);
   const plan = settings.plan;

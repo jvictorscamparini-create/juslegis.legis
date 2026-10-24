@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { isAdminProfile } from "@/lib/authorization";
+
+export { isAdminProfile } from "@/lib/authorization";
 
 export type Profile = {
   id: string;
@@ -14,11 +17,6 @@ export type Profile = {
 };
 
 export type SessionContext = { supabase: SupabaseClient; user: User; profile: Profile | null };
-
-/** Regra única de autorização administrativa, sempre avaliada no servidor a partir do banco. */
-export function isAdminProfile(profile: Pick<Profile, "role" | "status"> | null | undefined) {
-  return !!profile && profile.role === "admin" && profile.status === "active";
-}
 
 export async function getSessionContext(): Promise<SessionContext | null> {
   const supabase = await createClient();

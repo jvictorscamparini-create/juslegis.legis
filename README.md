@@ -30,7 +30,7 @@ O repositório já contém a aplicação Next.js; não crie um projeto novo. As 
 
 Antes do primeiro deploy:
 
-1. Crie/configure o projeto Supabase e aplique, em ordem, as migrações de `supabase/migrations/`. A migração do plano preenche R$ 44,90 somente quando o preço ainda não foi definido; o plano permanece indisponível e cobranças continuam desativadas. Habilite Google e e-mail com código (OTP) em Authentication e adicione `<SITE_URL>/auth/callback` nas Redirect URLs.
+1. Crie/configure o projeto Supabase e aplique, em ordem, as migrações de `supabase/migrations/`. A migração do plano preenche R$ 44,90 somente quando o preço ainda não foi definido; o plano permanece indisponível e cobranças continuam desativadas. Habilite e-mail/senha, recuperação por e-mail e, se desejado, Google em Authentication. Em **Authentication → URL Configuration**, configure `https://juslegis.vercel.app` como Site URL e permita `https://juslegis.vercel.app/auth/callback` e os callbacks Preview autorizados em Redirect URLs. A recuperação volta por `/auth/callback` para `/login?recovery=1`.
 2. Cadastre na Vercel as variáveis necessárias listadas abaixo. `NEXT_PUBLIC_SITE_URL` deve ser a URL HTTPS canônica do deployment.
 3. Faça o primeiro login com a conta proprietária e execute `supabase/promote-admin.sql` com o e-mail correto para promovê-la a Administrador Geral.
 4. Em `/admin/apis`, teste a Responses API e a pesquisa oficial. Esses testes fazem chamadas reais à OpenAI e podem gerar uso faturável.
@@ -38,7 +38,7 @@ Antes do primeiro deploy:
 
 O teste é de 72 horas por padrão e começa na primeira ativação autenticada do workspace. A migração `20261023020000_trial_activation.sql` registra uma única ativação e congela a duração por usuário; contas já existentes são migradas com o período calculado pela configuração vigente, para preservar o acesso atual. Se o RPC dessa migração não estiver instalado, o acesso ao teste falha fechado.
 
-**Não configure cobranças reais nesta etapa.** Mantenha `BILLING_ENABLED=false`; Mercado Pago, checkout e webhooks são etapas posteriores. A Vercel não executa migrações remotas automaticamente.
+**Não configure cobranças reais nesta etapa.** Mantenha `BILLING_ENABLED=false`, `MP_ENVIRONMENT=test` e não cadastre credenciais de produção. As rotas de criação/sincronização de plano e processamento de webhook recusam o ambiente `prod`; o cancelamento implementado também só atua sobre assinaturas de teste. Para um teste de checkout, use exclusivamente credenciais e usuários de teste do Mercado Pago e habilite `BILLING_ENABLED` somente no Preview protegido. A Vercel não executa migrações remotas automaticamente.
 
 ### Variáveis da Vercel
 
@@ -50,9 +50,9 @@ Necessárias para autenticação e funcionamento do servidor:
 
 Necessária para IA e pesquisa jurídica oficial (opcional para compilar/deploy):
 
-- `OPENAI_API_KEY`: chave de API mantida como segredo; selecione o modelo no Admin Geral.
+- `OPENAI_API_KEY`: chave da plataforma API da OpenAI, mantida como segredo; assinatura ChatGPT não substitui créditos/API. Selecione um modelo permitido pela conta no Admin Geral.
 
-Mercado Pago fica fora do escopo desta etapa. Se as variáveis desse provedor forem cadastradas para testes futuros, mantenha `MP_ENVIRONMENT=test` e `BILLING_ENABLED=false`. Não é necessária uma chave jurídica separada: a pesquisa usa a ferramenta web da OpenAI e só acontece quando o Admin Geral habilita fontes oficiais. Não há consulta de jurisprudência fora dos domínios configurados, doutrina ou consulta processual.
+Para validar Mercado Pago em sandbox, configure somente `MP_ACCESS_TOKEN_TEST` e `MP_WEBHOOK_SECRET` como segredos no Preview, `MP_ENVIRONMENT=test` e habilite o checkout apenas durante o teste autorizado. Nunca cadastre tokens de produção nesta etapa. A API existente usa Assinaturas/Preapproval; não habilite Pix ou outro meio recorrente sem confirmar a modalidade disponível na conta e na documentação da região. Não é necessária uma chave jurídica separada: a pesquisa usa a ferramenta web da OpenAI e só acontece quando o Admin Geral habilita fontes oficiais. Não há consulta de jurisprudência fora dos domínios configurados, doutrina ou consulta processual.
 
 ## Segurança
 
@@ -65,7 +65,7 @@ Mercado Pago fica fora do escopo desta etapa. Se as variáveis desse provedor fo
 
 ## Etapas ainda pendentes
 
-- **Mercado Pago PJ:** plano mensal, checkout, verificação/cancelamento e webhooks devem ser integrados e testados em sandbox antes de qualquer ativação.
+- **Mercado Pago PJ:** o código implementa checkout mensal, cancelamento limitado a testes e webhooks assinados/idempotentes, mas ainda depende de credenciais de sandbox e teste real de ponta a ponta. Não declara pagamentos ou assinaturas funcionais antes dessa validação. Alteração de plano de uma assinatura existente ainda não está disponível.
 - **Fontes jurídicas adicionais:** ampliar fontes jurisprudenciais mediante verificação das APIs, licenças e termos aplicáveis. Doutrina e consulta processual continuam indisponíveis; nenhum processo é consultado ou simulado.
 - **Admin Geral:** configuração de modelo, prompts, limites, fontes e funcionalidades já existe; monitoramento/custos e demais módulos ainda precisam de implementação específica.
 

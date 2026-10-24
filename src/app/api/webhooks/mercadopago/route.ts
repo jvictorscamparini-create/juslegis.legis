@@ -18,6 +18,9 @@ export async function POST(request: Request) {
   const secret = mpWebhookSecret();
   const admin = createAdminClient();
   if (!secret || !admin) return NextResponse.json({ error: "Webhook não configurado." }, { status: 503 });
+  if (mpEnvironment() !== "test") {
+    return NextResponse.json({ error: "Este deploy só processa webhooks de teste." }, { status: 503 });
+  }
 
   const url = new URL(request.url);
   const payload = (await request.json().catch(() => ({}))) as { type?: string; action?: string; data?: { id?: string | number } };
