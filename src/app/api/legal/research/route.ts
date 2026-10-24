@@ -16,7 +16,7 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   const auth = await apiRequireUser();
   if (!auth.ok) return auth.response;
-  const { supabase, user, profile } = auth.ctx;
+  const { supabase, user } = auth.ctx;
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError(400, "Informe um tema jurídico válido, sem dados pessoais.");
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     .maybeSingle();
   if (!petition) return jsonError(404, "Petição não encontrada.");
 
-  const access = await loadAccess(supabase, user.id, profile?.created_at ?? user.created_at, settings.trial.days);
+  const access = await loadAccess(supabase, user.id);
   const usage = await loadUsage(supabase, user.id);
   const blocked = checkAiAllowed({ feature: "petitions", settings, access, usage });
   if (blocked) return jsonError(403, blocked, { code: "blocked" });

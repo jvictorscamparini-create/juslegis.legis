@@ -35,7 +35,7 @@ export async function loadPublicSettings(supabase: SupabaseClient): Promise<Publ
   };
 }
 
-export async function loadAccess(supabase: SupabaseClient, userId: string, _profileCreatedAt: string, _trialDays: number): Promise<Access> {
+export async function loadAccess(supabase: SupabaseClient, userId: string): Promise<Access> {
   const [{ data: subscription }, { data: activation, error }] = await Promise.all([
     supabase
       .from("subscriptions")

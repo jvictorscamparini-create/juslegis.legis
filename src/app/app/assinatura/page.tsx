@@ -7,9 +7,9 @@ const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 const STATUS: Record<string, string> = { authorized: "Ativa", pending: "Aguardando pagamento", paused: "Pausada", cancelled: "Cancelada" };
 
 export default async function SubscriptionPage() {
-  const { supabase, user, profile } = await requireUser();
+  const { supabase, user } = await requireUser();
   const settings = await loadPublicSettings(supabase);
-  const access = await loadAccess(supabase, user.id, profile?.created_at ?? user.created_at, settings.trial.days);
+  const access = await loadAccess(supabase, user.id);
   const [{ data: sub }, { data: payments }] = await Promise.all([
     supabase.from("subscriptions").select("status,next_payment_date,environment").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("payments").select("mp_payment_id,amount,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(24),

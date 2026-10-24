@@ -12,6 +12,13 @@ set trial_started_at = created_at,
     )
 where trial_started_at is null;
 
+-- Establish the required 72-hour duration for future activations without changing existing snapshots.
+update public.admin_settings
+set value = jsonb_set(value, '{days}', '3'::jsonb, true),
+    updated_at = now()
+where key = 'trial'
+  and value ? 'days';
+
 create or replace function public.activate_trial()
 returns table (
   trial_started_at timestamptz,

@@ -4,10 +4,10 @@ import { loadAccess, loadPublicSettings, loadUsage } from "@/lib/runtime";
 const n = (v: number) => v.toLocaleString("pt-BR");
 
 export default async function UsagePage() {
-  const { supabase, user, profile } = await requireUser();
+  const { supabase, user } = await requireUser();
   const settings = await loadPublicSettings(supabase);
   const [access, usage] = await Promise.all([
-    loadAccess(supabase, user.id, profile?.created_at ?? user.created_at, settings.trial.days),
+    loadAccess(supabase, user.id),
     loadUsage(supabase, user.id),
   ]);
   const t = settings.trial;
