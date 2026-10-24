@@ -78,3 +78,21 @@ Para validar Mercado Pago em sandbox, configure somente `MP_ACCESS_TOKEN_TEST` e
 
 `npm run lint` · `npm run typecheck` · `npm test` · `npm run build`
 (em máquinas com pouca RAM: `SKIP_NEXT_TYPECHECK=1 npm run build` após rodar o typecheck)
+
+## Checklist de configuração manual (Preview)
+
+Projeto Supabase dedicado: `hbqlwwnnbvritknwwzos` (nunca usar `odoavqqihukvpsmvopvf`, CRM da Versátil).
+
+**Supabase (Authentication)**: Email provider + OTP ativados; *Allow new users to sign up* ativado; Google provider ativado (Client ID/Secret do Google Cloud); SMTP próprio antes de testes externos; *Redirect URLs*: `http://localhost:3000/auth/callback`, `https://*-<time>.vercel.app/auth/callback` (Preview) e a URL de produção `/auth/callback`.
+
+**Variáveis na Vercel** (ver `.env.example`):
+- Preview e Production: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (servidor), `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL`.
+- Conforme habilitação: `OPENAI_API_KEY`, `OPENAI_MODEL`, `MERCADO_PAGO_ACCESS_TOKEN`, `MERCADO_PAGO_WEBHOOK_SECRET`, `MERCADO_PAGO_ENVIRONMENT=sandbox`, `DATAJUD_API_URL`, `DATAJUD_API_KEY`.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `MP_*` continuam aceitos como nomes legados.
+
+**Primeiro admin**: cadastre-se normalmente e execute `supabase/promote-admin.sql` no SQL Editor (service role), informando o e-mail. Nunca no frontend.
+
+**Mercado Pago**: somente sandbox; `BILLING_ENABLED=false` impede qualquer cobrança. **DataJud**: sem `DATAJUD_API_URL`/`DATAJUD_API_KEY` a consulta fica "ainda não configurada"; nenhum dado é fabricado.
+
+## Status e limitações reais
+Não foi possível, neste ambiente, validar com credenciais reais: OTP por e-mail, Google OAuth, OpenAI, DataJud e Mercado Pago (sem acesso ao dashboard Supabase/chaves). Apenas testes unitários e build foram executados. Se algum fluxo real for bloqueado por configuração do Supabase, a recomendação é manter Supabase (RLS por workspace já implementada, menor custo/atrito) e corrigir a configuração; alternativas (Neon + Better Auth, Clerk, Convex) exigiriam reescrever RLS e storage. O acesso a dados fica concentrado em `src/lib/supabase/*` e `src/lib/runtime.ts`, facilitando uma eventual migração.
