@@ -18,6 +18,9 @@ export async function POST() {
   if (!isBillingEnabled()) {
     return jsonError(503, "O checkout seguro do Mercado Pago ainda não está habilitado. Nenhuma cobrança foi iniciada.");
   }
+  if (mpEnvironment() !== "test") {
+    return jsonError(503, "Este deploy só permite checkout com credenciais de teste.");
+  }
   const settings = await loadAllSettings();
   const admin = createAdminClient();
   if (!settings || !admin) return jsonError(503, "Servidor sem configuração completa. Nenhuma cobrança foi iniciada.");

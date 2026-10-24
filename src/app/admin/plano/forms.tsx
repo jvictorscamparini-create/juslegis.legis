@@ -48,9 +48,9 @@ export function TrialForm({ initial }: { initial: Settings["trial"] }) {
     <label className="field">{label}<input className="input" type="number" min="0" value={nv(v[key])} onChange={(e) => setV({ ...v, [key]: numOrNull(e.target.value) })} placeholder="Sem limite" /></label>
   );
   return (
-    <Section title="Regras do teste" desc="Sem cartão de crédito. Sem cobrança automática ao expirar." tag="Servidor">
+    <Section title="Regras dos próximos testes" desc="72 horas por padrão, sem cartão ou cobrança automática. A duração configurada é registrada na primeira ativação e não altera testes já iniciados." tag="Servidor">
       <div className="grid-auto">
-        <label className="field">Duração (dias)<input className="input" type="number" min="0" max="90" value={v.days} onChange={(e) => setV({ ...v, days: Number(e.target.value) || 0 })} /></label>
+        <label className="field">Duração para novas ativações (dias)<input className="input" type="number" min="0" max="90" value={v.days} onChange={(e) => setV({ ...v, days: Number(e.target.value) || 0 })} /></label>
         {f("Solicitações de IA permitidas", "ai_requests")}
         {f("Limite de análises documentais", "documents")}
         {f("Limite de petições geradas", "petitions")}

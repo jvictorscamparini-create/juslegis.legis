@@ -19,7 +19,7 @@ export function esc(t: string | null | undefined) {
   return String(t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-const H = "font-family:Cormorant Garamond,serif;font-size:19px;font-weight:700;margin:22px 0 6px;text-align:left";
+const H = "font-family:'Cormorant Garamond Variable',serif;font-size:19px;font-weight:700;margin:22px 0 6px;text-align:left";
 const P = "margin:0 0 10px;text-indent:2em";
 
 export function skeleton(f: PetitionForm) {

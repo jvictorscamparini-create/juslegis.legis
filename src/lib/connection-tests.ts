@@ -1,7 +1,9 @@
 import "server-only";
-import { legalDataKey, mpWebhookSecret, openAiKey, type MpEnvironment } from "@/lib/env";
+import { mpWebhookSecret, openAiKey, type MpEnvironment } from "@/lib/env";
+import { generate } from "@/lib/ai";
 import { mpRequest } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { searchOfficialLegalSources } from "@/lib/legal-research";
 
 // Testes de conexão reais: cada um chama o serviço de verdade e só reporta sucesso se ele responder.
 
@@ -39,6 +41,19 @@ export async function testOpenAI(configuredModel: string, fetchImpl: typeof fetc
   }
 }
 
+export async function testOpenAIResponses(configuredModel: string, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
+  if (!openAiKey()) return { ok: false, detail: "OPENAI_API_KEY não definida no servidor." };
+  if (!configuredModel) return { ok: false, detail: "Selecione um modelo para testar a Responses API." };
+  const result = await generate({
+    config: { provider: "openai", model: configuredModel, temperature: 0, max_output_tokens: 8 },
+    input: [{ role: "user", content: [{ type: "input_text", text: "Responda apenas: OK." }] }],
+    fetchImpl,
+  });
+  return result.ok
+    ? { ok: true, detail: `Responses API respondeu usando o modelo "${result.model}".` }
+    : { ok: false, detail: result.message };
+}
+
 export async function testMercadoPago(env: MpEnvironment, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
   const res = await mpRequest<{ id: number; nickname?: string; site_id?: string }>(env, "/users/me", {}, fetchImpl);
   if (!res.ok) {
@@ -65,15 +80,31 @@ export async function testSupabase(): Promise<CheckResult> {
   return { ok: true, detail: "Banco, Auth e armazenamento privado respondendo." };
 }
 
-export async function testLegal(): Promise<CheckResult> {
-  if (!legalDataKey()) return { ok: false, detail: "Nenhum fornecedor jurídico configurado." };
-  return { ok: false, detail: "Credencial definida, mas nenhum fornecedor jurídico está integrado nesta versão." };
+export async function testLegal(configuredModel: string): Promise<CheckResult> {
+  if (!openAiKey()) return { ok: false, detail: "OPENAI_API_KEY não definida no servidor." };
+  if (!configuredModel) return { ok: false, detail: "Selecione um modelo OpenAI antes de testar a pesquisa oficial." };
+  const result = await searchOfficialLegalSources({
+    model: configuredModel,
+    topic: "Lei nº 8.078 de 1990 Código de Defesa do Consumidor",
+    petitionType: "pesquisa de integração",
+    area: "Direito do consumidor",
+    categories: ["legislation"],
+  });
+  if (!result.ok) {
+    return {
+      ok: false,
+      detail: result.code === "no_sources"
+        ? "A pesquisa não retornou links oficiais válidos."
+        : `A pesquisa oficial via OpenAI falhou (${result.code}).`,
+    };
+  }
+  return { ok: true, detail: `${result.sources.length} fonte(s) oficial(is) encontradas e com URL respondendo.` };
 }
 
 export async function runCheck(service: Service, configuredModel: string): Promise<CheckResult> {
   switch (service) {
     case "openai":
-      return testOpenAI(configuredModel);
+      return testOpenAIResponses(configuredModel);
     case "mp_test":
       return testMercadoPago("test");
     case "mp_prod":
@@ -81,6 +112,6 @@ export async function runCheck(service: Service, configuredModel: string): Promi
     case "supabase":
       return testSupabase();
     case "legal":
-      return testLegal();
+      return testLegal(configuredModel);
   }
 }

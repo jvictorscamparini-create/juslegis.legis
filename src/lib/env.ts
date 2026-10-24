@@ -38,10 +38,6 @@ export function isBillingEnabled() {
   return process.env.BILLING_ENABLED === "true";
 }
 
-export function legalDataKey() {
-  return process.env.LEGAL_DATA_API_KEY || null;
-}
-
 export function siteUrl() {
   return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 }

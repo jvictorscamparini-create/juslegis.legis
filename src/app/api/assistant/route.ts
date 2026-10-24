@@ -55,7 +55,7 @@ async function documentParts(supabase: SupabaseClient, ids: string[]): Promise<A
 export async function POST(request: Request) {
   const auth = await apiRequireUser();
   if (!auth.ok) return auth.response;
-  const { supabase, user, profile } = auth.ctx;
+  const { supabase, user } = auth.ctx;
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError(400, "Requisição inválida.");
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
     const err = aiError("not_configured");
     return respond(err.ok ? "" : err.message, "error", "not_configured");
   }
-  const access = await loadAccess(supabase, user.id, profile?.created_at ?? user.created_at, settings.trial.days);
+  const access = await loadAccess(supabase, user.id);
   const usage = await loadUsage(supabase, user.id);
 
   const { data: history } = await supabase

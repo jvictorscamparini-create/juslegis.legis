@@ -28,7 +28,7 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
             <TestCard service="mp_prod" name="Mercado Pago (produção)" desc="Credenciais reais. Teste apenas verifica a conta; não cobra." status={statusLabel(checks.mp_prod, secretsPresent.mpProd())} initial={checks.mp_prod ?? null} configureHref="/admin/apis?tab=mp" />
             <TestCard service="mcp" name="Mercado Pago MCP" desc="Ferramentas de desenvolvimento, separadas da API de pagamentos." status="Não conectado" initial={null} noTest configureHref="/admin/apis?tab=mcp" />
             <TestCard service="supabase" name="Supabase" desc="Autenticação, banco PostgreSQL e arquivos privados." status={statusLabel(checks.supabase, secretsPresent.serviceRole())} initial={checks.supabase ?? null} configureHref="/admin/apis?tab=sb" />
-            <TestCard service="legal" name="APIs jurídicas" desc="Fornecedor futuro de legislação, jurisprudência e processos." status={s.legal.provider ? "Fornecedor selecionado · não integrado" : "Nenhum fornecedor"} initial={checks.legal ?? null} configureHref="/admin/apis?tab=jur" />
+            <TestCard service="legal" name="Fontes jurídicas oficiais" desc="Pesquisa via OpenAI, restrita a domínios oficiais de legislação e tribunais." status={statusLabel(checks.legal, secretsPresent.legal())} initial={checks.legal ?? null} configureHref="/admin/apis?tab=jur" />
           </div>
         </Section>
       )}
@@ -87,7 +87,6 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
           <Section>
             <TestButton service="legal" initial={checks.legal ?? null} />
           </Section>
-          <SecretRows rows={[{ name: "LEGAL_DATA_API_KEY", kind: "Secreta", defined: secretsPresent.legal() }]} />
         </>
       )}
     </>

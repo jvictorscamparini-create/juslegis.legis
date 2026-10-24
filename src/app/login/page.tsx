@@ -1,4 +1,5 @@
 import { isSupabaseConfigured } from "@/lib/env";
+import { safeInternalPath } from "@/lib/safe-redirect";
 import { LogoMark } from "@/components/icons";
 import LoginForm from "./LoginForm";
 
@@ -9,10 +10,10 @@ const ERRORS: Record<string, string> = {
   oauth: "Não foi possível concluir o login com Google. Tente novamente.",
 };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erro?: string; next?: string }> }) {
-  const { erro, next } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erro?: string; next?: string; recovery?: string }> }) {
+  const { erro, next, recovery } = await searchParams;
   const configured = isSupabaseConfigured();
-  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/app";
+  const safeNext = safeInternalPath(next);
 
   return (
     <div className="login-grid" style={{ minHeight: "100vh", display: "grid" }}>
@@ -43,7 +44,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
       </div>
       <div style={{ background: "var(--paper)", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 24px" }}>
-        <LoginForm configured={configured} initialError={erro ? ERRORS[erro] ?? null : null} next={safeNext} />
+        <LoginForm configured={configured} initialError={erro ? ERRORS[erro] ?? null : null} next={safeNext} recovery={recovery === "1"} />
       </div>
     </div>
   );

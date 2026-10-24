@@ -86,14 +86,14 @@ export const DEFAULT_SETTINGS: Settings = {
   ai_limits: { tokens_user_day: null, tokens_user_month: null, cost_month_brl: null, alert_pct: 80 },
   features: allFeatures(["assistant", "petitions", "documents"]),
   plan: {
-    price_brl: null,
+    price_brl: 44.9,
     tokens_month: null,
     renewal: "auto",
     available: false,
     mp_plan_id: null,
     features: allFeatures(["assistant", "petitions", "documents"]),
   },
-  trial: { days: 7, ai_requests: null, documents: null, petitions: null, max_tokens: null, on_expire: "block" },
+  trial: { days: 3, ai_requests: null, documents: null, petitions: null, max_tokens: null, on_expire: "block" },
   legal: {
     provider: "",
     contract: "nc",

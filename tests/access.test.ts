@@ -6,11 +6,11 @@ const created = "2026-10-01T00:00:00Z";
 const s = { ...DEFAULT_SETTINGS };
 
 describe("computeAccess", () => {
-  it("teste ativo, expirado e assinatura", () => {
-    expect(computeAccess({ profileCreatedAt: created, trialDays: 7, subscriptionStatus: null, now: new Date("2026-10-05") }).kind).toBe("trial");
-    expect(computeAccess({ profileCreatedAt: created, trialDays: 7, subscriptionStatus: null, now: new Date("2026-10-09") }).kind).toBe("expired");
-    expect(computeAccess({ profileCreatedAt: created, trialDays: 7, subscriptionStatus: "authorized", now: new Date("2026-12-01") }).kind).toBe("subscription");
-    expect(computeAccess({ profileCreatedAt: created, trialDays: 7, subscriptionStatus: "pending", now: new Date("2026-12-01") }).kind).toBe("expired");
+  it("expira o teste exatamente após as 72 horas ativadas", () => {
+    expect(computeAccess({ profileCreatedAt: created, trialDays: 3, subscriptionStatus: null, now: new Date("2026-10-03T23:59:59.999Z") }).kind).toBe("trial");
+    expect(computeAccess({ profileCreatedAt: created, trialDays: 3, subscriptionStatus: null, now: new Date("2026-10-04T00:00:00.000Z") }).kind).toBe("expired");
+    expect(computeAccess({ profileCreatedAt: created, trialDays: 3, subscriptionStatus: "authorized", now: new Date("2026-12-01") }).kind).toBe("subscription");
+    expect(computeAccess({ profileCreatedAt: created, trialDays: 3, subscriptionStatus: "pending", now: new Date("2026-12-01") }).kind).toBe("expired");
   });
 });
 

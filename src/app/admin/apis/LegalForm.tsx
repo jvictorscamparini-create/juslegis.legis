@@ -15,18 +15,18 @@ const SOURCES: [keyof Settings["legal"]["sources"], string, string][] = [
 export default function LegalForm({ initial }: { initial: Settings["legal"] }) {
   const [v, setV] = useState(initial);
   return (
-    <Section title="Fornecedor e contrato" desc="Nenhuma fonte jurídica é apresentada como disponível até a conexão e a licença estarem confirmadas.">
+    <Section title="Fontes jurídicas oficiais" desc="A pesquisa usa a ferramenta web da OpenAI, limitada a domínios oficiais brasileiros; links são conferidos antes de serem apresentados. Nenhuma pesquisa processual ou doutrinária é feita.">
       <div className="grid-auto">
         <label className="field">
           Fornecedor
           <select className="select" value={v.provider} onChange={(e) => setV({ ...v, provider: e.target.value as Settings["legal"]["provider"] })}>
             <option value="">Nenhum fornecedor selecionado</option>
             <option value="oficial">Fontes oficiais (acesso público)</option>
-            <option value="lic">Fornecedor licenciado</option>
+            <option value="lic" disabled>Fornecedor licenciado — futuro</option>
           </select>
         </label>
         <label className="field">
-          Contrato / licença
+          Contrato / licença de fornecedor
           <select className="select" value={v.contract} onChange={(e) => setV({ ...v, contract: e.target.value as Settings["legal"]["contract"] })}>
             <option value="nc">Sem contrato</option>
             <option value="neg">Em negociação</option>
