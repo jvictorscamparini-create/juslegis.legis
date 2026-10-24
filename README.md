@@ -30,11 +30,14 @@ O repositório já contém a aplicação Next.js; não crie um projeto novo. As 
 
 Antes do primeiro deploy:
 
-1. Crie/configure o projeto Supabase e aplique, em ordem, as migrações de `supabase/migrations/`. A migração do plano preenche R$ 44,90 somente quando o preço ainda não foi definido; o plano permanece indisponível e cobranças continuam desativadas. Habilite e-mail/senha, recuperação por e-mail e, se desejado, Google em Authentication. Em **Authentication → URL Configuration**, configure `https://juslegis.vercel.app` como Site URL e permita `https://juslegis.vercel.app/auth/callback` e os callbacks Preview autorizados em Redirect URLs. A recuperação volta por `/auth/callback` para `/login?recovery=1`.
-2. Cadastre na Vercel as variáveis necessárias listadas abaixo. `NEXT_PUBLIC_SITE_URL` deve ser a URL HTTPS canônica do deployment.
-3. Faça o primeiro login com a conta proprietária e execute `supabase/promote-admin.sql` com o e-mail correto para promovê-la a Administrador Geral.
-4. Em `/admin/apis`, teste a Responses API e a pesquisa oficial. Esses testes fazem chamadas reais à OpenAI e podem gerar uso faturável.
-5. Em `/admin/ia`, selecione um modelo permitido pela conta OpenAI. Fontes jurídicas iniciam desabilitadas; habilite apenas as categorias oficiais que pretende oferecer.
+1. **Use um projeto Supabase exclusivo da JusLegis.** Não reutilize banco de CRM ou de outro produto. Crie um projeto separado (`juslegis-dev`) e confira o Project Ref no dashboard antes de copiar URL e chaves. No projeto novo, aplique em ordem, pelo timestamp, todos os arquivos de `supabase/migrations/`; não execute alterações no banco atualmente configurado em Production.
+2. No projeto dedicado, habilite o provedor **Email** e novos cadastros para o beta autorizado; o fluxo por código usa `signInWithOtp` com `shouldCreateUser` somente na opção “Criar conta”. Configure o template de confirmação para incluir `{{ .Token }}`. Habilite recuperação por e-mail. Após o primeiro login bem-sucedido da conta proprietária, execute `supabase/promote-admin.sql` com o e-mail correto.
+3. Em **Authentication → URL Configuration**, configure a URL do deployment que será testado como Site URL e inclua a URL exata `https://<preview-gerado>.vercel.app/auth/callback` em Redirect URLs. O login Google e recuperação usam `/auth/callback`; após verificar o Preview, inclua também `https://juslegis.vercel.app/auth/callback` ao preparar uma troca de backend em Production, somente com aprovação.
+4. Em **Authentication → Providers → Google**, habilite Google. No Google Cloud Console, configure a tela de consentimento e uma credencial OAuth **Web application**; registre como Authorized redirect URI o callback exibido pelo Supabase (formato `https://<PROJECT_REF>.supabase.co/auth/v1/callback`). Copie Client ID/Secret para o provedor Google no Supabase. Restrinja os usuários de teste na tela de consentimento enquanto estiver em modo Testing.
+5. No projeto Vercel existente, configure as variáveis abaixo no escopo **Preview**, com os dados do projeto JusLegis dedicado. Não copie nem revele valores de Production e não substitua as variáveis Production do CRM sem aprovação explícita. Configure proteção de deployment para o Preview antes de usar dados reais; não compartilhe o endereço se a proteção não estiver disponível.
+6. Cadastre na Vercel as variáveis necessárias listadas abaixo. `NEXT_PUBLIC_SITE_URL` deve ser a URL HTTPS do deployment correspondente ao ambiente.
+7. Em `/admin/apis`, teste a Responses API e a pesquisa oficial. Esses testes fazem chamadas reais à OpenAI e podem gerar uso faturável.
+8. Em `/admin/ia`, selecione um modelo permitido pela conta OpenAI. Fontes jurídicas iniciam desabilitadas; habilite apenas as categorias oficiais que pretende oferecer.
 
 O teste é de 72 horas por padrão e começa na primeira ativação autenticada do workspace. A migração `20261023020000_trial_activation.sql` registra uma única ativação e congela a duração por usuário; contas já existentes são migradas com o período calculado pela configuração vigente, para preservar o acesso atual. Se o RPC dessa migração não estiver instalado, o acesso ao teste falha fechado.
 
@@ -47,6 +50,8 @@ Necessárias para autenticação e funcionamento do servidor:
 - `NEXT_PUBLIC_SITE_URL`: URL pública HTTPS do app.
 - `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`: URL e chave pública/anon do projeto Supabase.
 - `SUPABASE_SERVICE_ROLE_KEY`: chave secreta usada apenas no servidor; nunca use o prefixo `NEXT_PUBLIC_`.
+
+Para Preview, todas as três variáveis Supabase devem pertencer ao projeto dedicado JusLegis, não ao banco CRM. Cadastre-as no ambiente **Preview** no projeto Vercel existente. Os nomes atuais do código continuam sendo `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY`.
 
 Necessária para IA e pesquisa jurídica oficial (opcional para compilar/deploy):
 

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { authConfigurationError } from "@/lib/auth-errors";
 import { passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
 
 type Step = "auth" | "code" | "recovery-sent" | "new-password";
@@ -47,7 +48,7 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
       options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
     if (error) {
-      setError("Não foi possível iniciar o login com Google. Verifique se o provedor está habilitado no Supabase.");
+      setError(authConfigurationError(error, "google"));
       setBusy(false);
     }
   }
@@ -83,14 +84,10 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
     });
     setBusy(false);
     if (error) {
-      const notFound = /signups not allowed|user not found/i.test(error.message);
-      setError(
-        notFound
-          ? "Não encontramos uma conta com este e-mail. Use “Criar conta”."
-          : error.status === 429
-            ? "Muitas tentativas. Aguarde alguns instantes e tente de novo."
-            : "Não foi possível enviar o código. Tente novamente.",
-      );
+      const message = error.code === "user_not_found" || /user not found/i.test(error.message)
+        ? "Não encontramos uma conta com este e-mail. Use “Criar conta”."
+        : authConfigurationError(error, "email");
+      setError(message);
       return;
     }
     setCode("");
