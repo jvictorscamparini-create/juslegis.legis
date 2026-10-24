@@ -52,9 +52,9 @@ Nomes legados (`MP_ENVIRONMENT`, `MP_ACCESS_TOKEN_TEST`, `MP_WEBHOOK_SECRET`) co
 
 ## Conectar ao Supabase dedicado
 
-1. Use um projeto Supabase **exclusivo da JusLegis** (ref `hbqlwwnnbvritknwwzos`). Nunca reutilize o projeto do CRM da Versátil Agência (`odoavqqihukvpsmvopvf`). Confira o Project Ref no dashboard antes de copiar URL e chaves.
+1. Use um projeto Supabase **exclusivo da JusLegis**. Confira o nome e o Project Ref no dashboard do proprietário antes de copiar URL e chaves; não reutilize projeto ou credenciais de outro aplicativo.
 2. Se o banco estiver vazio, aplique em ordem de timestamp todos os arquivos de `supabase/migrations/` (SQL Editor ou Supabase CLI). RLS permanece ativo em todas as tabelas privadas; não crie políticas `USING (true)`.
-3. Copie URL, chave publishable e service role para `.env.local` (e para a Vercel). A Vercel não executa migrações.
+3. Copie a URL, a chave publishable e a service role desse projeto para `.env.local` (e para a Vercel). A URL e a chave publishable são usadas no cliente; a service role é secreta e exclusiva do servidor. A Vercel não executa migrações.
 
 ## Login por e-mail, OTP e Google
 
@@ -68,9 +68,9 @@ Testar: cadastro com e-mail → receber código → entrar em `/app`; sair e ent
 
 ## Promover o primeiro Admin Geral com segurança
 
-O papel de admin nunca é definido no frontend nem via `user_metadata`; o usuário não consegue alterar o próprio papel.
-1. Cadastre-se normalmente e faça o primeiro login (o perfil é criado automaticamente).
-2. No SQL Editor do Supabase, edite o e-mail em `supabase/promote-admin.sql` e execute.
+O papel de admin nunca é definido no frontend nem via `user_metadata`; o usuário não consegue alterar o próprio papel. Faça esta operação apenas com acesso autorizado ao projeto dedicado.
+1. Cadastre a conta pretendida normalmente e faça o primeiro login (o perfil é criado automaticamente).
+2. Confirme o e-mail exato dessa conta. No SQL Editor do projeto Supabase dedicado, substitua o e-mail de exemplo em `supabase/promote-admin.sql` pelo e-mail confirmado e execute o script.
 3. Saia e entre novamente; `/admin` passa a abrir. Qualquer outro usuário é redirecionado a `/acesso-negado`.
 
 ## OpenAI sem expor a chave
