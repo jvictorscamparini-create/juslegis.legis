@@ -1,98 +1,135 @@
 # JusLegis
 
-Plataforma de inteligência jurídica (Next.js 16 · React 19 · TypeScript · Supabase · OpenAI · Mercado Pago).
-Os protótipos originais do Claude Design estão preservados em `design-reference/` (não fazem parte do build).
+SaaS jurídico **exclusivo para advogados**: assistente de IA, redação de petições, pesquisa restrita a fontes oficiais habilitadas e workspace individual por advogado, com Admin Geral separado. Os protótipos originais estão em `design-reference/` (fora do build).
+
+## Stack
+
+Next.js 16 (App Router) · React 19 · TypeScript · Supabase (Auth, Postgres com RLS, Storage) via `@supabase/ssr` · OpenAI API (somente servidor) · Mercado Pago (somente Sandbox) · Vercel · Vitest · Zod.
 
 ## Rotas
 
 | Rota | Acesso |
 |---|---|
-| `/login` | público (Supabase Auth: Google + código por e-mail) |
-| `/app/*` | usuário logado — workspace isolado por RLS |
-| `/admin/*` | somente `profiles.role = 'admin'` ativo, verificado no servidor |
-| `/acesso-negado` | destino de quem não é admin / conta bloqueada |
-| `/api/webhooks/mercadopago` | assinatura HMAC validada |
-| `/api/legal/research` | usuário autenticado; pesquisa restrita a fontes oficiais habilitadas |
+| `/login` | público (Google + código por e-mail) |
+| `/auth/callback`, `/auth/signout` | callback OAuth/OTP e logout |
+| `/app/*` | usuário logado; workspace isolado por RLS |
+| `/admin/*` | somente `profiles.role = 'admin'` ativo, validado no servidor |
+| `/acesso-negado` | destino de quem não é admin ou tem conta bloqueada |
+| `/api/assistant`, `/api/petitions/ai`, `/api/legal/research` | usuário autenticado; chamadas OpenAI só no servidor |
+| `/api/billing/*`, `/api/webhooks/mercadopago` | checkout sandbox; webhook com assinatura HMAC e idempotência |
 
-## Executar localmente
+## Instalar e rodar localmente
 
 ```bash
 npm install
-cp .env.example .env.local   # preencha as variáveis
-npm run dev
+cp .env.example .env.local   # preencha com valores do SEU projeto; nunca versione
+npm run dev                  # http://localhost:3000
 ```
 
-Sem credenciais, o build não precisa de serviços externos, mas login e integrações ficam indisponíveis. A pesquisa jurídica permanece desabilitada até ser habilitada pelo Administrador Geral.
+Scripts: `npm run lint` · `npm run typecheck` · `npm test` · `npm run build`
+(pouca RAM: `SKIP_NEXT_TYPECHECK=1 npm run build` após o typecheck).
+Sem credenciais o build funciona, mas login e integrações ficam indisponíveis.
 
-## Deploy na Vercel
+## Variáveis de ambiente (`.env.example`)
 
-O repositório já contém a aplicação Next.js; não crie um projeto novo. As fontes Cormorant Garamond e Plus Jakarta Sans são empacotadas localmente, então o build não precisa buscar fontes externas. Ao importar no dashboard da Vercel, use **Root Directory `.`** (raiz do repositório), framework preset **Next.js** e os comandos detectados pelo `package.json` (`npm run build` para build).
+Variáveis sem `NEXT_PUBLIC_` existem somente no servidor. Nunca coloque segredos em `NEXT_PUBLIC_`.
 
-Antes do primeiro deploy:
+| Variável | Uso | Visibilidade |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase | pública |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | chave publishable/anon (protegida por RLS); `NEXT_PUBLIC_SUPABASE_ANON_KEY` segue aceita | pública |
+| `SUPABASE_SERVICE_ROLE_KEY` | webhooks, testes de conexão, configurações admin | **segredo** |
+| `NEXT_PUBLIC_SITE_URL` / `NEXT_PUBLIC_APP_URL` | URLs base para redirects de login e retorno do checkout | pública |
+| `OPENAI_API_KEY` | chave OpenAI da plataforma | **segredo** |
+| `OPENAI_MODEL` | modelo padrão (o Admin Geral pode sobrescrever) | servidor |
+| `MERCADO_PAGO_ACCESS_TOKEN` | token de **teste** | **segredo** |
+| `MERCADO_PAGO_WEBHOOK_SECRET` | segredo da assinatura de webhooks | **segredo** |
+| `MERCADO_PAGO_ENVIRONMENT` | mantenha `sandbox` | servidor |
+| `BILLING_ENABLED` | trava; só o valor exato `true` libera criação de checkout. Mantenha `false` | servidor |
+| `DATAJUD_API_URL` / `DATAJUD_API_KEY` | integração DataJud futura | servidor / **segredo** |
 
-1. **Use um projeto Supabase exclusivo da JusLegis.** Não reutilize banco de CRM ou de outro produto. Crie um projeto separado (`juslegis-dev`) e confira o Project Ref no dashboard antes de copiar URL e chaves. No projeto novo, aplique em ordem, pelo timestamp, todos os arquivos de `supabase/migrations/`; não execute alterações no banco atualmente configurado em Production.
-2. No projeto dedicado, habilite o provedor **Email** e novos cadastros para o beta autorizado; o fluxo por código usa `signInWithOtp` com `shouldCreateUser` somente na opção “Criar conta”. Configure o template de confirmação para incluir `{{ .Token }}`. Habilite recuperação por e-mail. Após o primeiro login bem-sucedido da conta proprietária, execute `supabase/promote-admin.sql` com o e-mail correto.
-3. Em **Authentication → URL Configuration**, configure a URL do deployment que será testado como Site URL e inclua a URL exata `https://<preview-gerado>.vercel.app/auth/callback` em Redirect URLs. O login Google e recuperação usam `/auth/callback`; após verificar o Preview, inclua também `https://juslegis.vercel.app/auth/callback` ao preparar uma troca de backend em Production, somente com aprovação.
-4. Em **Authentication → Providers → Google**, habilite Google. No Google Cloud Console, configure a tela de consentimento e uma credencial OAuth **Web application**; registre como Authorized redirect URI o callback exibido pelo Supabase (formato `https://<PROJECT_REF>.supabase.co/auth/v1/callback`). Copie Client ID/Secret para o provedor Google no Supabase. Restrinja os usuários de teste na tela de consentimento enquanto estiver em modo Testing.
-5. No projeto Vercel existente, configure as variáveis abaixo no escopo **Preview**, com os dados do projeto JusLegis dedicado. Não copie nem revele valores de Production e não substitua as variáveis Production do CRM sem aprovação explícita. Configure proteção de deployment para o Preview antes de usar dados reais; não compartilhe o endereço se a proteção não estiver disponível.
-6. Cadastre na Vercel as variáveis necessárias listadas abaixo. `NEXT_PUBLIC_SITE_URL` deve ser a URL HTTPS do deployment correspondente ao ambiente.
-7. Em `/admin/apis`, teste a Responses API e a pesquisa oficial. Esses testes fazem chamadas reais à OpenAI e podem gerar uso faturável.
-8. Em `/admin/ia`, selecione um modelo permitido pela conta OpenAI. Fontes jurídicas iniciam desabilitadas; habilite apenas as categorias oficiais que pretende oferecer.
+Nomes legados (`MP_ENVIRONMENT`, `MP_ACCESS_TOKEN_TEST`, `MP_WEBHOOK_SECRET`) continuam aceitos.
 
-O teste é de 72 horas por padrão e começa na primeira ativação autenticada do workspace. A migração `20261023020000_trial_activation.sql` registra uma única ativação e congela a duração por usuário; contas já existentes são migradas com o período calculado pela configuração vigente, para preservar o acesso atual. Se o RPC dessa migração não estiver instalado, o acesso ao teste falha fechado.
+## Conectar ao Supabase dedicado
 
-**Não configure cobranças reais nesta etapa.** Mantenha `BILLING_ENABLED=false`, `MP_ENVIRONMENT=test` e não cadastre credenciais de produção. As rotas de criação/sincronização de plano e processamento de webhook recusam o ambiente `prod`; o cancelamento implementado também só atua sobre assinaturas de teste. Para um teste de checkout, use exclusivamente credenciais e usuários de teste do Mercado Pago e habilite `BILLING_ENABLED` somente no Preview protegido. A Vercel não executa migrações remotas automaticamente.
+1. Use um projeto Supabase **exclusivo da JusLegis** (ref `hbqlwwnnbvritknwwzos`). Nunca reutilize o projeto do CRM da Versátil Agência (`odoavqqihukvpsmvopvf`). Confira o Project Ref no dashboard antes de copiar URL e chaves.
+2. Se o banco estiver vazio, aplique em ordem de timestamp todos os arquivos de `supabase/migrations/` (SQL Editor ou Supabase CLI). RLS permanece ativo em todas as tabelas privadas; não crie políticas `USING (true)`.
+3. Copie URL, chave publishable e service role para `.env.local` (e para a Vercel). A Vercel não executa migrações.
 
-### Variáveis da Vercel
+## Login por e-mail, OTP e Google
 
-Necessárias para autenticação e funcionamento do servidor:
+No dashboard do Supabase:
+1. **Authentication → Providers → Email**: habilite; permita novos cadastros (*Allow new users to sign up*). O fluxo usa `signInWithOtp`; no template de e-mail inclua `{{ .Token }}`. Habilite recuperação de acesso.
+2. **Authentication → Providers → Google**: habilite. No Google Cloud Console crie uma credencial OAuth *Web application* e registre como redirect URI o callback exibido pelo Supabase (`https://<PROJECT_REF>.supabase.co/auth/v1/callback`); copie Client ID e Secret para o Supabase.
+3. **Authentication → URL Configuration**: Site URL do ambiente testado e Redirect URLs para `http://localhost:3000/auth/callback`, a URL exata do Preview `https://<preview>.vercel.app/auth/callback` e a de produção.
+4. **SMTP próprio** é recomendado antes de testes com usuários externos (o SMTP padrão tem limite baixo de envios).
 
-- `NEXT_PUBLIC_SITE_URL`: URL pública HTTPS do app.
-- `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`: URL e chave pública/anon do projeto Supabase.
-- `SUPABASE_SERVICE_ROLE_KEY`: chave secreta usada apenas no servidor; nunca use o prefixo `NEXT_PUBLIC_`.
+Testar: cadastro com e-mail → receber código → entrar em `/app`; sair e entrar novamente; login Google; recuperação de acesso. Provedor desabilitado ou cadastro indisponível exibem mensagem clara; erros de configuração não são mascarados.
 
-Para Preview, todas as três variáveis Supabase devem pertencer ao projeto dedicado JusLegis, não ao banco CRM. Cadastre-as no ambiente **Preview** no projeto Vercel existente. Os nomes atuais do código continuam sendo `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY`.
+## Promover o primeiro Admin Geral com segurança
 
-Necessária para IA e pesquisa jurídica oficial (opcional para compilar/deploy):
+O papel de admin nunca é definido no frontend nem via `user_metadata`; o usuário não consegue alterar o próprio papel.
+1. Cadastre-se normalmente e faça o primeiro login (o perfil é criado automaticamente).
+2. No SQL Editor do Supabase, edite o e-mail em `supabase/promote-admin.sql` e execute.
+3. Saia e entre novamente; `/admin` passa a abrir. Qualquer outro usuário é redirecionado a `/acesso-negado`.
 
-- `OPENAI_API_KEY`: chave da plataforma API da OpenAI, mantida como segredo; assinatura ChatGPT não substitui créditos/API. Selecione um modelo permitido pela conta no Admin Geral.
+## OpenAI sem expor a chave
 
-Para validar Mercado Pago em sandbox, configure somente `MP_ACCESS_TOKEN_TEST` e `MP_WEBHOOK_SECRET` como segredos no Preview, `MP_ENVIRONMENT=test` e habilite o checkout apenas durante o teste autorizado. Nunca cadastre tokens de produção nesta etapa. A API existente usa Assinaturas/Preapproval; não habilite Pix ou outro meio recorrente sem confirmar a modalidade disponível na conta e na documentação da região. Não é necessária uma chave jurídica separada: a pesquisa usa a ferramenta web da OpenAI e só acontece quando o Admin Geral habilita fontes oficiais. Não há consulta de jurisprudência fora dos domínios configurados, doutrina ou consulta processual.
+- Defina `OPENAI_API_KEY` apenas como variável de servidor (`.env.local` / Vercel). O advogado nunca informa chave própria.
+- Toda chamada OpenAI ocorre em rotas server-side, com sessão válida, limites configuráveis e registro de consumo.
+- O modelo vem de `OPENAI_MODEL` ou do Admin Geral (`/admin/ia`), nunca do cliente.
+- Em `/admin/apis` há testes de conexão que fazem chamadas reais e podem gerar custo.
+- A IA não substitui revisão humana e não afirma ter consultado fonte jurídica sem fonte oficial integrada.
 
-## Segurança
+## DataJud: limitações e configuração futura
 
-- Autorização de admin: `requireAdmin()` em `src/app/admin/layout.tsx` + `apiRequireAdmin()` em toda API admin + RLS (`is_admin()`) no banco. `proxy.ts` é só checagem otimista.
-- Papel e situação do usuário não são graváveis pelo próprio usuário (grant de coluna só em `full_name`).
-- Chaves OpenAI/Mercado Pago/service role só existem no servidor (`server-only`); a tela admin mostra apenas "definida / não definida".
-- Dados dos advogados: RLS por `user_id`; arquivos em bucket privado `user-files/<user_id>/`.
-- Webhook: assinatura validada, idempotência por evento, status reconsultado na API do Mercado Pago antes de liberar acesso.
-- Pesquisa legal: busca OpenAI limitada a domínios oficiais; URLs precisam responder por HTTPS e permanecer em domínio autorizado, referências são armazenadas em tabela sem permissão de escrita pelo usuário. A validação técnica do link não substitui a conferência da vigência ou interpretação jurídica pelo advogado.
+Não há integração DataJud/CNJ ativa: nenhum dado processual é consultado, simulado ou fabricado. A consulta deve exibir "Consulta ainda não configurada" até existirem `DATAJUD_API_URL` e `DATAJUD_API_KEY` e um adaptador server-side. Ao implementar: usar a API pública oficial do CNJ e a chave/termos vigentes, e distinguir metadados processuais de conteúdo integral (a API não fornece inteiro teor).
 
-## Etapas ainda pendentes
+## Mercado Pago (somente Sandbox)
 
-- **Mercado Pago PJ:** o código implementa checkout mensal, cancelamento limitado a testes e webhooks assinados/idempotentes, mas ainda depende de credenciais de sandbox e teste real de ponta a ponta. Não declara pagamentos ou assinaturas funcionais antes dessa validação. Alteração de plano de uma assinatura existente ainda não está disponível.
-- **Fontes jurídicas adicionais:** ampliar fontes jurisprudenciais mediante verificação das APIs, licenças e termos aplicáveis. Doutrina e consulta processual continuam indisponíveis; nenhum processo é consultado ou simulado.
-- **Admin Geral:** configuração de modelo, prompts, limites, fontes e funcionalidades já existe; monitoramento/custos e demais módulos ainda precisam de implementação específica.
+- Plano Essencial R$ 44,90/mês (editável pelo Admin) e teste de 72 horas sem cartão.
+- Use apenas credenciais e usuários de teste do Mercado Pago; `MERCADO_PAGO_ENVIRONMENT=sandbox` e `BILLING_ENABLED=false` por padrão. As rotas recusam o ambiente de produção.
+- Cadastre no painel do Mercado Pago a URL `<site>/api/webhooks/mercadopago` e use o segredo em `MERCADO_PAGO_WEBHOOK_SECRET`.
+- A assinatura só é liberada após o status ser reconsultado e confirmado; eventos duplicados são ignorados (idempotência por evento).
+- Habilite `BILLING_ENABLED` somente no Preview protegido, durante teste autorizado.
 
-## Scripts
+## Publicar Preview na Vercel
 
-`npm run lint` · `npm run typecheck` · `npm test` · `npm run build`
-(em máquinas com pouca RAM: `SKIP_NEXT_TYPECHECK=1 npm run build` após rodar o typecheck)
+1. Use o projeto Vercel existente (Root Directory `.`, preset Next.js, `npm run build`). Não faça deploy em Production nesta etapa.
+2. Cadastre as variáveis: Supabase (URL, publishable, service role) e `NEXT_PUBLIC_SITE_URL`/`NEXT_PUBLIC_APP_URL` em **Preview e Production**; OpenAI, Mercado Pago e DataJud apenas quando for testá-los (Preview, com valores de teste).
+3. Ative a proteção de deployment no Preview antes de usar dados reais.
+4. Adicione a URL do Preview às Redirect URLs do Supabase.
+5. Faça push da branch; a Vercel gera o Preview. Execute o checklist de testes manuais abaixo.
 
-## Checklist de configuração manual (Preview)
+## Checklist de segurança
 
-Projeto Supabase dedicado: `hbqlwwnnbvritknwwzos` (nunca usar `odoavqqihukvpsmvopvf`, CRM da Versátil).
+- [ ] Nenhum segredo em `NEXT_PUBLIC_` nem versionado; `.env.local` fora do git.
+- [ ] Service role, OpenAI e Mercado Pago apenas no servidor (`server-only`).
+- [ ] Projeto Supabase é o dedicado, não o do CRM.
+- [ ] RLS ativo; nenhuma política permissiva em dados privados.
+- [ ] Autorização por papel no banco/servidor, nunca `user_metadata`.
+- [ ] `/app` exige sessão; `/admin` exige admin validado (`requireAdmin`, `apiRequireAdmin`, `is_admin()`).
+- [ ] Arquivos em bucket privado por usuário.
+- [ ] Webhook com assinatura e idempotência; cobrança real desativada.
+- [ ] Proteção de deployment no Preview.
 
-**Supabase (Authentication)**: Email provider + OTP ativados; *Allow new users to sign up* ativado; Google provider ativado (Client ID/Secret do Google Cloud); SMTP próprio antes de testes externos; *Redirect URLs*: `http://localhost:3000/auth/callback`, `https://*-<time>.vercel.app/auth/callback` (Preview) e a URL de produção `/auth/callback`.
+## Checklist de testes manuais (Preview)
 
-**Variáveis na Vercel** (ver `.env.example`):
-- Preview e Production: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (servidor), `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL`.
-- Conforme habilitação: `OPENAI_API_KEY`, `OPENAI_MODEL`, `MERCADO_PAGO_ACCESS_TOKEN`, `MERCADO_PAGO_WEBHOOK_SECRET`, `MERCADO_PAGO_ENVIRONMENT=sandbox`, `DATAJUD_API_URL`, `DATAJUD_API_KEY`.
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `MP_*` continuam aceitos como nomes legados.
+- [ ] Cadastro por e-mail: código chega e entra em `/app`.
+- [ ] Login por código de usuário existente; sessão persiste após recarregar; logout funciona.
+- [ ] Login com Google.
+- [ ] Recuperação de acesso.
+- [ ] `/app` sem sessão redireciona ao login.
+- [ ] Usuário comum em `/admin` é redirecionado/negado; admin promovido acessa.
+- [ ] Usuário A não vê documentos/conversas do usuário B.
+- [ ] Rotas de IA recusam requisição sem sessão (401).
+- [ ] Teste de IA com `OPENAI_API_KEY` configurada e limite de uso respeitado.
+- [ ] Checkout sandbox e webhook duplicado sem duplicar pagamento.
 
-**Primeiro admin**: cadastre-se normalmente e execute `supabase/promote-admin.sql` no SQL Editor (service role), informando o e-mail. Nunca no frontend.
+## Limitações conhecidas e itens que exigem credenciais do proprietário
 
-**Mercado Pago**: somente sandbox; `BILLING_ENABLED=false` impede qualquer cobrança. **DataJud**: sem `DATAJUD_API_URL`/`DATAJUD_API_KEY` a consulta fica "ainda não configurada"; nenhum dado é fabricado.
-
-## Status e limitações reais
-Não foi possível, neste ambiente, validar com credenciais reais: OTP por e-mail, Google OAuth, OpenAI, DataJud e Mercado Pago (sem acesso ao dashboard Supabase/chaves). Apenas testes unitários e build foram executados. Se algum fluxo real for bloqueado por configuração do Supabase, a recomendação é manter Supabase (RLS por workspace já implementada, menor custo/atrito) e corrigir a configuração; alternativas (Neon + Better Auth, Clerk, Convex) exigiriam reescrever RLS e storage. O acesso a dados fica concentrado em `src/lib/supabase/*` e `src/lib/runtime.ts`, facilitando uma eventual migração.
+- Dependem de credenciais/dashboard do proprietário e **não foram validados**: envio real de OTP (SMTP), Google OAuth, OpenAI, DataJud e Mercado Pago sandbox.
+- DataJud não implementado; doutrina e consulta processual indisponíveis.
+- Alteração de plano de assinatura existente indisponível; módulos de custos/monitoramento do Admin pendentes.
+- A validação técnica de links de fontes não substitui a conferência jurídica pelo advogado.
+- O acesso a dados concentra-se em `src/lib/supabase/*` e `src/lib/runtime.ts`, facilitando migração futura de backend.
