@@ -86,7 +86,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ai_limits: { tokens_user_day: null, tokens_user_month: null, cost_month_brl: null, alert_pct: 80 },
   features: allFeatures(["assistant", "petitions", "documents"]),
   plan: {
-    price_brl: null,
+    price_brl: 44.9,
     tokens_month: null,
     renewal: "auto",
     available: false,

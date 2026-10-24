@@ -30,7 +30,7 @@ O repositório já contém a aplicação Next.js; não crie um projeto novo. As 
 
 Antes do primeiro deploy:
 
-1. Crie/configure o projeto Supabase e aplique, em ordem, as migrações de `supabase/migrations/`. Habilite Google e e-mail com código (OTP) em Authentication e adicione `<SITE_URL>/auth/callback` nas Redirect URLs.
+1. Crie/configure o projeto Supabase e aplique, em ordem, as migrações de `supabase/migrations/`. A migração do plano preenche R$ 44,90 somente quando o preço ainda não foi definido; o plano permanece indisponível e cobranças continuam desativadas. Habilite Google e e-mail com código (OTP) em Authentication e adicione `<SITE_URL>/auth/callback` nas Redirect URLs.
 2. Cadastre na Vercel as variáveis necessárias listadas abaixo. `NEXT_PUBLIC_SITE_URL` deve ser a URL HTTPS canônica do deployment.
 3. Faça o primeiro login com a conta proprietária e execute `supabase/promote-admin.sql` com o e-mail correto para promovê-la a Administrador Geral.
 4. Em `/admin/apis`, teste a Responses API e a pesquisa oficial. Esses testes fazem chamadas reais à OpenAI e podem gerar uso faturável.

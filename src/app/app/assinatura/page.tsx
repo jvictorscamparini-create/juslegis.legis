@@ -34,7 +34,7 @@ export default async function SubscriptionPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 16, alignItems: "start" }}>
         <section style={{ ...card, gap: 14 }}>
           <div style={{ fontSize: 11, letterSpacing: ".14em", color: "var(--bronze)", fontWeight: 600 }}>PLANO JUSLEGIS</div>
-          <div className="serif" style={{ fontSize: 30, fontWeight: 600, lineHeight: 1.1 }}>Assinatura mensal</div>
+          <div className="serif" style={{ fontSize: 30, fontWeight: 600, lineHeight: 1.1 }}>JusLegis Essencial</div>
           <div style={{ fontSize: 14, color: "var(--muted-2)", lineHeight: 1.55 }}>
             Acesso ao Assistente IA, petições, análise de documentos, pesquisa, agenda e arquivos, conforme os recursos habilitados pelo administrador da plataforma.
           </div>

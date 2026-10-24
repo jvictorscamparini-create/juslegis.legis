@@ -5,6 +5,8 @@ describe("settings", () => {
   it("usa padrões sem linhas e ignora linhas inválidas", () => {
     expect(mergeSettings([])).toEqual(DEFAULT_SETTINGS);
     expect(mergeSettings([{ key: "trial", value: { days: "x" } }]).trial).toEqual(DEFAULT_SETTINGS.trial);
+    expect(DEFAULT_SETTINGS.plan.price_brl).toBe(44.9);
+    expect(DEFAULT_SETTINGS.plan.available).toBe(false);
   });
   it("aplica valores válidos", () => {
     expect(mergeSettings([{ key: "trial", value: { ...DEFAULT_SETTINGS.trial, days: 14 } }]).trial.days).toBe(14);
