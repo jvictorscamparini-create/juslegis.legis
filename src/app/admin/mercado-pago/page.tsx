@@ -1,5 +1,5 @@
 import { DataTable, ReadOnlyField, Section, Tabs, TestCard } from "@/components/admin/kit";
-import { loadLastChecks, loadSettingsFor, secretsPresent, statusLabel } from "@/lib/admin-data";
+import { loadLastChecks, loadSettingsFor, loadSecretsPresent, statusLabel } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { isBillingEnabled, mpEnvironment } from "@/lib/env";
 import SyncPlanButton from "./SyncPlanButton";
@@ -11,6 +11,7 @@ const when = (d: string | null) => (d ? new Date(d).toLocaleString("pt-BR") : "�
 export default async function MercadoPagoPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab = "planos" } = await searchParams;
   const { supabase } = await requireAdmin();
+  const sp = await loadSecretsPresent();
   const [s, checks] = await Promise.all([loadSettingsFor(supabase), loadLastChecks(supabase)]);
   const emailOf = async (ids: (string | null)[]) => {
     const list = [...new Set(ids.filter(Boolean))] as string[];
@@ -59,7 +60,7 @@ export default async function MercadoPagoPage({ searchParams }: { searchParams: 
         <Section title="Endpoint de webhooks" desc="Cadastre esta URL no painel de Webhooks do Mercado Pago (eventos: pagamentos e assinaturas).">
           <div className="grid-auto">
             <ReadOnlyField label="URL do endpoint" value={site ? `${site.replace(/\/$/, "")}/api/webhooks/mercadopago` : "Defina NEXT_PUBLIC_SITE_URL"} />
-            <ReadOnlyField label="Segredo de assinatura" value={secretsPresent.mpWebhook() ? "Definido no servidor — não exibido" : "MP_WEBHOOK_SECRET não definido"} />
+            <ReadOnlyField label="Segredo de assinatura" value={sp.mpWebhook ? "Definido no servidor — não exibido" : "Não definido — informe em Integrações e APIs"} />
           </div>
         </Section>
         <Section title="Regras de segurança" desc="Aplicadas pelo código; não podem ser desativadas.">
@@ -76,8 +77,8 @@ export default async function MercadoPagoPage({ searchParams }: { searchParams: 
     body = (
       <Section title="Ambientes" desc="Inicie em teste; produção só após validar o fluxo completo. O ambiente ativo é definido por MP_ENVIRONMENT na Vercel." tag={mpEnvironment() === "prod" ? "PRODUÇÃO" : "TESTE"}>
         <div className="grid-auto" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))" }}>
-          <TestCard service="mp_test" name="Teste" desc="Credenciais de sandbox." status={statusLabel(checks.mp_test, secretsPresent.mpTest())} initial={checks.mp_test ?? null} />
-          <TestCard service="mp_prod" name="Produção" desc="Credenciais reais. O teste só consulta a conta; nada é cobrado." status={statusLabel(checks.mp_prod, secretsPresent.mpProd())} initial={checks.mp_prod ?? null} />
+          <TestCard service="mp_test" name="Teste" desc="Credenciais de sandbox." status={statusLabel(checks.mp_test, sp.mpTest)} initial={checks.mp_test ?? null} />
+          <TestCard service="mp_prod" name="Produção" desc="Credenciais reais. O teste só consulta a conta; nada é cobrado." status={statusLabel(checks.mp_prod, sp.mpProd)} initial={checks.mp_prod ?? null} />
         </div>
       </Section>
     );

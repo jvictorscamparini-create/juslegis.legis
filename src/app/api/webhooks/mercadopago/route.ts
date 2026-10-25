@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { mpEnvironment, mpWebhookSecret } from "@/lib/env";
+import { mpEnvironment } from "@/lib/env";
+import { getMpWebhookSecret } from "@/lib/secrets";
 import {
   mpRequest,
   normalizeSubscriptionStatus,
@@ -15,7 +16,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * (o corpo do evento nunca é usado para liberar acesso) e registro de todos os eventos aceitos.
  */
 export async function POST(request: Request) {
-  const secret = mpWebhookSecret();
+  const secret = await getMpWebhookSecret();
   const admin = createAdminClient();
   if (!secret || !admin) return NextResponse.json({ error: "Webhook não configurado." }, { status: 503 });
   if (mpEnvironment() !== "test") {

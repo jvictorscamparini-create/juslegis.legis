@@ -1,6 +1,7 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { mpAccessToken, type MpEnvironment } from "@/lib/env";
+import type { MpEnvironment } from "@/lib/env";
+import { getMpAccessToken } from "@/lib/secrets";
 
 // Mercado Pago PJ — API de Assinaturas (preapproval). Nenhuma cobrança é criada sem a trava BILLING_ENABLED.
 
@@ -14,7 +15,7 @@ export async function mpRequest<T>(
   init: { method?: "GET" | "POST" | "PUT"; body?: unknown; idempotencyKey?: string } = {},
   fetchImpl: typeof fetch = fetch,
 ): Promise<MpResult<T>> {
-  const token = mpAccessToken(env);
+  const token = await getMpAccessToken(env);
   if (!token) {
     const label = env === "prod" ? "produção" : "teste";
     return { ok: false, status: 0, message: `Credencial do Mercado Pago (${label}) não definida no servidor.` };

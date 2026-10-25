@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Section } from "@/components/admin/kit";
-import { loadLastChecks, loadSettingsFor, secretsPresent, statusLabel } from "@/lib/admin-data";
+import { loadLastChecks, loadSettingsFor, loadSecretsPresent, statusLabel } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export default async function AdminDashboard() {
   const { supabase } = await requireAdmin();
+  const sp = await loadSecretsPresent();
   const [checks, settings, users, subs, usage, audit] = await Promise.all([
     loadLastChecks(supabase),
     loadSettingsFor(supabase),
@@ -26,16 +27,16 @@ export default async function AdminDashboard() {
     ["Custo estimado de IA", "—", "Cálculo de custo ainda não implementado"],
   ];
   const integ: [string, string][] = [
-    ["OpenAI", statusLabel(checks.openai, secretsPresent.openai())],
-    ["Mercado Pago (teste)", statusLabel(checks.mp_test, secretsPresent.mpTest())],
-    ["Mercado Pago (produção)", statusLabel(checks.mp_prod, secretsPresent.mpProd())],
-    ["Supabase", statusLabel(checks.supabase, secretsPresent.serviceRole())],
-    ["Fontes jurídicas", statusLabel(checks.legal, secretsPresent.legal())],
+    ["OpenAI", statusLabel(checks.openai, sp.openai)],
+    ["Mercado Pago (teste)", statusLabel(checks.mp_test, sp.mpTest)],
+    ["Mercado Pago (produção)", statusLabel(checks.mp_prod, sp.mpProd)],
+    ["Supabase", statusLabel(checks.supabase, sp.serviceRole)],
+    ["Fontes jurídicas", statusLabel(checks.legal, sp.legal)],
   ];
   const alerts: string[] = [];
   if (!settings.ai_model.model) alerts.push("Nenhum modelo de IA autorizado: o assistente não responderá.");
   if (!settings.plan.price_brl) alerts.push("Valor do plano mensal não definido.");
-  if (!secretsPresent.mpWebhook()) alerts.push("MP_WEBHOOK_SECRET não definido: webhooks do Mercado Pago serão rejeitados.");
+  if (!sp.mpWebhook) alerts.push("Segredo do webhook do Mercado Pago não definido (Integrações e APIs): os webhooks serão rejeitados.");
   if (settings.ai_limits.cost_month_brl == null) alerts.push("Limite de custo mensal da IA não definido.");
 
   return (
