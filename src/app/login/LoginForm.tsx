@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { authConfigurationError } from "@/lib/auth-errors";
-import { isOAuthProviderEnabled, passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
+import { isOAuthProviderEnabled, MIN_PASSWORD_LENGTH, passwordRecoveryRedirect, passwordSignInError, signUpError } from "@/lib/auth-flow";
 
-type Step = "auth" | "code" | "recovery-sent" | "new-password";
+type Step = "auth" | "code" | "signup-sent" | "recovery-sent" | "new-password";
 
 const inputStyle: React.CSSProperties = {
   height: 44,
@@ -74,6 +74,36 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
       return;
     }
     finishLogin();
+  }
+
+  async function signUp() {
+    if (!validEmail) {
+      setError("Informe um e-mail válido.");
+      return;
+    }
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError(`A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`);
+      return;
+    }
+    if (!supabase) return;
+    setBusy(true);
+    setError(null);
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+    });
+    setBusy(false);
+    if (error) {
+      setError(signUpError(error));
+      return;
+    }
+    // Com confirmação de e-mail desligada no Supabase a sessão já vem pronta.
+    if (data.session) {
+      finishLogin();
+      return;
+    }
+    setStep("signup-sent");
   }
 
   async function sendCode() {
@@ -189,35 +219,36 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
                 setEmail(e.target.value);
                 setError(null);
               }}
-              onKeyDown={(e) => e.key === "Enter" && (up || emailMethod === "code" ? sendCode() : signInWithPassword())}
+              onKeyDown={(e) => e.key === "Enter" && (up ? signUp() : emailMethod === "code" ? sendCode() : signInWithPassword())}
               placeholder="seu@email.com.br"
               type="email"
               autoComplete="email"
               style={inputStyle}
             />
           </label>
-          {!up && emailMethod === "password" && (
+          {(up || emailMethod === "password") && (
             <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12.5, fontWeight: 600 }}>
               Senha
               <input
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(null); }}
-                onKeyDown={(e) => e.key === "Enter" && signInWithPassword()}
+                onKeyDown={(e) => e.key === "Enter" && (up ? signUp() : signInWithPassword())}
                 type="password"
-                autoComplete="current-password"
+                autoComplete={up ? "new-password" : "current-password"}
+                placeholder={up ? `Mínimo de ${MIN_PASSWORD_LENGTH} caracteres` : undefined}
                 style={inputStyle}
               />
             </label>
           )}
           {error && <div style={{ fontSize: 12.5, color: "var(--red)", lineHeight: 1.5 }}>{error}</div>}
           <button
-            onClick={up || emailMethod === "code" ? sendCode : signInWithPassword}
+            onClick={up ? signUp : emailMethod === "code" ? sendCode : signInWithPassword}
             disabled={!configured || busy}
             className="btn btn-dark"
             style={{ height: 46, borderRadius: 11, fontSize: 14 }}
           >
             {busy ? <span className="spinner" /> : null}
-            {up || emailMethod === "code" ? "Enviar código por e-mail" : "Entrar com senha"}
+            {up ? "Criar conta" : emailMethod === "code" ? "Enviar código por e-mail" : "Entrar"}
           </button>
           {!up && (
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
@@ -277,6 +308,20 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
           {error && <div className="alert-err">{error}</div>}
           <button onClick={() => { setStep("auth"); setError(null); }} style={{ fontSize: 13, color: "var(--muted)", textAlign: "center" }}>
             Usar outro e-mail
+          </button>
+        </>
+      ) : step === "signup-sent" ? (
+        <>
+          <h2 className="serif" style={{ margin: 0, fontSize: 34, fontWeight: 600 }}>Confirme seu e-mail</h2>
+          <div style={{ fontSize: 13.5, color: "var(--muted)", lineHeight: 1.5 }}>
+            Enviamos um link de confirmação para <b style={{ color: "var(--ink)" }}>{email}</b>. Abra o e-mail e clique no link para ativar sua conta. Depois é só entrar com seu e-mail e senha.
+          </div>
+          <button
+            onClick={() => { setMode("in"); setEmailMethod("password"); setStep("auth"); setError(null); }}
+            className="btn btn-outline"
+            style={{ height: 46, borderRadius: 11 }}
+          >
+            Voltar para entrar
           </button>
         </>
       ) : step === "recovery-sent" ? (

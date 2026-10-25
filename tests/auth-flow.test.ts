@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emailOtpType, isOAuthProviderEnabled, isPasswordRecoveryPath, passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
+import { emailOtpType, isOAuthProviderEnabled, isPasswordRecoveryPath, MIN_PASSWORD_LENGTH, passwordRecoveryRedirect, passwordSignInError, signUpError } from "@/lib/auth-flow";
 import { safeInternalPath } from "@/lib/safe-redirect";
 
 describe("password auth flow", () => {
@@ -18,6 +18,14 @@ describe("password auth flow", () => {
     expect(isPasswordRecoveryPath("/login", new URLSearchParams("recovery=1"))).toBe(true);
     expect(isPasswordRecoveryPath("/login", new URLSearchParams())).toBe(false);
     expect(isPasswordRecoveryPath("/app", new URLSearchParams("recovery=1"))).toBe(false);
+  });
+
+  it("explains sign-up failures without exposing raw Supabase errors", () => {
+    expect(signUpError({ code: "user_already_exists" })).toMatch(/Já existe uma conta/);
+    expect(signUpError({ message: "User already registered" })).toMatch(/Já existe uma conta/);
+    expect(signUpError({ code: "weak_password" })).toMatch(new RegExp(`${MIN_PASSWORD_LENGTH} caracteres`));
+    expect(signUpError({ status: 429 })).toMatch(/Muitas tentativas/);
+    expect(signUpError({ message: "boom" })).toMatch(/Não foi possível criar a conta/);
   });
 
   it("accepts only known e-mail link types in the callback", () => {

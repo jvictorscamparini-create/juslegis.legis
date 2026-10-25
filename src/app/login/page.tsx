@@ -7,7 +7,7 @@ export const metadata = { title: "Entrar — JusLegis" };
 
 const ERRORS: Record<string, string> = {
   config: "Autenticação ainda não configurada no servidor (variáveis do Supabase ausentes).",
-  oauth: "Não foi possível concluir o login com Google. Tente novamente.",
+  oauth: "Não foi possível concluir o acesso por este link. Se você confirmou o e-mail, entre com seu e-mail e senha.",
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erro?: string; next?: string; recovery?: string }> }) {

@@ -4,6 +4,21 @@ export function passwordSignInError(status: number | undefined) {
     : "E-mail ou senha incorretos.";
 }
 
+export const MIN_PASSWORD_LENGTH = 8;
+
+export function signUpError(error: { status?: number; code?: string; message?: string }) {
+  if (error.status === 429 || error.code === "over_email_send_rate_limit") {
+    return "Muitas tentativas. Aguarde alguns instantes e tente de novo.";
+  }
+  if (error.code === "user_already_exists" || /already registered/i.test(error.message ?? "")) {
+    return "Já existe uma conta com este e-mail. Use “Entrar” ou “Esqueci minha senha”.";
+  }
+  if (error.code === "weak_password") {
+    return `Escolha uma senha mais forte, com pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+  }
+  return "Não foi possível criar a conta agora. Tente novamente em instantes.";
+}
+
 export function passwordRecoveryRedirect(origin: string) {
   const destination = new URL("/auth/callback", origin);
   destination.searchParams.set("next", "/login?recovery=1");
