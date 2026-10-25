@@ -30,10 +30,10 @@ function readTextEnv(name: string, fallback: string): string {
   return Deno.env.get(name)?.trim() || fallback
 }
 
-const SERVER_NAME = readTextEnv('MCP_SERVER_NAME', 'supabase-mcp')
+const SERVER_NAME = readTextEnv('MCP_SERVER_NAME', 'juslegis-mcp')
 const SERVER_DESCRIPTION = readTextEnv(
   'MCP_SERVER_DESCRIPTION',
-  'MCP access to this Supabase project for the signed-in user.'
+  'Acesso somente leitura ao workspace do advogado autenticado na JusLegis.'
 )
 
 const SERVER_INSTRUCTIONS =
