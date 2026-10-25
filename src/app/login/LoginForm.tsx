@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { authConfigurationError } from "@/lib/auth-errors";
-import { passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
+import { isOAuthProviderEnabled, passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
 
 type Step = "auth" | "code" | "recovery-sent" | "new-password";
 
@@ -43,6 +43,12 @@ export default function LoginForm({ configured, initialError, next, recovery }: 
     if (!supabase) return;
     setBusy(true);
     setError(null);
+    // O signInWithOAuth redireciona sem checar o provedor; com o Google desligado o usuário caía numa página de erro do Supabase.
+    if (!(await isOAuthProviderEnabled("google"))) {
+      setError(authConfigurationError({ code: "provider_disabled", message: "provider is not enabled" }, "google"));
+      setBusy(false);
+      return;
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },

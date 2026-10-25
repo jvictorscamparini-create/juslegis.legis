@@ -13,7 +13,7 @@ export function authConfigurationError(error: AuthErrorInfo, method: "google" | 
   }
 
   if (method === "google" && (code === "provider_disabled" || /provider is not enabled|provider.*disabled/.test(message))) {
-    return "Login Google indisponível: habilite Google em Supabase → Authentication → Providers e configure as credenciais OAuth.";
+    return "Login com Google ainda não está disponível. Entre com seu e-mail: use “Criar conta” ou “Entrar com código”.";
   }
 
   if (

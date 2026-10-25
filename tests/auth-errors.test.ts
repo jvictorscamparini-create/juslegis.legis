@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { authConfigurationError } from "@/lib/auth-errors";
 
 describe("Supabase authentication configuration errors", () => {
-  it("explains that Google OAuth must be enabled in Supabase", () => {
+  it("points the user to e-mail login when Google OAuth is disabled", () => {
     expect(authConfigurationError({ status: 400, message: "provider is not enabled" }, "google"))
-      .toMatch(/habilite Google/);
+      .toMatch(/Google ainda não está disponível.*e-mail/);
   });
 
   it("distinguishes disabled OTP signups from an unknown account", () => {
