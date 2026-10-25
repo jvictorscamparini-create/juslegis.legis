@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { openAiKey } from "@/lib/env";
+import { getOpenAiKey } from "@/lib/secrets";
 
 export type LegalSourceCategory = "legislation" | "summaries" | "case_law";
 
@@ -144,7 +144,7 @@ export async function searchOfficialLegalSources(opts: {
   categories: LegalSourceCategory[];
   fetchImpl?: typeof fetch;
 }): Promise<LegalResearchResult> {
-  const key = openAiKey();
+  const key = await getOpenAiKey();
   if (!key) return { ok: false, code: "not_configured" };
   if (!opts.model) return { ok: false, code: "no_model" };
 

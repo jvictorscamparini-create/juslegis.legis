@@ -1,5 +1,5 @@
 import "server-only";
-import { openAiKey } from "@/lib/env";
+import { getOpenAiKey } from "@/lib/secrets";
 import type { Settings } from "@/lib/settings";
 
 // Integração com a OpenAI pela Responses API. A chave nunca sai do servidor.
@@ -62,7 +62,7 @@ export async function generate(opts: {
   input: AiMessage[];
   fetchImpl?: typeof fetch;
 }): Promise<AiResult> {
-  const key = openAiKey();
+  const key = await getOpenAiKey();
   if (!key) return aiError("not_configured");
   if (!opts.config.model) return aiError("no_model");
 

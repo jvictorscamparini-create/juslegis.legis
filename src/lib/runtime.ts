@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeAccess, EMPTY_USAGE, type Access, type Usage } from "@/lib/access";
-import { openAiKey } from "@/lib/env";
+import { getOpenAiKey } from "@/lib/secrets";
 import { DEFAULT_SETTINGS, mergeSettings, type PublicSettings, type Settings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -97,7 +97,7 @@ export async function recordUsage(event: {
 
 /** IA pronta = chave da OpenAI no servidor + modelo autorizado pelo admin. Não expõe nenhum valor. */
 export async function isAiReady(): Promise<boolean> {
-  if (!openAiKey()) return false;
+  if (!(await getOpenAiKey())) return false;
   const settings = await loadAllSettings();
   return !!settings?.ai_model.model;
 }
