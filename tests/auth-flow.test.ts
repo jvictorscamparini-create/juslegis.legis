@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emailOtpType, isPasswordRecoveryPath, passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
+import { emailOtpType, isOAuthProviderEnabled, isPasswordRecoveryPath, passwordRecoveryRedirect, passwordSignInError } from "@/lib/auth-flow";
 import { safeInternalPath } from "@/lib/safe-redirect";
 
 describe("password auth flow", () => {
@@ -25,6 +25,17 @@ describe("password auth flow", () => {
     expect(emailOtpType("recovery")).toBe("recovery");
     expect(emailOtpType("sms")).toBeNull();
     expect(emailOtpType(null)).toBeNull();
+  });
+
+  it("reports whether an OAuth provider is enabled in the public auth settings", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://exemplo.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_teste";
+    const respond = (body: unknown, ok = true) => (async () => ({ ok, json: async () => body })) as unknown as typeof fetch;
+    expect(await isOAuthProviderEnabled("google", respond({ external: { google: false } }))).toBe(false);
+    expect(await isOAuthProviderEnabled("google", respond({ external: { google: true } }))).toBe(true);
+    expect(await isOAuthProviderEnabled("google", respond({}, false))).toBe(true);
+    const offline = (async () => { throw new Error("offline"); }) as unknown as typeof fetch;
+    expect(await isOAuthProviderEnabled("google", offline)).toBe(true);
   });
 
   it("does not permit an external post-auth redirect", () => {

@@ -10,6 +10,24 @@ export function passwordRecoveryRedirect(origin: string) {
   return destination.toString();
 }
 
+/**
+ * Consulta as configurações públicas do Supabase Auth (só a chave pública).
+ * Em falha de rede devolve true para não bloquear um provedor que pode estar ativo.
+ */
+export async function isOAuthProviderEnabled(provider: "google", fetcher: typeof fetch = fetch) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return false;
+  try {
+    const res = await fetcher(`${url}/auth/v1/settings`, { headers: { apikey: key } });
+    if (!res.ok) return true;
+    const settings = (await res.json()) as { external?: Record<string, boolean> };
+    return settings.external?.[provider] === true;
+  } catch {
+    return true;
+  }
+}
+
 const EMAIL_OTP_TYPES = ["signup", "invite", "magiclink", "recovery", "email_change", "email"] as const;
 
 /** Tipo de link de e-mail aceito pelo callback; qualquer outro valor é recusado. */
