@@ -39,7 +39,7 @@ const GROUPS: [string, NavItem[]][] = [
   [
     "MINHA CONTA",
     [
-      { label: "Perfil", icon: "user" },
+      { label: "Perfil", icon: "user", href: "/app/perfil" },
       { label: "Minha Assinatura", icon: "card", href: "/app/assinatura" },
       { label: "Meu Consumo", icon: "bar", href: "/app/consumo" },
       { label: "Configurações Pessoais", icon: "cog" },
@@ -53,6 +53,7 @@ const TITLES: Record<string, string> = {
   "/app/peticoes": "Criação de Petições",
   "/app/assinatura": "Minha Assinatura",
   "/app/consumo": "Meu Consumo",
+  "/app/perfil": "Perfil",
 };
 
 export type ShellUser = { email: string; isAdmin: boolean; planLabel: string };
@@ -144,9 +145,9 @@ function Shell({ user, children }: { user: ShellUser; children: React.ReactNode 
                 <div onClick={() => setUserOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
                 <div className="dropdown">
                   <div style={{ padding: "8px 12px", fontSize: 12, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
-                  <button className="dropdown-item" onClick={() => { setUserOpen(false); say(soonMessage("Perfil")); }}>
+                  <Link className="dropdown-item" href="/app/perfil" onClick={() => setUserOpen(false)}>
                     Meu perfil
-                  </button>
+                  </Link>
                   <Link className="dropdown-item" href="/app/assinatura" onClick={() => setUserOpen(false)}>
                     Minha assinatura
                   </Link>
