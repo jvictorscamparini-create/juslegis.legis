@@ -1,0 +1,19 @@
+# Configuração usada pelo CLI do Supabase para IMPLANTAR a Edge Function.
+# Projeto exclusivo da JusLegis: hbqlwwnnbvritknwwzos (NÃO usar odoavqqihukvpsmvopvf).
+#
+# ATENÇÃO: não rode "supabase config push" com este arquivo. Ele contém só o mínimo para
+# a função e enviaria valores padrão para as demais configurações de Auth do projeto.
+# Configure o servidor OAuth pelo painel (Authentication > OAuth Server), conforme docs/mcp.md.
+project_id = "hbqlwwnnbvritknwwzos"
+
+# A função valida o token do usuário por conta própria (withSupabase auth: 'user');
+# o portão do gateway precisa ficar desligado para o fluxo OAuth/descoberta funcionar.
+[functions.mcp]
+enabled = true
+verify_jwt = false
+
+# Usado apenas no ambiente local (supabase start).
+[auth.oauth_server]
+enabled = true
+authorization_url_path = "/oauth/consent"
+allow_dynamic_registration = true
