@@ -234,3 +234,75 @@ export function DataTable({ cols, rows, empty }: { cols: string[]; rows: React.R
 }
 
 export const numOrNull = (v: string) => (v.trim() === "" ? null : Number(v));
+
+export type SecretRowInfo = { name: string; label: string; kind: string; source: "painel" | "ambiente" | null; last4: string | null; hint?: string };
+
+/** Campos para informar, trocar ou remover credenciais. O valor vai direto ao servidor, que o cifra; nunca volta ao navegador. */
+export function SecretEditor({ rows, canStore }: { rows: SecretRowInfo[]; canStore: boolean }) {
+  const say = useToast();
+  const router = useRouter();
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function call(name: string, method: "PUT" | "DELETE") {
+    setBusy(name);
+    setError(null);
+    const res = await fetch("/api/admin/secrets", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(method === "PUT" ? { name, value: values[name] ?? "" } : { name }),
+    }).catch(() => null);
+    const data = res ? await res.json().catch(() => ({})) : { error: "Sem conexão com o servidor." };
+    setBusy(null);
+    if (!res?.ok) {
+      setError(data.error ?? "Não foi possível concluir.");
+      return;
+    }
+    setValues((v) => ({ ...v, [name]: "" }));
+    say(method === "PUT" ? "Credencial salva com segurança e registrada no log." : "Credencial removida.");
+    router.refresh();
+  }
+
+  return (
+    <Section title="Credenciais" desc="Informe aqui as chaves das integrações. Elas são cifradas no servidor, nunca são exibidas depois de salvas e cada alteração fica no log administrativo." tag="Somente Administrador Geral">
+      {!canStore && (
+        <div className="alert-err" style={{ fontSize: 12.5 }}>
+          Para salvar chaves por esta tela, defina a variável secreta APP_SECRETS_KEY (32 bytes em base64) na Vercel e reimplante. Enquanto isso, valem as variáveis de ambiente.
+        </div>
+      )}
+      <div>
+        {rows.map((r) => (
+          <div key={r.name} className="row" style={{ fontSize: 13, flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
+            <label className="field" style={{ flex: 1, minWidth: 260 }}>
+              <span>
+                {r.label} <span style={{ color: "var(--muted)", fontSize: 11.5 }}>· {r.kind}</span>
+              </span>
+              <input
+                className="input"
+                type="password"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={r.source === "painel" ? `Salva no painel · termina em ${r.last4}` : r.source === "ambiente" ? "Definida na Vercel · cole aqui para substituir" : "Cole a chave aqui"}
+                value={values[r.name] ?? ""}
+                disabled={!canStore || busy === r.name}
+                onChange={(e) => setValues((v) => ({ ...v, [r.name]: e.target.value }))}
+              />
+              {r.hint && <span style={{ fontSize: 11.5, color: "var(--muted)" }}>{r.hint}</span>}
+            </label>
+            <span className={`tag${r.source ? " tag-ok" : ""}`}>{r.source === "painel" ? "Definida (painel)" : r.source === "ambiente" ? "Definida (Vercel)" : "Não definida"}</span>
+            <button className="btn btn-dark" disabled={!canStore || busy === r.name || (values[r.name] ?? "").trim().length < 8} onClick={() => call(r.name, "PUT")} style={{ fontSize: 12.5, padding: "8px 14px", borderRadius: 9 }}>
+              {busy === r.name ? "Salvando…" : "Salvar"}
+            </button>
+            {r.source === "painel" && (
+              <button className="btn btn-outline" disabled={busy === r.name} onClick={() => call(r.name, "DELETE")} style={{ fontSize: 12.5, padding: "8px 14px", borderRadius: 9 }}>
+                Remover
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      {error && <div className="alert-err" style={{ fontSize: 12.5 }}>{error}</div>}
+    </Section>
+  );
+}

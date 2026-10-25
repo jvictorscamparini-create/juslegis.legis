@@ -1,5 +1,6 @@
 import "server-only";
-import { mpWebhookSecret, openAiKey, type MpEnvironment } from "@/lib/env";
+import type { MpEnvironment } from "@/lib/env";
+import { getMpWebhookSecret, getOpenAiKey } from "@/lib/secrets";
 import { generate } from "@/lib/ai";
 import { mpRequest } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -16,8 +17,8 @@ export function isService(s: string): s is Service {
 }
 
 export async function testOpenAI(configuredModel: string, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
-  const key = openAiKey();
-  if (!key) return { ok: false, detail: "OPENAI_API_KEY não definida no servidor." };
+  const key = await getOpenAiKey();
+  if (!key) return { ok: false, detail: "Chave da OpenAI não definida (informe em Integrações e APIs)." };
   try {
     const res = await fetchImpl("https://api.openai.com/v1/models", {
       headers: { Authorization: `Bearer ${key}` },
@@ -42,7 +43,7 @@ export async function testOpenAI(configuredModel: string, fetchImpl: typeof fetc
 }
 
 export async function testOpenAIResponses(configuredModel: string, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
-  if (!openAiKey()) return { ok: false, detail: "OPENAI_API_KEY não definida no servidor." };
+  if (!(await getOpenAiKey())) return { ok: false, detail: "Chave da OpenAI não definida." };
   if (!configuredModel) return { ok: false, detail: "Selecione um modelo para testar a Responses API." };
   const result = await generate({
     config: { provider: "openai", model: configuredModel, temperature: 0, max_output_tokens: 8 },
@@ -59,7 +60,7 @@ export async function testMercadoPago(env: MpEnvironment, fetchImpl: typeof fetc
   if (!res.ok) {
     return { ok: false, detail: res.status ? `Mercado Pago respondeu HTTP ${res.status}: ${res.message}` : res.message };
   }
-  const warn = mpWebhookSecret() ? "" : " Atenção: MP_WEBHOOK_SECRET não definido — webhooks serão rejeitados.";
+  const warn = (await getMpWebhookSecret()) ? "" : " Atenção: segredo do webhook do Mercado Pago não definido — webhooks serão rejeitados.";
   return { ok: true, detail: `Conta conectada (${res.data.nickname ?? res.data.id}, ${res.data.site_id ?? "?"}).${warn}` };
 }
 
@@ -81,7 +82,7 @@ export async function testSupabase(): Promise<CheckResult> {
 }
 
 export async function testLegal(configuredModel: string): Promise<CheckResult> {
-  if (!openAiKey()) return { ok: false, detail: "OPENAI_API_KEY não definida no servidor." };
+  if (!(await getOpenAiKey())) return { ok: false, detail: "Chave da OpenAI não definida." };
   if (!configuredModel) return { ok: false, detail: "Selecione um modelo OpenAI antes de testar a pesquisa oficial." };
   const result = await searchOfficialLegalSources({
     model: configuredModel,

@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { mpAccessToken, mpWebhookSecret, openAiKey, serviceRoleKey, supabasePublicConfig } from "@/lib/env";
+import { serviceRoleKey, supabasePublicConfig } from "@/lib/env";
+import { secretStatuses } from "@/lib/secrets";
 import { mergeSettings, type Settings } from "@/lib/settings";
 import type { CheckInfo } from "@/components/admin/kit";
 
@@ -19,12 +20,17 @@ export async function loadLastChecks(supabase: SupabaseClient): Promise<Record<s
 
 export const statusLabel = (c: CheckInfo | undefined, defined: boolean) => (c ? (c.ok ? "Conectada" : "Falhou no último teste") : defined ? "Credencial definida · não testada" : "Não configurada");
 
-export const secretsPresent = {
-  openai: () => !!openAiKey(),
-  mpTest: () => !!mpAccessToken("test"),
-  mpProd: () => !!mpAccessToken("prod"),
-  mpWebhook: () => !!mpWebhookSecret(),
-  supabaseUrl: () => !!supabasePublicConfig(),
-  serviceRole: () => !!serviceRoleKey(),
-  legal: () => !!openAiKey(),
-};
+/** Quais credenciais existem (painel ou ambiente). Nunca devolve valores. */
+export async function loadSecretsPresent() {
+  const st = await secretStatuses();
+  const has = (n: keyof typeof st) => st[n].source !== null;
+  return {
+    openai: has("OPENAI_API_KEY"),
+    mpTest: has("MP_ACCESS_TOKEN_TEST"),
+    mpProd: has("MP_ACCESS_TOKEN_PROD"),
+    mpWebhook: has("MP_WEBHOOK_SECRET"),
+    supabaseUrl: !!supabasePublicConfig(),
+    serviceRole: !!serviceRoleKey(),
+    legal: has("OPENAI_API_KEY"),
+  };
+}
