@@ -39,7 +39,9 @@ export function isBillingEnabled() {
 }
 
 export function siteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  // Nas prévias da Vercel NEXT_PUBLIC_SITE_URL não existe; VERCEL_URL aponta para o próprio deployment.
+  const vercel = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
+  return (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || vercel || "http://localhost:3000").replace(/\/$/, "");
 }
 
 /** Modelo OpenAI padrão (fallback; o Admin Geral pode sobrescrever no banco). */
