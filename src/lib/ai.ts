@@ -56,6 +56,17 @@ export function extractOutputText(data: ResponsesApiOutput) {
     .trim();
 }
 
+/**
+ * A OpenAI só aceita temperature sem raciocínio. GPT-6 Astra e 6.1 Sol não têm esforço "none";
+ * os demais GPT-6 têm. GPT-5 e série o recusam temperature, e modelos anteriores não têm raciocínio.
+ */
+export function samplingParams(model: string, temperature: number): Record<string, unknown> {
+  if (/^gpt-6-astra|^gpt-6\.1-sol/.test(model)) return { reasoning: { effort: "low" } };
+  if (/^gpt-6/.test(model)) return { reasoning: { effort: "none" }, temperature };
+  if (/^gpt-5|^o\d/.test(model)) return {};
+  return { temperature };
+}
+
 export async function generate(opts: {
   config: Settings["ai_model"];
   instructions?: string;
@@ -70,7 +81,7 @@ export async function generate(opts: {
     model: opts.config.model,
     instructions: opts.instructions || DEFAULT_INSTRUCTIONS,
     input: opts.input,
-    temperature: opts.config.temperature,
+    ...samplingParams(opts.config.model, opts.config.temperature),
     store: false,
   };
   if (opts.config.max_output_tokens) body.max_output_tokens = opts.config.max_output_tokens;
@@ -92,10 +103,15 @@ export async function generate(opts: {
     if (res.status === 401 || res.status === 403) return aiError("auth");
     if (res.status === 404 || data.error?.code === "model_not_found") return aiError("model");
     if (res.status === 429) return aiError("quota");
+    // Só status e código: a mensagem da OpenAI pode repetir parte do que foi enviado.
+    console.error("OpenAI retornou erro", { status: res.status, code: data.error?.code ?? null, model: opts.config.model });
     return aiError("upstream");
   }
   const text = extractOutputText(data);
-  if (!text) return aiError("upstream");
+  if (!text) {
+    console.error("OpenAI respondeu sem texto", { model: opts.config.model });
+    return aiError("upstream");
+  }
   return {
     ok: true,
     text,

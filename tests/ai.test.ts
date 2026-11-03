@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { generate } from "@/lib/ai";
+import { generate, samplingParams } from "@/lib/ai";
 import { testOpenAIResponses } from "@/lib/connection-tests";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 
@@ -8,6 +8,17 @@ const input = [{ role: "user" as const, content: [{ type: "input_text" as const,
 const reply = (status: number, body: unknown) => (async () => new Response(JSON.stringify(body), { status })) as unknown as typeof fetch;
 
 afterEach(() => vi.unstubAllEnvs());
+
+describe("samplingParams", () => {
+  it("só envia temperature quando o modelo aceita", () => {
+    expect(samplingParams("gpt-6-luna", 0.2)).toEqual({ reasoning: { effort: "none" }, temperature: 0.2 });
+    expect(samplingParams("gpt-6.1-terra", 0.2)).toEqual({ reasoning: { effort: "none" }, temperature: 0.2 });
+    expect(samplingParams("gpt-6-astra", 0.2)).toEqual({ reasoning: { effort: "low" } });
+    expect(samplingParams("gpt-6.1-sol", 0.2)).toEqual({ reasoning: { effort: "low" } });
+    expect(samplingParams("gpt-5.4-mini", 0.2)).toEqual({});
+    expect(samplingParams("gpt-4.1-mini", 0.2)).toEqual({ temperature: 0.2 });
+  });
+});
 
 describe("generate (OpenAI)", () => {
   it("falha sem chave e sem modelo, sem chamar a rede", async () => {
