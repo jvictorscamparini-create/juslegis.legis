@@ -88,7 +88,16 @@ export async function saveSecret(name: SecretName, value: string, userId: string
     updated_by: userId,
   });
   cache.delete(name);
-  return error ? { ok: false, message: "Não foi possível gravar a credencial." } : { ok: true };
+  if (!error) return { ok: true };
+  // Só código e mensagem do banco são registrados; o valor da credencial nunca entra no log.
+  console.error("saveSecret falhou", { name, code: error.code, message: error.message });
+  if (error.code === "42P01" || error.code === "PGRST205") {
+    return { ok: false, message: "A tabela integration_secrets não existe: aplique a migration 20261025000000_integration_secrets.sql no Supabase." };
+  }
+  if (error.code === "42501" || error.code === "PGRST301") {
+    return { ok: false, message: "Sem permissão no banco: confira se SUPABASE_SERVICE_ROLE_KEY é a chave service_role." };
+  }
+  return { ok: false, message: `Não foi possível gravar a credencial (${error.code ?? "erro desconhecido"}).` };
 }
 
 export async function removeSecret(name: SecretName): Promise<boolean> {
