@@ -15,7 +15,9 @@ export function serviceRoleKey() {
 }
 
 export function openAiKey() {
-  return process.env.OPENAI_API_KEY || null;
+  // TEMPORÁRIO (Cloudflare de teste): o segredo foi cadastrado como "openaikey". Remover o segundo
+  // nome depois de recadastrar a chave como OPENAI_API_KEY.
+  return process.env.OPENAI_API_KEY || process.env.openaikey || null;
 }
 
 export type MpEnvironment = "test" | "prod";
