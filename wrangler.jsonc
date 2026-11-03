@@ -9,10 +9,14 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  "workers_dev": true,
+  // Sem URLs de prévia públicas por versão: só o endereço workers.dev principal.
+  "preview_urls": false,
   // Variáveis públicas (não secretas). Segredos vão por "wrangler secret put", nunca aqui.
   "vars": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://hbqlwwnnbvritknwwzos.supabase.co",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_8ULFXJ7Xyedoxd4yqJoNWQ_SJl6a5Yu",
+    "NEXT_PUBLIC_SITE_URL": "https://juslegis.jvictor-scamparini.workers.dev",
     "BILLING_ENABLED": "false",
     "MERCADO_PAGO_ENVIRONMENT": "test"
   }
