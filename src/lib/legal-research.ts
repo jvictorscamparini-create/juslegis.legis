@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
+import { usageFrom, type UsageReport } from "@/lib/ai";
 import { getOpenAiKey } from "@/lib/secrets";
 
 export type LegalSourceCategory = "legislation" | "summaries" | "case_law";
@@ -21,6 +22,7 @@ export type VerifiedLegalResearch = {
 };
 
 type ResearchResponse = {
+  id?: string;
   model?: string;
   output?: {
     type?: string;
@@ -44,8 +46,10 @@ const OFFICIAL_DOMAINS: Record<LegalSourceCategory, string[]> = {
 };
 
 export type LegalResearchResult =
-  | { ok: true; model: string; sources: VerifiedLegalSource[]; inputTokens: number; outputTokens: number }
-  | { ok: false; code: "not_configured" | "no_model" | "upstream" | "network" | "no_sources" };
+  | { ok: true; sources: VerifiedLegalSource[]; usage: UsageReport }
+  // no_sources com usage: a OpenAI respondeu (e cobrou), mas nenhuma fonte oficial foi validada.
+  | { ok: false; code: "no_sources"; usage?: UsageReport }
+  | { ok: false; code: "not_configured" | "no_model" | "upstream" | "network" };
 
 export function legalResearchHash(input: {
   topic: string;
@@ -194,13 +198,8 @@ export async function searchOfficialLegalSources(opts: {
       : "legislation";
     return { title: source.title.slice(0, 300), url: url.toString(), category, verified_at: new Date().toISOString() } as VerifiedLegalSource;
   }))).filter((source): source is VerifiedLegalSource => !!source);
-  if (!verified.length) return { ok: false, code: "no_sources" };
+  const usage = usageFrom(data, opts.model);
+  if (!verified.length) return { ok: false, code: "no_sources", usage };
 
-  return {
-    ok: true,
-    model: data.model ?? opts.model,
-    sources: verified,
-    inputTokens: data.usage?.input_tokens ?? 0,
-    outputTokens: data.usage?.output_tokens ?? 0,
-  };
+  return { ok: true, sources: verified, usage };
 }

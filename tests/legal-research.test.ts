@@ -58,7 +58,7 @@ describe("pesquisa de fontes jurídicas", () => {
       categories: [...categories],
       fetchImpl,
     });
-    expect(result).toEqual({ ok: false, code: "no_sources" });
+    expect(result).toMatchObject({ ok: false, code: "no_sources", usage: { inputTokens: 10, outputTokens: 5 } });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
@@ -77,7 +77,7 @@ describe("pesquisa de fontes jurídicas", () => {
       categories: [...categories],
       fetchImpl,
     });
-    expect(result).toEqual({ ok: false, code: "no_sources" });
+    expect(result).toMatchObject({ ok: false, code: "no_sources", usage: { inputTokens: 10, outputTokens: 5 } });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 });

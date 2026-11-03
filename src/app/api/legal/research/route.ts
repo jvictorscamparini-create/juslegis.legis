@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkAiAllowed } from "@/lib/access";
 import { apiRequireUser, jsonError } from "@/lib/auth";
-import { loadAccess, loadAllSettings, loadUsage, recordUsage } from "@/lib/runtime";
+import { loadAccess, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
 import { legalResearchHash, searchOfficialLegalSources, type LegalSourceCategory, type VerifiedLegalResearch } from "@/lib/legal-research";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -55,6 +55,9 @@ export async function POST(request: Request) {
     categories,
   });
   if (!result.ok) {
+    if (result.code === "no_sources") {
+      if (result.usage) await recordUsage({ user_id: user.id, feature: "legal_research", result: result.usage });
+    } else await recordAiFailure({ user_id: user.id, feature: "legal_research", model: settings.ai_model.model, code: result.code });
     const status = result.code === "no_model" || result.code === "not_configured" ? 503 : result.code === "no_sources" ? 422 : 502;
     const errors = {
       no_model: "Nenhum modelo de IA foi autorizado pelo administrador.",
@@ -96,12 +99,6 @@ export async function POST(request: Request) {
   );
   if (error) return jsonError(500, "Não foi possível salvar as fontes verificadas.");
 
-  await recordUsage({
-    user_id: user.id,
-    feature: "legal_research",
-    model: result.model,
-    input_tokens: result.inputTokens,
-    output_tokens: result.outputTokens,
-  });
+  await recordUsage({ user_id: user.id, feature: "legal_research", result: result.usage });
   return NextResponse.json({ research });
 }

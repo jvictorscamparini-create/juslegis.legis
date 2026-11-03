@@ -3,7 +3,7 @@ import { z } from "zod";
 import { checkAiAllowed } from "@/lib/access";
 import { aiError, generate } from "@/lib/ai";
 import { apiRequireUser, jsonError } from "@/lib/auth";
-import { activePrompt, loadAccess, loadAllSettings, loadUsage, recordUsage } from "@/lib/runtime";
+import { activePrompt, loadAccess, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
 import { legalResearchHash, type VerifiedLegalSource } from "@/lib/legal-research";
 
 export const maxDuration = 120;
@@ -142,17 +142,15 @@ export async function POST(request: Request) {
     instructions: (await activePrompt()) ?? undefined,
     input: [{ role: "user", content: [{ type: "input_text", text: buildPrompt(action, petition, verifiedSources, selection, currentText) }] }],
   });
-  if (!result.ok) return jsonError(503, result.message, { code: result.code });
+  const feature = action === "generate" ? "petition_generate" : `petition_${action}`;
+  if (!result.ok) {
+    await recordAiFailure({ user_id: user.id, feature, model: settings.ai_model.model, code: result.code });
+    return jsonError(503, result.message, { code: result.code });
+  }
 
   const references = verifiedSources.map((source, index) =>
     `[${index + 1}] ${source.title} — ${source.url} (fonte oficial consultada em ${new Date(source.verified_at).toLocaleDateString("pt-BR")})`,
   );
-  await recordUsage({
-    user_id: user.id,
-    feature: action === "generate" ? "petition_generate" : `petition_${action}`,
-    model: result.model,
-    input_tokens: result.inputTokens,
-    output_tokens: result.outputTokens,
-  });
+  await recordUsage({ user_id: user.id, feature, result });
   return NextResponse.json({ text: `${result.text}\n\nFONTES OFICIAIS CONSULTADAS\n${references.join("\n")}` });
 }

@@ -14,9 +14,18 @@ export type AiMessage =
 
 export type AiErrorCode = "not_configured" | "no_model" | "auth" | "model" | "quota" | "upstream" | "network";
 
-export type AiResult =
-  | { ok: true; text: string; model: string; inputTokens: number; outputTokens: number }
-  | { ok: false; code: AiErrorCode; message: string };
+/** Uso real informado pela Responses API em uma chamada (base do cálculo de custo). */
+export type UsageReport = {
+  model: string;
+  requestId: string | null;
+  inputTokens: number;
+  cachedInputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  toolCalls: Record<string, number>;
+};
+
+export type AiResult = ({ ok: true; text: string } & UsageReport) | { ok: false; code: AiErrorCode; message: string };
 
 export const DEFAULT_INSTRUCTIONS =
   "Você é o assistente jurídico da JusLegis, apoiando advogados brasileiros. Responda em português do Brasil, " +
@@ -39,12 +48,43 @@ export function aiError(code: AiErrorCode): AiResult {
   return { ok: false, code, message: ERROR_MESSAGES[code] };
 }
 
-type ResponsesApiOutput = {
+export type ResponsesApiUsage = {
+  id?: string;
   model?: string;
+  output?: { type?: string }[];
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    input_tokens_details?: { cached_tokens?: number };
+    output_tokens_details?: { reasoning_tokens?: number };
+  };
+};
+
+type ResponsesApiOutput = Omit<ResponsesApiUsage, "output"> & {
   output?: { type: string; content?: { type: string; text?: string }[] }[];
-  usage?: { input_tokens?: number; output_tokens?: number };
   error?: { message?: string; code?: string } | null;
 };
+
+/** Itens de ferramenta na saída (web_search_call, file_search_call...), contados por tipo para o custo adicional. */
+export function countToolCalls(data: ResponsesApiUsage) {
+  const counts: Record<string, number> = {};
+  for (const item of data.output ?? []) {
+    if (item.type?.endsWith("_call")) counts[item.type] = (counts[item.type] ?? 0) + 1;
+  }
+  return counts;
+}
+
+export function usageFrom(data: ResponsesApiUsage, fallbackModel: string): UsageReport {
+  return {
+    model: data.model ?? fallbackModel,
+    requestId: data.id ?? null,
+    inputTokens: data.usage?.input_tokens ?? 0,
+    cachedInputTokens: data.usage?.input_tokens_details?.cached_tokens ?? 0,
+    outputTokens: data.usage?.output_tokens ?? 0,
+    reasoningTokens: data.usage?.output_tokens_details?.reasoning_tokens ?? 0,
+    toolCalls: countToolCalls(data),
+  };
+}
 
 export function extractOutputText(data: ResponsesApiOutput) {
   return (data.output ?? [])
@@ -96,11 +136,5 @@ export async function generate(opts: {
   }
   const text = extractOutputText(data);
   if (!text) return aiError("upstream");
-  return {
-    ok: true,
-    text,
-    model: data.model ?? opts.config.model,
-    inputTokens: data.usage?.input_tokens ?? 0,
-    outputTokens: data.usage?.output_tokens ?? 0,
-  };
+  return { ok: true, text, ...usageFrom(data, opts.config.model) };
 }
