@@ -37,10 +37,24 @@ type ResearchResponse = {
   usage?: { input_tokens?: number; output_tokens?: number };
 };
 
+const UFS = ["ac", "al", "am", "ap", "ba", "ce", "df", "es", "go", "ma", "mg", "ms", "mt", "pa", "pb", "pe", "pi", "pr", "rj", "rn", "ro", "rr", "rs", "sc", "se", "sp", "to"];
+const numbered = (prefix: string, count: number) => Array.from({ length: count }, (_, i) => `${prefix}${i + 1}.jus.br`);
+
+// A OpenAI aceita até 100 domínios por pesquisa, e cada um já cobre os seus subdomínios.
 const OFFICIAL_DOMAINS: Record<LegalSourceCategory, string[]> = {
   legislation: ["planalto.gov.br", "lexml.gov.br", "senado.leg.br", "camara.leg.br"],
   summaries: ["stf.jus.br", "stj.jus.br"],
-  case_law: ["stf.jus.br", "stj.jus.br", "tst.jus.br", "tse.jus.br", "trf.jus.br", "trt.jus.br", "tre.jus.br"],
+  case_law: [
+    "stf.jus.br",
+    "stj.jus.br",
+    "tst.jus.br",
+    "tse.jus.br",
+    "stm.jus.br",
+    ...numbered("trf", 6),
+    ...numbered("trt", 24),
+    ...UFS.map((uf) => (uf === "df" ? "tjdft.jus.br" : `tj${uf}.jus.br`)),
+    ...UFS.map((uf) => `tre-${uf}.jus.br`),
+  ],
 };
 
 export type LegalResearchResult =
