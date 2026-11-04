@@ -64,8 +64,8 @@ function mpRejection(status: number, message: string, code?: string) {
 
 /**
  * Valida o token com GET /v1/payment_methods, a chamada indicada na documentação oficial, que só lê
- * dados e não cobra. /users/me serve apenas para identificar a conta: ele pode ser bloqueado para
- * credenciais de teste, e por isso a recusa dele não reprova o token.
+ * dados e não cobra. /users/me serve apenas para identificar a conta, e por isso a recusa dele
+ * não reprova o token.
  * O sucesso exige que a credencial seja compatível com o campo testado.
  */
 export async function testMercadoPago(env: MpEnvironment, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
