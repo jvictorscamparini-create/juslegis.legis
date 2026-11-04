@@ -3,9 +3,11 @@ import { loadLastChecks, loadSettingsFor, loadSecretsPresent, statusLabel } from
 import { requireAdmin } from "@/lib/auth";
 import { isBillingEnabled, mpEnvironment } from "@/lib/env";
 import { canStoreSecrets, secretStatuses } from "@/lib/secrets";
+import { listCustomIntegrations } from "@/lib/custom-integrations";
 import LegalForm from "./LegalForm";
+import { AiRoutingForm, CustomIntegrations, OpenDataForm, ProcessLookupForm } from "./MoreForms";
 
-const TABS: [string, string][] = [["", "Visão geral"], ["openai", "OpenAI"], ["mp", "Mercado Pago"], ["mcp", "Mercado Pago MCP"], ["sb", "Supabase"], ["jur", "APIs jurídicas"]];
+const TABS: [string, string][] = [["", "Visão geral"], ["openai", "OpenAI"], ["mp", "Mercado Pago"], ["mcp", "Mercado Pago MCP"], ["sb", "Supabase"], ["jur", "APIs jurídicas"], ["ias", "Outras IAs"], ["proc", "Consulta processual"], ["livre", "Outras APIs"]];
 
 export default async function ApisPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab = "" } = await searchParams;
@@ -15,6 +17,7 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
   const b = isBillingEnabled();
   const st = await secretStatuses();
   const canStore = canStoreSecrets();
+  const custom = tab === "livre" ? await listCustomIntegrations() : { ready: false, items: [] };
 
   return (
     <>
@@ -32,7 +35,11 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
             <TestCard service="mp_prod" name="Mercado Pago (produção)" desc="Credenciais reais. Teste apenas verifica a conta; não cobra." status={statusLabel(checks.mp_prod, sp.mpProd)} initial={checks.mp_prod ?? null} configureHref="/admin/apis?tab=mp" />
             <TestCard service="mcp" name="Mercado Pago MCP" desc="Ferramentas de desenvolvimento, separadas da API de pagamentos." status="Não conectado" initial={null} noTest configureHref="/admin/apis?tab=mcp" />
             <TestCard service="supabase" name="Supabase" desc="Autenticação, banco PostgreSQL e arquivos privados." status={statusLabel(checks.supabase, sp.serviceRole)} initial={checks.supabase ?? null} configureHref="/admin/apis?tab=sb" />
-            <TestCard service="legal" name="Fontes jurídicas oficiais" desc="Pesquisa via OpenAI, restrita a domínios oficiais de legislação e tribunais." status={statusLabel(checks.legal, sp.legal)} initial={checks.legal ?? null} configureHref="/admin/apis?tab=jur" />
+            <TestCard service="legal" name="Fontes jurídicas oficiais" desc="Pesquisa via OpenAI, restrita a domínios oficiais de legislação e tribunais." status={s.legal.provider === "oficial" ? statusLabel(checks.legal, sp.legal) : "Não ativada"} initial={checks.legal ?? null} configureHref="/admin/apis?tab=jur" />
+            <TestCard service="anthropic" name="Claude (Anthropic)" desc="Fornecedor de IA alternativo." status={statusLabel(checks.anthropic, st.ANTHROPIC_API_KEY.source !== null)} initial={checks.anthropic ?? null} configureHref="/admin/apis?tab=ias" />
+            <TestCard service="gemini" name="Gemini (Google)" desc="Fornecedor de IA alternativo." status={statusLabel(checks.gemini, st.GEMINI_API_KEY.source !== null)} initial={checks.gemini ?? null} configureHref="/admin/apis?tab=ias" />
+            <TestCard service="escavador" name="Escavador" desc="Consulta processual por número CNJ. Pago por consulta." status={statusLabel(checks.escavador, st.ESCAVADOR_API_TOKEN.source !== null)} initial={checks.escavador ?? null} configureHref="/admin/apis?tab=proc" />
+            <TestCard service="judit" name="Judit" desc="Consulta processual por número CNJ. Pago por consulta." status={statusLabel(checks.judit, st.JUDIT_API_KEY.source !== null)} initial={checks.judit ?? null} configureHref="/admin/apis?tab=proc" />
           </div>
         </Section>
       )}
@@ -91,8 +98,37 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
           <Section>
             <TestButton service="legal" initial={checks.legal ?? null} />
           </Section>
+          <OpenDataForm initial={s.open_data} />
+          <Section>
+            <TestButton service="senado" label="Testar Senado" initial={checks.senado ?? null} />
+            <TestButton service="camara" label="Testar Câmara" initial={checks.camara ?? null} />
+          </Section>
         </>
       )}
+
+      {tab === "ias" && (
+        <>
+          <AiRoutingForm initial={s.ai_routing} />
+          <SecretEditor canStore={canStore} rows={[{ label: "Chave da API Anthropic (Claude)", kind: "Secreta", ...st.ANTHROPIC_API_KEY }, { label: "Chave da API Gemini (Google)", kind: "Secreta", ...st.GEMINI_API_KEY }]} />
+          <Section>
+            <TestButton service="anthropic" label="Testar Claude" initial={checks.anthropic ?? null} />
+            <TestButton service="gemini" label="Testar Gemini" initial={checks.gemini ?? null} />
+          </Section>
+        </>
+      )}
+
+      {tab === "proc" && (
+        <>
+          <ProcessLookupForm initial={s.process_lookup} />
+          <SecretEditor canStore={canStore} rows={[{ label: "Token da API Escavador", kind: "Secreta", ...st.ESCAVADOR_API_TOKEN }, { label: "Chave da API Judit", kind: "Secreta", ...st.JUDIT_API_KEY }]} />
+          <Section>
+            <TestButton service="escavador" label="Testar Escavador" initial={checks.escavador ?? null} />
+            <TestButton service="judit" label="Testar Judit" initial={checks.judit ?? null} />
+          </Section>
+        </>
+      )}
+
+      {tab === "livre" && <CustomIntegrations items={custom.items} ready={custom.ready} />}
     </>
   );
 }

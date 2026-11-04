@@ -139,6 +139,7 @@ export async function POST(request: Request) {
 
   const result = await generate({
     config: settings.ai_model,
+    routing: settings.ai_routing,
     instructions: (await activePrompt()) ?? undefined,
     input: [{ role: "user", content: [{ type: "input_text", text: buildPrompt(action, petition, verifiedSources, selection, currentText) }] }],
   });

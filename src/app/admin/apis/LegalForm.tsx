@@ -15,7 +15,7 @@ const SOURCES: [keyof Settings["legal"]["sources"], string, string][] = [
 export default function LegalForm({ initial }: { initial: Settings["legal"] }) {
   const [v, setV] = useState(initial);
   return (
-    <Section title="Fontes jurídicas oficiais" desc="A pesquisa usa a ferramenta web da OpenAI, limitada a domínios oficiais brasileiros; links são conferidos antes de serem apresentados. Nenhuma pesquisa processual ou doutrinária é feita.">
+    <Section title="Fontes jurídicas oficiais" desc="A pesquisa usa a ferramenta web da OpenAI, limitada a domínios oficiais brasileiros; links são conferidos antes de serem apresentados. Esta pesquisa não consulta processos nem doutrina.">
       <div className="grid-auto">
         <label className="field">
           Fornecedor

@@ -134,7 +134,7 @@ export async function POST(request: Request) {
   const blocked = checkAiAllowed({ feature: "assistant", settings, access, usage, hasDocuments: currentDocs.length > 0 });
   if (blocked) return respond(blocked, "error", "blocked");
 
-  // 3. Chamada à OpenAI com o histórico e os anexos da última mensagem.
+  // 3. Chamada ao fornecedor de IA com o histórico e os anexos da última mensagem.
   const input: AiMessage[] = [];
   for (const m of ordered) {
     if (m.role === "assistant") input.push({ role: "assistant", content: m.content });
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const result = await generate({ config: settings.ai_model, instructions: (await activePrompt()) ?? undefined, input });
+  const result = await generate({ config: settings.ai_model, routing: settings.ai_routing, instructions: (await activePrompt()) ?? undefined, input });
   if (!result.ok) return respond(result.message, "error", result.code);
 
   await recordUsage({

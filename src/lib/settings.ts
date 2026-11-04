@@ -30,6 +30,10 @@ const featuresSchema = z.object(
   Object.fromEntries(FEATURE_KEYS.map((k) => [k, z.boolean()])) as Record<FeatureKey, z.ZodBoolean>,
 );
 
+export const AI_PROVIDERS = ["openai", "anthropic", "gemini"] as const;
+export type AiProvider = (typeof AI_PROVIDERS)[number];
+export const CLAUDE_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"] as const;
+
 export const settingsSchemas = {
   ai_model: z.object({
     provider: z.literal("openai"),
@@ -71,6 +75,18 @@ export const settingsSchemas = {
       process_lookup: z.boolean(),
     }),
   }),
+  // Chaves separadas de ai_model e legal: versões anteriores do sistema ignoram chaves que não conhecem.
+  ai_routing: z.object({
+    provider: z.enum(AI_PROVIDERS),
+    anthropic_model: z.enum(CLAUDE_MODELS),
+    gemini_model: z.string().trim().max(100),
+  }),
+  open_data: z.object({ camara: z.boolean(), senado: z.boolean() }),
+  process_lookup: z.object({
+    provider: z.enum(["", "escavador", "judit"]),
+    daily_limit_user: z.number().int().min(1).max(500),
+    allow_trial: z.boolean(),
+  }),
 } as const;
 
 export type SettingKey = keyof typeof settingsSchemas;
@@ -99,6 +115,9 @@ export const DEFAULT_SETTINGS: Settings = {
     contract: "nc",
     sources: { legislation: false, summaries: false, case_law: false, doctrine: false, process_lookup: false },
   },
+  ai_routing: { provider: "openai", anthropic_model: "claude-opus-5-5", gemini_model: "" },
+  open_data: { camara: false, senado: false },
+  process_lookup: { provider: "", daily_limit_user: 10, allow_trial: false },
 };
 
 export function isSettingKey(key: string): key is SettingKey {

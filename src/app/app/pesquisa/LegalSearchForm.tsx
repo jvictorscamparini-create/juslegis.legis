@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import type { LegalScope } from "@/lib/legal-search";
 
 type Source = { title: string; url: string; category: "legislation" | "case_law"; verified_at: string };
+type OpenDataResult = { title: string; summary: string; url: string; origin: string; kind: string };
 
 const CATEGORY_LABEL: Record<Source["category"], string> = {
   legislation: "Legislação",
@@ -17,12 +18,14 @@ export default function LegalSearchForm({ scope, placeholder, unavailable }: { s
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sources, setSources] = useState<Source[] | null>(null);
+  const [openData, setOpenData] = useState<OpenDataResult[]>([]);
 
   async function search(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
     setError(null);
     setSources(null);
+    setOpenData([]);
     const response = await fetch("/api/legal/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -35,6 +38,7 @@ export default function LegalSearchForm({ scope, placeholder, unavailable }: { s
       return;
     }
     setSources(data.sources ?? []);
+    setOpenData(data.openData ?? []);
   }
 
   return (
@@ -55,7 +59,24 @@ export default function LegalSearchForm({ scope, placeholder, unavailable }: { s
         {error && <div className="alert-err" style={{ fontSize: 13 }}>{error}</div>}
       </section>
 
-      {sources && (
+      {openData.length > 0 && (
+        <section style={{ background: "#fff", borderRadius: 18, padding: 24, boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Dados abertos do Congresso</h2>
+          <p style={{ margin: "0 0 8px", fontSize: 12.5, color: "var(--muted)" }}>Projeto de lei ainda não é lei em vigor. Confira a situação atual na fonte antes de citar.</p>
+          {openData.map((item) => (
+            <div key={item.url} className="row" style={{ flexWrap: "wrap", gap: 8, fontSize: 13.5 }}>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>{item.title}</a>
+                {item.summary && <div style={{ fontSize: 12.5, lineHeight: 1.45, marginTop: 2 }}>{item.summary}</div>}
+                <div style={{ fontSize: 12, color: "var(--muted)" }}>{item.origin}</div>
+              </div>
+              <span className="tag">{item.kind}</span>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {sources && sources.length > 0 && (
         <section style={{ background: "#fff", borderRadius: 18, padding: 24, boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 4 }}>
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Fontes oficiais encontradas</h2>
           <p style={{ margin: "0 0 8px", fontSize: 12.5, color: "var(--muted)" }}>Os links responderam no momento da busca. Leia o conteúdo na fonte antes de citar.</p>

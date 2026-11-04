@@ -4,6 +4,7 @@ import { checkAiAllowed } from "@/lib/access";
 import { apiRequireUser, jsonError } from "@/lib/auth";
 import { legalResearchFailure, searchOfficialLegalSources } from "@/lib/legal-research";
 import { LEGAL_SCOPES, scopeCategories, searchUnavailableReason } from "@/lib/legal-search";
+import { searchOpenData } from "@/lib/open-data";
 import { loadAccess, loadAllSettings, loadUsage, recordUsage } from "@/lib/runtime";
 
 export const maxDuration = 120;
@@ -37,8 +38,14 @@ export async function POST(request: Request) {
   });
   if (blocked) return jsonError(403, blocked, { code: "blocked" });
 
-  const result = await searchOfficialLegalSources({ model: settings.ai_model.model, topic, petitionType: "", area: "", categories });
+  // A pesquisa web continua na OpenAI, mesmo com outro fornecedor de IA: é ela que restringe os domínios oficiais.
+  const [result, openData] = await Promise.all([
+    searchOfficialLegalSources({ model: settings.ai_model.model, topic, petitionType: "", area: "", categories }),
+    categories.includes("legislation") ? searchOpenData(topic, settings.open_data) : Promise.resolve([]),
+  ]);
   if (!result.ok) {
+    // Sem links da pesquisa web, os dados abertos ainda são resultado verdadeiro para mostrar.
+    if (result.code === "no_sources" && openData.length) return NextResponse.json({ sources: [], openData });
     const failure = legalResearchFailure(result.code);
     return jsonError(failure.status, failure.message, { code: result.code });
   }
@@ -50,5 +57,5 @@ export async function POST(request: Request) {
     input_tokens: result.inputTokens,
     output_tokens: result.outputTokens,
   });
-  return NextResponse.json({ sources: result.sources });
+  return NextResponse.json({ sources: result.sources, ...(openData.length ? { openData } : {}) });
 }

@@ -7,7 +7,16 @@ import { decryptSecret, encryptSecret, parseMasterKey } from "@/lib/secret-crypt
 // (cifrado em public.integration_secrets) e, se não houver, a variável de ambiente.
 // Os valores nunca são devolvidos ao navegador: o painel só recebe "definida" e os 4 últimos caracteres.
 
-export const SECRET_NAMES = ["OPENAI_API_KEY", "MP_ACCESS_TOKEN_TEST", "MP_ACCESS_TOKEN_PROD", "MP_WEBHOOK_SECRET"] as const;
+export const SECRET_NAMES = [
+  "OPENAI_API_KEY",
+  "MP_ACCESS_TOKEN_TEST",
+  "MP_ACCESS_TOKEN_PROD",
+  "MP_WEBHOOK_SECRET",
+  "ANTHROPIC_API_KEY",
+  "GEMINI_API_KEY",
+  "ESCAVADOR_API_TOKEN",
+  "JUDIT_API_KEY",
+] as const;
 export type SecretName = (typeof SECRET_NAMES)[number];
 
 export function isSecretName(v: string): v is SecretName {
@@ -54,6 +63,13 @@ export async function getMpWebhookSecret() {
   return (await fromPanel("MP_WEBHOOK_SECRET")) ?? envMpWebhook();
 }
 
+type PanelOnlySecret = "ANTHROPIC_API_KEY" | "GEMINI_API_KEY" | "ESCAVADOR_API_TOKEN" | "JUDIT_API_KEY";
+
+/** Chaves dos novos fornecedores: painel e, se não houver, variável de ambiente com o mesmo nome. */
+export async function getProviderKey(name: PanelOnlySecret) {
+  return (await fromPanel(name)) ?? process.env[name] ?? null;
+}
+
 export type SecretStatus = { name: SecretName; source: "painel" | "ambiente" | null; last4: string | null };
 
 /** Estado de cada credencial, sem expor valores. */
@@ -66,6 +82,10 @@ export async function secretStatuses(): Promise<Record<SecretName, SecretStatus>
     MP_ACCESS_TOKEN_TEST: !!envMpToken("test"),
     MP_ACCESS_TOKEN_PROD: !!envMpToken("prod"),
     MP_WEBHOOK_SECRET: !!envMpWebhook(),
+    ANTHROPIC_API_KEY: !!process.env.ANTHROPIC_API_KEY,
+    GEMINI_API_KEY: !!process.env.GEMINI_API_KEY,
+    ESCAVADOR_API_TOKEN: !!process.env.ESCAVADOR_API_TOKEN,
+    JUDIT_API_KEY: !!process.env.JUDIT_API_KEY,
   };
   const out = {} as Record<SecretName, SecretStatus>;
   for (const name of SECRET_NAMES) {
@@ -93,6 +113,9 @@ export async function saveSecret(name: SecretName, value: string, userId: string
   console.error("saveSecret falhou", { name, code: error.code, message: error.message });
   if (error.code === "42P01" || error.code === "PGRST205") {
     return { ok: false, message: "A tabela integration_secrets não existe: aplique a migration 20261025000000_integration_secrets.sql no Supabase." };
+  }
+  if (error.code === "23514") {
+    return { ok: false, message: "O banco ainda não aceita esta credencial: aplique a migration 20261104000000_more_integrations.sql no Supabase." };
   }
   if (error.code === "42501" || error.code === "PGRST301") {
     return { ok: false, message: "Sem permissão no banco: confira se SUPABASE_SERVICE_ROLE_KEY é a chave service_role." };

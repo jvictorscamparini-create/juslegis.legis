@@ -1,6 +1,9 @@
 import "server-only";
+import Anthropic from "@anthropic-ai/sdk";
 import type { MpEnvironment } from "@/lib/env";
-import { getMpAccessToken, getMpWebhookSecret, getOpenAiKey } from "@/lib/secrets";
+import { getMpAccessToken, getMpWebhookSecret, getOpenAiKey, getProviderKey } from "@/lib/secrets";
+import { searchCamara, searchSenado, type OpenDataItem } from "@/lib/open-data";
+import type { Settings } from "@/lib/settings";
 import { generate } from "@/lib/ai";
 import { mpRequest } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -9,7 +12,7 @@ import { searchOfficialLegalSources } from "@/lib/legal-research";
 // Testes de conexão reais: cada um chama o serviço de verdade e só reporta sucesso se ele responder.
 
 export type CheckResult = { ok: boolean; detail: string };
-export const SERVICES = ["openai", "mp_test", "mp_prod", "supabase", "legal"] as const;
+export const SERVICES = ["openai", "mp_test", "mp_prod", "supabase", "legal", "anthropic", "gemini", "escavador", "judit", "senado", "camara"] as const;
 export type Service = (typeof SERVICES)[number];
 
 export function isService(s: string): s is Service {
@@ -136,8 +139,100 @@ export async function testLegal(configuredModel: string): Promise<CheckResult> {
   return { ok: true, detail: `${result.sources.length} fonte(s) oficial(is) encontradas e com URL respondendo.` };
 }
 
-export async function runCheck(service: Service, configuredModel: string): Promise<CheckResult> {
+/** Confere a chave e o modelo sem gerar texto: consultar o modelo não consome tokens. */
+export async function testAnthropic(model: string, fetchImpl?: typeof fetch): Promise<CheckResult> {
+  const key = await getProviderKey("ANTHROPIC_API_KEY");
+  if (!key) return { ok: false, detail: "Chave da Anthropic não definida (informe nesta tela)." };
+  const client = new Anthropic({ apiKey: key, timeout: 10_000, maxRetries: 0, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
+  try {
+    await client.models.retrieve(model);
+    return { ok: true, detail: `Credencial válida. Modelo "${model}" disponível.` };
+  } catch (error) {
+    if (error instanceof Anthropic.APIConnectionError) return { ok: false, detail: "Não foi possível contatar a Anthropic." };
+    if (error instanceof Anthropic.AuthenticationError || error instanceof Anthropic.PermissionDeniedError) return { ok: false, detail: `Credencial recusada pela Anthropic (${error.status}).` };
+    if (error instanceof Anthropic.NotFoundError) return { ok: false, detail: `Credencial válida, mas o modelo "${model}" não está disponível para ela.` };
+    if (error instanceof Anthropic.APIError) return { ok: false, detail: `A Anthropic respondeu HTTP ${error.status}.` };
+    throw error;
+  }
+}
+
+export async function testGemini(model: string, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
+  const key = await getProviderKey("GEMINI_API_KEY");
+  if (!key) return { ok: false, detail: "Chave do Gemini não definida (informe nesta tela)." };
+  if (!model) return { ok: false, detail: "Informe o modelo Gemini antes de testar." };
+  try {
+    const res = await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}`, {
+      headers: { "x-goog-api-key": key },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.status === 400 || res.status === 401 || res.status === 403) return { ok: false, detail: `Credencial recusada pelo Google (${res.status}).` };
+    if (res.status === 404) return { ok: false, detail: `Credencial válida, mas o modelo "${model}" não está disponível para ela.` };
+    if (!res.ok) return { ok: false, detail: `O Google respondeu HTTP ${res.status}.` };
+    return { ok: true, detail: `Credencial válida. Modelo "${model}" disponível.` };
+  } catch {
+    return { ok: false, detail: "Não foi possível contatar o Google." };
+  }
+}
+
+/** Consulta o saldo, que não cobra crédito. Nunca consulta um processo no teste. */
+export async function testEscavador(fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
+  const token = await getProviderKey("ESCAVADOR_API_TOKEN");
+  if (!token) return { ok: false, detail: "Token do Escavador não definido (informe nesta tela)." };
+  try {
+    const res = await fetchImpl("https://api.escavador.com/api/v1/quantidade-creditos", {
+      headers: { Authorization: `Bearer ${token}`, "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.status === 401) return { ok: false, detail: "Token recusado pelo Escavador (401)." };
+    if (!res.ok) return { ok: false, detail: `O Escavador respondeu HTTP ${res.status}.` };
+    return { ok: true, detail: "Token aceito pelo Escavador. Nenhuma consulta foi cobrada." };
+  } catch {
+    return { ok: false, detail: "Não foi possível contatar o Escavador." };
+  }
+}
+
+/** Lista pedidos já feitos, sem criar nenhum: só criar pedido é cobrado. */
+export async function testJudit(fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
+  const key = await getProviderKey("JUDIT_API_KEY");
+  if (!key) return { ok: false, detail: "Chave da Judit não definida (informe nesta tela)." };
+  try {
+    const res = await fetchImpl("https://requests.production.judit.io/requests?page=1&page_size=1", {
+      headers: { "api-key": key, Accept: "application/json" },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.status === 401 || res.status === 403) return { ok: false, detail: `Chave recusada pela Judit (${res.status}).` };
+    if (!res.ok) return { ok: false, detail: `A Judit respondeu HTTP ${res.status}.` };
+    return { ok: true, detail: "Chave aceita pela Judit. Nenhum pedido foi criado." };
+  } catch {
+    return { ok: false, detail: "Não foi possível contatar a Judit." };
+  }
+}
+
+async function testOpenData(search: () => Promise<OpenDataItem[]>, name: string): Promise<CheckResult> {
+  try {
+    const items = await search();
+    return items.length
+      ? { ok: true, detail: `${name} respondeu com ${items.length} resultado(s) de exemplo.` }
+      : { ok: false, detail: `${name} respondeu, mas sem resultados para o tema de teste.` };
+  } catch {
+    return { ok: false, detail: `Não foi possível consultar ${name}.` };
+  }
+}
+
+export async function runCheck(service: Service, configuredModel: string, routing: Settings["ai_routing"]): Promise<CheckResult> {
   switch (service) {
+    case "anthropic":
+      return testAnthropic(routing.anthropic_model);
+    case "gemini":
+      return testGemini(routing.gemini_model);
+    case "escavador":
+      return testEscavador();
+    case "judit":
+      return testJudit();
+    case "senado":
+      return testOpenData(() => searchSenado("Lei 8.078/1990"), "o Senado");
+    case "camara":
+      return testOpenData(() => searchCamara("consumidor"), "a Câmara");
     case "openai":
       return testOpenAIResponses(configuredModel);
     case "mp_test":

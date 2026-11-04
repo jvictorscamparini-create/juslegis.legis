@@ -1,8 +1,11 @@
 import "server-only";
-import { getOpenAiKey } from "@/lib/secrets";
+import { generateWithClaude } from "@/lib/ai-anthropic";
+import { generateWithGemini } from "@/lib/ai-gemini";
+import { getOpenAiKey, getProviderKey } from "@/lib/secrets";
 import type { Settings } from "@/lib/settings";
 
-// Integração com a OpenAI pela Responses API. A chave nunca sai do servidor.
+// Geração de texto. A OpenAI usa a Responses API aqui; Claude e Gemini têm arquivos próprios.
+// As chaves nunca saem do servidor.
 
 export type AiInputPart =
   | { type: "input_text"; text: string }
@@ -67,12 +70,49 @@ export function samplingParams(model: string, temperature: number): Record<strin
   return { temperature };
 }
 
+/** Modelo em uso e presença da chave do fornecedor escolhido. Nada aqui devolve valores. */
+export async function selectedProviderReady(settings: Pick<Settings, "ai_model" | "ai_routing">): Promise<boolean> {
+  const { provider, anthropic_model, gemini_model } = settings.ai_routing;
+  if (provider === "anthropic") return !!anthropic_model && !!(await getProviderKey("ANTHROPIC_API_KEY"));
+  if (provider === "gemini") return !!gemini_model && !!(await getProviderKey("GEMINI_API_KEY"));
+  return !!settings.ai_model.model && !!(await getOpenAiKey());
+}
+
 export async function generate(opts: {
   config: Settings["ai_model"];
+  /** Fornecedor escolhido no painel. Sem ele, usa a OpenAI (testes de conexão da OpenAI dependem disso). */
+  routing?: Settings["ai_routing"];
   instructions?: string;
   input: AiMessage[];
   fetchImpl?: typeof fetch;
 }): Promise<AiResult> {
+  if (opts.routing?.provider === "anthropic") {
+    const apiKey = await getProviderKey("ANTHROPIC_API_KEY");
+    if (!apiKey) return aiError("not_configured");
+    return generateWithClaude({
+      apiKey,
+      model: opts.routing.anthropic_model,
+      instructions: opts.instructions || DEFAULT_INSTRUCTIONS,
+      input: opts.input,
+      maxOutputTokens: opts.config.max_output_tokens,
+      fetchImpl: opts.fetchImpl,
+    });
+  }
+  if (opts.routing?.provider === "gemini") {
+    const apiKey = await getProviderKey("GEMINI_API_KEY");
+    if (!apiKey) return aiError("not_configured");
+    if (!opts.routing.gemini_model) return aiError("no_model");
+    return generateWithGemini({
+      apiKey,
+      model: opts.routing.gemini_model,
+      instructions: opts.instructions || DEFAULT_INSTRUCTIONS,
+      input: opts.input,
+      temperature: opts.config.temperature,
+      maxOutputTokens: opts.config.max_output_tokens,
+      fetchImpl: opts.fetchImpl,
+    });
+  }
+
   const key = await getOpenAiKey();
   if (!key) return aiError("not_configured");
   if (!opts.config.model) return aiError("no_model");

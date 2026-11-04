@@ -13,7 +13,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ se
 
   const { data } = await supabase.from("admin_settings").select("key,value");
   const settings = mergeSettings(data);
-  const result = await runCheck(service, settings.ai_model.model);
+  const result = await runCheck(service, settings.ai_model.model, settings.ai_routing);
   const checkedAt = new Date().toISOString();
 
   await supabase.from("integration_checks").insert({ service, ok: result.ok, detail: result.detail, checked_by: user.id });

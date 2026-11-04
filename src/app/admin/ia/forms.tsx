@@ -11,19 +11,10 @@ const nv = (v: number | null) => (v == null ? "" : String(v));
 export function ModelForm({ initial, check }: { initial: Settings["ai_model"]; check: CheckInfo }) {
   const [v, setV] = useState(initial);
   return (
-    <Section title="Fornecedor e modelo" desc="Somente a OpenAI é ativada. Outros fornecedores são previsão futura e não estão integrados." tag="Servidor">
+    <Section title="Modelo OpenAI e parâmetros" desc="O fornecedor ativo é escolhido em Integrações e APIs, na aba Outras IAs. A Pesquisa Jurídica sempre usa este modelo OpenAI. Temperatura e limite de saída valem também para os outros fornecedores, quando eles aceitam." tag="Servidor">
       <div className="grid-auto">
         <label className="field">
-          Fornecedor principal
-          <select className="select" value="openai" onChange={() => {}}>
-            <option value="openai">OpenAI</option>
-            <option disabled>Gemini — futuro</option>
-            <option disabled>Claude — futuro</option>
-            <option disabled>OpenRouter — futuro</option>
-          </select>
-        </label>
-        <label className="field">
-          Modelo ativo
+          Modelo OpenAI
           <input className="input" value={v.model} onChange={(e) => setV({ ...v, model: e.target.value.trim() })} placeholder="ID do modelo autorizado (ex.: definido pelo administrador)" />
           <span className="hint">Sem modelo, o assistente informa que a IA não está configurada. O teste de conexão confirma se a credencial enxerga este modelo.</span>
         </label>

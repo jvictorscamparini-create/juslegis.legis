@@ -22,7 +22,7 @@ const GROUPS: [string, NavItem[]][] = [
     "PESQUISA E PROCESSOS",
     [
       { label: "Meus Processos", icon: "scale" },
-      { label: "Consulta Processual", icon: "search" },
+      { label: "Consulta Processual", icon: "search", href: "/app/consulta" },
       { label: "Pesquisa Jurídica", icon: "book", href: "/app/pesquisa" },
       { label: "Legislação e Súmulas", icon: "landmark", href: "/app/legislacao" },
       { label: "Jurisprudência", icon: "gavel", href: "/app/jurisprudencia" },
@@ -54,6 +54,7 @@ const TITLES: Record<string, string> = {
   "/app/assinatura": "Minha Assinatura",
   "/app/consumo": "Meu Consumo",
   "/app/perfil": "Perfil",
+  "/app/consulta": "Consulta Processual",
   "/app/pesquisa": "Pesquisa Jurídica",
   "/app/legislacao": "Legislação e Súmulas",
   "/app/jurisprudencia": "Jurisprudência",

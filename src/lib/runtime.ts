@@ -1,11 +1,28 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeAccess, EMPTY_USAGE, type Access, type Usage } from "@/lib/access";
-import { getOpenAiKey } from "@/lib/secrets";
+import { selectedProviderReady } from "@/lib/ai";
 import { DEFAULT_SETTINGS, mergeSettings, type PublicSettings, type Settings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Leituras de servidor usadas pelo workspace e pelas rotas de IA.
+
+export const PROCESS_LOOKUP_FEATURE = "process_lookup";
+
+/** Consultas processuais feitas pelo usuário hoje (UTC), para o limite diário. */
+export async function countProcessLookupsToday(userId: string): Promise<number | null> {
+  const admin = createAdminClient();
+  if (!admin) return null;
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const { count, error } = await admin
+    .from("usage_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("feature", PROCESS_LOOKUP_FEATURE)
+    .gte("created_at", start.toISOString());
+  return error ? null : (count ?? 0);
+}
 
 /** Todas as configurações (service role). null quando a service role não está disponível. */
 export async function loadAllSettings(): Promise<Settings | null> {
@@ -71,6 +88,8 @@ export async function loadUsage(supabase: SupabaseClient, userId: string): Promi
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const usage = { ...EMPTY_USAGE };
   for (const e of data as { feature: string; input_tokens: number; output_tokens: number; created_at: string }[]) {
+    // A consulta processual não é uso de IA: tem limite próprio e não gasta a cota do teste gratuito.
+    if (e.feature === PROCESS_LOOKUP_FEATURE) continue;
     const tokens = e.input_tokens + e.output_tokens;
     const t = new Date(e.created_at).getTime();
     usage.tokensTotal += tokens;
@@ -95,11 +114,10 @@ export async function recordUsage(event: {
   await admin.from("usage_events").insert(event);
 }
 
-/** IA pronta = chave da OpenAI no servidor + modelo autorizado pelo admin. Não expõe nenhum valor. */
+/** IA pronta = chave do fornecedor escolhido no servidor + modelo autorizado pelo admin. Não expõe nenhum valor. */
 export async function isAiReady(): Promise<boolean> {
-  if (!(await getOpenAiKey())) return false;
   const settings = await loadAllSettings();
-  return !!settings?.ai_model.model;
+  return !!settings && selectedProviderReady(settings);
 }
 
 export async function activePrompt(): Promise<string | null> {
