@@ -12,7 +12,7 @@ export type AiMessage =
   | { role: "user"; content: AiInputPart[] }
   | { role: "assistant"; content: string };
 
-export type AiErrorCode = "not_configured" | "no_model" | "auth" | "model" | "quota" | "upstream" | "network";
+export type AiErrorCode = "not_configured" | "no_model" | "auth" | "forbidden" | "model" | "quota" | "upstream" | "network";
 
 export type AiResult =
   | { ok: true; text: string; model: string; inputTokens: number; outputTokens: number }
@@ -28,7 +28,9 @@ const ERROR_MESSAGES: Record<AiErrorCode, string> = {
   not_configured:
     "A API de IA ainda não está conectada. Nenhuma resposta foi gerada. A configuração é feita pelo administrador da plataforma.",
   no_model: "Nenhum modelo de IA foi autorizado pelo administrador. Nenhuma resposta foi gerada.",
-  auth: "A credencial da OpenAI foi recusada. Nenhuma resposta foi gerada.",
+  auth: "A credencial da OpenAI foi recusada (401): a chave é inválida, foi revogada ou foi colada incompleta. Nenhuma resposta foi gerada.",
+  forbidden:
+    "A OpenAI negou o acesso (403): a chave não tem permissão para este recurso, ou o projeto dela não libera o modelo configurado. Nenhuma resposta foi gerada.",
   model: "O modelo configurado não está disponível para esta credencial. Nenhuma resposta foi gerada.",
   quota: "Limite de uso da OpenAI atingido. Tente novamente mais tarde.",
   upstream: "A OpenAI retornou um erro. Nenhuma resposta foi gerada.",
@@ -100,7 +102,12 @@ export async function generate(opts: {
 
   const data = (await res.json().catch(() => ({}))) as ResponsesApiOutput;
   if (!res.ok) {
-    if (res.status === 401 || res.status === 403) return aiError("auth");
+    if (res.status === 401) return aiError("auth");
+    if (res.status === 403) {
+      // Só status, código e modelo: a mensagem da OpenAI pode repetir parte do que foi enviado.
+      console.error("OpenAI negou o acesso", { status: res.status, code: data.error?.code ?? null, model: opts.config.model });
+      return aiError("forbidden");
+    }
     if (res.status === 404 || data.error?.code === "model_not_found") return aiError("model");
     if (res.status === 429) return aiError("quota");
     // Só status e código: a mensagem da OpenAI pode repetir parte do que foi enviado.

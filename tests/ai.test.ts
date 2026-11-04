@@ -32,6 +32,7 @@ describe("generate (OpenAI)", () => {
   it("mapeia erros HTTP e extrai texto e tokens", async () => {
     vi.stubEnv("OPENAI_API_KEY", "k");
     expect(await generate({ config: cfg, input, fetchImpl: reply(401, {}) })).toMatchObject({ code: "auth" });
+    expect(await generate({ config: cfg, input, fetchImpl: reply(403, {}) })).toMatchObject({ code: "forbidden" });
     expect(await generate({ config: cfg, input, fetchImpl: reply(429, {}) })).toMatchObject({ code: "quota" });
     const ok = await generate({
       config: cfg,
