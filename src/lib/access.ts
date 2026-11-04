@@ -39,7 +39,7 @@ export const EMPTY_USAGE: Usage = {
   documentsAnalyzed: 0,
 };
 
-export type AiFeature = "assistant" | "petitions";
+export type AiFeature = "assistant" | "petitions" | "legislation" | "case_law";
 
 /** Retorna o motivo do bloqueio, ou null se a operação de IA pode prosseguir. */
 export function checkAiAllowed(params: {

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { checkAiAllowed } from "@/lib/access";
 import { apiRequireUser, jsonError } from "@/lib/auth";
 import { loadAccess, loadAllSettings, loadUsage, recordUsage } from "@/lib/runtime";
-import { legalResearchHash, searchOfficialLegalSources, type LegalSourceCategory, type VerifiedLegalResearch } from "@/lib/legal-research";
+import { legalResearchFailure, legalResearchHash, searchOfficialLegalSources, type LegalSourceCategory, type VerifiedLegalResearch } from "@/lib/legal-research";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const maxDuration = 120;
@@ -55,15 +55,8 @@ export async function POST(request: Request) {
     categories,
   });
   if (!result.ok) {
-    const status = result.code === "no_model" || result.code === "not_configured" ? 503 : result.code === "no_sources" ? 422 : 502;
-    const errors = {
-      no_model: "Nenhum modelo de IA foi autorizado pelo administrador.",
-      not_configured: "A integração com OpenAI ainda não está configurada.",
-      no_sources: "Nenhuma fonte oficial foi encontrada e validada. Nenhuma referência foi adicionada.",
-      upstream: "A pesquisa oficial não pôde ser concluída.",
-      network: "Não foi possível contatar o serviço de pesquisa.",
-    };
-    return jsonError(status, errors[result.code], { code: result.code });
+    const failure = legalResearchFailure(result.code);
+    return jsonError(failure.status, failure.message, { code: result.code });
   }
 
   const consultedAt = new Date().toISOString();

@@ -61,6 +61,19 @@ export type LegalResearchResult =
   | { ok: true; model: string; sources: VerifiedLegalSource[]; inputTokens: number; outputTokens: number }
   | { ok: false; code: "not_configured" | "no_model" | "upstream" | "network" | "no_sources" };
 
+const FAILURE_MESSAGES: Record<Extract<LegalResearchResult, { ok: false }>["code"], string> = {
+  no_model: "Nenhum modelo de IA foi autorizado pelo administrador.",
+  not_configured: "A integração com OpenAI ainda não está configurada.",
+  no_sources: "Nenhuma fonte oficial foi encontrada e validada. Nenhuma referência foi adicionada.",
+  upstream: "A pesquisa oficial não pôde ser concluída.",
+  network: "Não foi possível contatar o serviço de pesquisa.",
+};
+
+export function legalResearchFailure(code: Extract<LegalResearchResult, { ok: false }>["code"]) {
+  const status = code === "no_model" || code === "not_configured" ? 503 : code === "no_sources" ? 422 : 502;
+  return { status, message: FAILURE_MESSAGES[code] };
+}
+
 export function legalResearchHash(input: {
   topic: string;
   petitionType: string;

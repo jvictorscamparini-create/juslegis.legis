@@ -23,9 +23,9 @@ const GROUPS: [string, NavItem[]][] = [
     [
       { label: "Meus Processos", icon: "scale" },
       { label: "Consulta Processual", icon: "search" },
-      { label: "Pesquisa Jurídica", icon: "book" },
-      { label: "Legislação e Súmulas", icon: "landmark" },
-      { label: "Jurisprudência", icon: "gavel" },
+      { label: "Pesquisa Jurídica", icon: "book", href: "/app/pesquisa" },
+      { label: "Legislação e Súmulas", icon: "landmark", href: "/app/legislacao" },
+      { label: "Jurisprudência", icon: "gavel", href: "/app/jurisprudencia" },
     ],
   ],
   [
@@ -54,6 +54,9 @@ const TITLES: Record<string, string> = {
   "/app/assinatura": "Minha Assinatura",
   "/app/consumo": "Meu Consumo",
   "/app/perfil": "Perfil",
+  "/app/pesquisa": "Pesquisa Jurídica",
+  "/app/legislacao": "Legislação e Súmulas",
+  "/app/jurisprudencia": "Jurisprudência",
 };
 
 export type ShellUser = { email: string; isAdmin: boolean; planLabel: string };
