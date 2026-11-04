@@ -46,7 +46,7 @@ export async function testOpenAIResponses(configuredModel: string, fetchImpl: ty
   if (!(await getOpenAiKey())) return { ok: false, detail: "Chave da OpenAI não definida." };
   if (!configuredModel) return { ok: false, detail: "Selecione um modelo para testar a Responses API." };
   const result = await generate({
-    config: { provider: "openai", model: configuredModel, temperature: 0, max_output_tokens: 8 },
+    config: { provider: "openai", model: configuredModel, temperature: 0, max_output_tokens: 32 },
     input: [{ role: "user", content: [{ type: "input_text", text: "Responda apenas: OK." }] }],
     fetchImpl,
   });
