@@ -1,6 +1,6 @@
 import "server-only";
 import type { MpEnvironment } from "@/lib/env";
-import { getMpWebhookSecret, getOpenAiKey } from "@/lib/secrets";
+import { getMpAccessToken, getMpWebhookSecret, getOpenAiKey } from "@/lib/secrets";
 import { generate } from "@/lib/ai";
 import { mpRequest } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -55,13 +55,47 @@ export async function testOpenAIResponses(configuredModel: string, fetchImpl: ty
     : { ok: false, detail: result.message };
 }
 
+function mpRejection(status: number, message: string, code?: string) {
+  const origin = `Mercado Pago respondeu HTTP ${status}${code ? ` (${code})` : ""}: ${message}`;
+  if (status === 401) return `${origin} Token inválido, expirado ou copiado pela metade.`;
+  if (status === 403) return `${origin} O Mercado Pago bloqueou este token por política da conta ou da aplicação; o bloqueio não vem do JusLegis.`;
+  return origin;
+}
+
+/**
+ * Valida o token com GET /v1/payment_methods, a chamada indicada na documentação oficial, que só lê
+ * dados e não cobra. /users/me serve apenas para identificar a conta: ele pode ser bloqueado para
+ * credenciais de teste, e por isso a recusa dele não reprova o token.
+ * O sucesso exige que a credencial seja compatível com o campo testado.
+ */
 export async function testMercadoPago(env: MpEnvironment, fetchImpl: typeof fetch = fetch): Promise<CheckResult> {
-  const res = await mpRequest<{ id: number; nickname?: string; site_id?: string }>(env, "/users/me", {}, fetchImpl);
-  if (!res.ok) {
-    return { ok: false, detail: res.status ? `Mercado Pago respondeu HTTP ${res.status}: ${res.message}` : res.message };
+  const label = env === "prod" ? "produção" : "teste";
+  const token = await getMpAccessToken(env);
+  if (!token) return { ok: false, detail: `Credencial do Mercado Pago (${label}) não definida no servidor.` };
+  if (token === (await getMpAccessToken(env === "prod" ? "test" : "prod"))) {
+    return { ok: false, detail: "A mesma credencial está nos campos de teste e de produção. Cada campo precisa da sua." };
   }
+
+  const methods = await mpRequest<unknown[]>(env, "/v1/payment_methods", {}, fetchImpl);
+  if (!methods.ok) {
+    return { ok: false, detail: methods.status ? mpRejection(methods.status, methods.message, methods.code) : methods.message };
+  }
+
+  const me = await mpRequest<{ id: number; nickname?: string; site_id?: string }>(env, "/users/me", {}, fetchImpl);
+  const account = me.ok ? `${me.data.nickname ?? me.data.id}, ${me.data.site_id ?? "?"}` : null;
+  const isTestAccount = me.ok && /^TEST_?USER/i.test(me.data.nickname ?? "");
+  const isTestToken = token.startsWith("TEST-") || isTestAccount;
+
+  if (env === "prod" && isTestToken) {
+    return { ok: false, detail: `Esta credencial é de teste${account ? ` (${account})` : ""}, não de produção. Cobranças reais não funcionariam com ela.` };
+  }
+  if (env === "test" && me.ok && !isTestToken) {
+    return { ok: false, detail: `Esta credencial aponta para uma conta real (${account}), então não foi aceita como teste. Copie o Access Token do ambiente de Teste da aplicação.` };
+  }
+
+  const identity = account ? `Conta ${account}.` : "O Mercado Pago não informou a conta deste token, então confira se ele foi copiado do ambiente de Teste.";
   const warn = (await getMpWebhookSecret()) ? "" : " Atenção: segredo do webhook do Mercado Pago não definido — webhooks serão rejeitados.";
-  return { ok: true, detail: `Conta conectada (${res.data.nickname ?? res.data.id}, ${res.data.site_id ?? "?"}).${warn}` };
+  return { ok: true, detail: `Token de ${label} aceito pelo Mercado Pago. ${identity}${warn}` };
 }
 
 export async function testSupabase(): Promise<CheckResult> {

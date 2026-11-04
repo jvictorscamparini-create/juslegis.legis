@@ -7,7 +7,7 @@ import { getMpAccessToken } from "@/lib/secrets";
 
 const API = "https://api.mercadopago.com";
 
-export type MpResult<T> = { ok: true; data: T } | { ok: false; status: number; message: string };
+export type MpResult<T> = { ok: true; data: T } | { ok: false; status: number; message: string; code?: string };
 
 export async function mpRequest<T>(
   env: MpEnvironment,
@@ -31,8 +31,13 @@ export async function mpRequest<T>(
       body: init.body ? JSON.stringify(init.body) : undefined,
       signal: AbortSignal.timeout(15_000),
     });
-    const data = (await res.json().catch(() => ({}))) as T & { message?: string };
-    if (!res.ok) return { ok: false, status: res.status, message: data?.message || `HTTP ${res.status}` };
+    const data = (await res.json().catch(() => ({}))) as T & { message?: string; code?: string; error?: string; blocked_by?: string };
+    if (!res.ok) {
+      const code = data?.code || data?.error || undefined;
+      // Só rota, status e códigos: o token nunca entra no log.
+      console.error("Mercado Pago recusou a chamada", { path: path.split("?")[0], status: res.status, code: code ?? null, blockedBy: data?.blocked_by ?? null });
+      return { ok: false, status: res.status, message: data?.message || `HTTP ${res.status}`, code };
+    }
     return { ok: true, data };
   } catch {
     return { ok: false, status: 0, message: "Não foi possível contatar o Mercado Pago." };
