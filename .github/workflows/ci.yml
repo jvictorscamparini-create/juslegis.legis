@@ -37,3 +37,16 @@ jobs:
           deno-version: v2.x
       - run: deno task check
       - run: deno task test
+
+  mcp-admin:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: supabase/functions/mcp-admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno task check
+      - run: deno task test
