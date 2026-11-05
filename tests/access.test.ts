@@ -30,3 +30,25 @@ describe("checkAiAllowed", () => {
     expect(checkAiAllowed({ feature: "assistant", settings: tr, access: trial, usage: { ...EMPTY_USAGE, aiRequestsTotal: 3 } })).toMatch(/teste gratuito/);
   });
 });
+
+describe("limites do administrador", () => {
+  const trial = { kind: "trial" as const, trialEndsAt: new Date() };
+  it("teto global pausa a IA para todos", () => {
+    const r = checkAiAllowed({ feature: "assistant", settings: s, access: trial, usage: EMPTY_USAGE, globalBudget: { capBrl: 100, spentBrl: 100 } });
+    expect(r).toMatch(/plataforma/);
+    expect(checkAiAllowed({ feature: "assistant", settings: s, access: trial, usage: EMPTY_USAGE, globalBudget: { capBrl: 100, spentBrl: 99.9 } })).toBeNull();
+    expect(checkAiAllowed({ feature: "assistant", settings: s, access: trial, usage: EMPTY_USAGE, globalBudget: { capBrl: null, spentBrl: 999 } })).toBeNull();
+  });
+  it("limite individual sobrepõe o limite mensal geral", () => {
+    const geral = { ...s, ai_limits: { ...s.ai_limits, tokens_user_month: 1000 } };
+    const usage = { ...EMPTY_USAGE, tokensMonth: 1500 };
+    expect(checkAiAllowed({ feature: "assistant", settings: geral, access: trial, usage })).toMatch(/mensal/);
+    expect(checkAiAllowed({ feature: "assistant", settings: geral, access: trial, usage, userLimit: { tokens_month: 5000, cost_month_brl: null } })).toBeNull();
+    expect(checkAiAllowed({ feature: "assistant", settings: s, access: trial, usage, userLimit: { tokens_month: 1200, cost_month_brl: null } })).toMatch(/mensal/);
+  });
+  it("limite individual de gasto em reais", () => {
+    const usage = { ...EMPTY_USAGE, costMonthBrl: 50 };
+    expect(checkAiAllowed({ feature: "assistant", settings: s, access: trial, usage, userLimit: { tokens_month: null, cost_month_brl: 50 } })).toMatch(/gasto/);
+    expect(checkAiAllowed({ feature: "assistant", settings: s, access: trial, usage, userLimit: { tokens_month: null, cost_month_brl: 80 } })).toBeNull();
+  });
+});

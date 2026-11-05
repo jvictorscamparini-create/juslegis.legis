@@ -3,7 +3,7 @@ import { z } from "zod";
 import { checkAiAllowed } from "@/lib/access";
 import { aiError, generate } from "@/lib/ai";
 import { apiRequireUser, jsonError } from "@/lib/auth";
-import { activePrompt, loadAccess, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
+import { activePrompt, loadAccess, loadAiGuards, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
 import { legalResearchHash, type VerifiedLegalSource } from "@/lib/legal-research";
 
 export const maxDuration = 120;
@@ -134,7 +134,8 @@ export async function POST(request: Request) {
   const verifiedSources = sourcesRow.sources;
   const access = await loadAccess(supabase, user.id);
   const usage = await loadUsage(supabase, user.id);
-  const blocked = checkAiAllowed({ feature: "petitions", settings, access, usage });
+  const guards = await loadAiGuards(user.id, settings);
+  const blocked = checkAiAllowed({ feature: "petitions", settings, access, usage, ...guards });
   if (blocked) return jsonError(403, blocked, { code: "blocked" });
 
   const result = await generate({

@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { checkAiAllowed } from "@/lib/access";
 import { aiError, generate, type AiInputPart, type AiMessage } from "@/lib/ai";
 import { apiRequireUser, jsonError } from "@/lib/auth";
-import { activePrompt, loadAccess, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
+import { activePrompt, loadAccess, loadAiGuards, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
 
 export const maxDuration = 120;
 
@@ -131,7 +131,8 @@ export async function POST(request: Request) {
   const lastUser = [...ordered].reverse().find((m) => m.role === "user");
   const currentDocs = lastUser?.document_ids ?? [];
 
-  const blocked = checkAiAllowed({ feature: "assistant", settings, access, usage, hasDocuments: currentDocs.length > 0 });
+  const guards = await loadAiGuards(user.id, settings);
+  const blocked = checkAiAllowed({ feature: "assistant", settings, access, usage, hasDocuments: currentDocs.length > 0, ...guards });
   if (blocked) return respond(blocked, "error", "blocked");
 
   // 3. Chamada à OpenAI com o histórico e os anexos da última mensagem.

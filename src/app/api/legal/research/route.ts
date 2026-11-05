@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkAiAllowed } from "@/lib/access";
 import { apiRequireUser, jsonError } from "@/lib/auth";
-import { loadAccess, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
+import { loadAccess, loadAiGuards, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
 import { legalResearchHash, searchOfficialLegalSources, type LegalSourceCategory, type VerifiedLegalResearch } from "@/lib/legal-research";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -42,7 +42,8 @@ export async function POST(request: Request) {
 
   const access = await loadAccess(supabase, user.id);
   const usage = await loadUsage(supabase, user.id);
-  const blocked = checkAiAllowed({ feature: "petitions", settings, access, usage });
+  const guards = await loadAiGuards(user.id, settings);
+  const blocked = checkAiAllowed({ feature: "petitions", settings, access, usage, ...guards });
   if (blocked) return jsonError(403, blocked, { code: "blocked" });
 
   const form = (petition.form ?? {}) as Record<string, string>;

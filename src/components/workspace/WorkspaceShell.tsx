@@ -31,7 +31,8 @@ const GROUPS: [string, NavItem[]][] = [
   [
     "ORGANIZAÇÃO",
     [
-      { label: "Agenda e Prazos", icon: "cal" },
+      { label: "Agenda e Prazos", icon: "cal", href: "/app/prazos" },
+      { label: "Calculadoras", icon: "scale", href: "/app/calculadoras" },
       { label: "Meus Arquivos", icon: "folder" },
       { label: "Modelos Jurídicos", icon: "files" },
     ],

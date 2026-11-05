@@ -1,10 +1,11 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { computeAccess, EMPTY_USAGE, type Access, type Usage } from "@/lib/access";
+import { computeAccess, EMPTY_USAGE, type Access, type GlobalBudget, type Usage, type UserLimit } from "@/lib/access";
 import type { UsageReport } from "@/lib/ai";
 import { costRecord, pickPrice, type ModelPrice } from "@/lib/pricing";
 import { getOpenAiKey } from "@/lib/secrets";
-import { DEFAULT_SETTINGS, mergeSettings, parseSetting, type PublicSettings, type Settings } from "@/lib/settings";import { createAdminClient } from "@/lib/supabase/admin";
+import { DEFAULT_SETTINGS, mergeSettings, parseSetting, type PublicSettings, type Settings } from "@/lib/settings";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // Leituras de servidor usadas pelo workspace e pelas rotas de IA.
 
@@ -64,7 +65,7 @@ export async function loadAccess(supabase: SupabaseClient, userId: string): Prom
 export async function loadUsage(supabase: SupabaseClient, userId: string): Promise<Usage> {
   const { data, error } = await supabase
     .from("usage_events")
-    .select("feature,input_tokens,output_tokens,created_at")
+    .select("feature,input_tokens,output_tokens,cost_brl,created_at")
     .eq("user_id", userId)
     .eq("status", "ok");
   if (error || !data) return EMPTY_USAGE;
@@ -72,17 +73,47 @@ export async function loadUsage(supabase: SupabaseClient, userId: string): Promi
   const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const usage = { ...EMPTY_USAGE };
-  for (const e of data as { feature: string; input_tokens: number; output_tokens: number; created_at: string }[]) {
+  for (const e of data as { feature: string; input_tokens: number; output_tokens: number; cost_brl: number | string | null; created_at: string }[]) {
     const tokens = e.input_tokens + e.output_tokens;
     const t = new Date(e.created_at).getTime();
     usage.tokensTotal += tokens;
     usage.aiRequestsTotal += 1;
-    if (t >= monthStart) usage.tokensMonth += tokens;
+    if (t >= monthStart) {
+      usage.tokensMonth += tokens;
+      usage.costMonthBrl += Number(e.cost_brl ?? 0);
+    }
     if (t >= dayStart) usage.tokensToday += tokens;
     if (e.feature === "petition_generate") usage.petitionsGenerated += 1;
     if (e.feature === "document_analysis") usage.documentsAnalyzed += 1;
   }
   return usage;
+}
+
+/** Limite individual de IA do usuário (service role; null = segue o limite geral). */
+export async function loadUserLimit(userId: string): Promise<UserLimit | null> {
+  const admin = createAdminClient();
+  if (!admin) return null;
+  const { data } = await admin.from("user_limits").select("tokens_month,cost_month_brl").eq("user_id", userId).maybeSingle();
+  if (!data) return null;
+  return { tokens_month: data.tokens_month ?? null, cost_month_brl: data.cost_month_brl == null ? null : Number(data.cost_month_brl) };
+}
+
+/** Gasto da plataforma no mês e o teto configurado. Sem service role, retorna null (o teto não é avaliado). */
+export async function loadGlobalBudget(settings: Settings): Promise<GlobalBudget | null> {
+  const admin = createAdminClient();
+  if (!admin) return null;
+  const capBrl = settings.ai_limits.cost_month_brl;
+  if (capBrl == null) return { capBrl: null, spentBrl: 0 };
+  const { data, error } = await admin.rpc("ai_cost_month_brl");
+  // Se não for possível medir o gasto, bloqueia por segurança: o teto existe e não pode ser confirmado.
+  if (error) return { capBrl, spentBrl: Number.POSITIVE_INFINITY };
+  return { capBrl, spentBrl: Number(data ?? 0) };
+}
+
+/** Limite individual e teto global de uma vez, para as rotas de IA. */
+export async function loadAiGuards(userId: string, settings: Settings) {
+  const [userLimit, globalBudget] = await Promise.all([loadUserLimit(userId), loadGlobalBudget(settings)]);
+  return { userLimit, globalBudget };
 }
 
 /**

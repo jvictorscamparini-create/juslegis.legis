@@ -16,7 +16,7 @@ const GROUPS: [string, Item[]][] = [
       { label: "Modelos de IA", icon: "cpu", href: "/admin/ia?tab=modelo" },
       { label: "Configurações", icon: "cog", href: "/admin/ia?tab=limites" },
       { label: "Prompts", icon: "term", href: "/admin/ia?tab=prompts" },
-      { label: "Consumo e custos", icon: "bar" },
+      { label: "Consumo e custos", icon: "bar", href: "/admin/consumo" },
     ],
   ],
   [
