@@ -12,6 +12,12 @@ project_id = "hbqlwwnnbvritknwwzos"
 enabled = true
 verify_jwt = false
 
+# MCP do Administrador Geral (supabase/functions/mcp-admin). Mesmo motivo: a função valida o
+# token sozinha e cada ferramenta exige papel admin ativo em public.profiles.
+[functions.mcp-admin]
+enabled = true
+verify_jwt = false
+
 # Usado apenas no ambiente local (supabase start).
 [auth.oauth_server]
 enabled = true
