@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { generate, samplingParams } from "@/lib/ai";
+import { generate, samplingParams, usageFrom } from "@/lib/ai";
 import { testOpenAIResponses } from "@/lib/connection-tests";
 import { DEFAULT_SETTINGS } from "@/lib/settings";
 
@@ -39,7 +39,44 @@ describe("generate (OpenAI)", () => {
       input,
       fetchImpl: reply(200, { model: "modelo-x", output: [{ type: "message", content: [{ type: "output_text", text: "Olá" }] }], usage: { input_tokens: 5, output_tokens: 7 } }),
     });
-    expect(ok).toEqual({ ok: true, text: "Olá", model: "modelo-x", inputTokens: 5, outputTokens: 7 });
+    expect(ok).toEqual({
+      ok: true,
+      text: "Olá",
+      model: "modelo-x",
+      requestId: null,
+      inputTokens: 5,
+      cachedInputTokens: 0,
+      outputTokens: 7,
+      reasoningTokens: 0,
+      toolCalls: {},
+    });
+  });
+
+  it("lê o uso real da API: id, tokens em cache, raciocínio e ferramentas", () => {
+    expect(
+      usageFrom(
+        {
+          id: "resp_123",
+          model: "gpt-x-2026-01-01",
+          output: [{ type: "web_search_call" }, { type: "web_search_call" }, { type: "message" }],
+          usage: {
+            input_tokens: 1000,
+            output_tokens: 200,
+            input_tokens_details: { cached_tokens: 400 },
+            output_tokens_details: { reasoning_tokens: 50 },
+          },
+        },
+        "fallback",
+      ),
+    ).toEqual({
+      model: "gpt-x-2026-01-01",
+      requestId: "resp_123",
+      inputTokens: 1000,
+      cachedInputTokens: 400,
+      outputTokens: 200,
+      reasoningTokens: 50,
+      toolCalls: { web_search_call: 2 },
+    });
   });
 });
 

@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { checkAiAllowed } from "@/lib/access";
 import { aiError, generate, type AiInputPart, type AiMessage } from "@/lib/ai";
 import { apiRequireUser, jsonError } from "@/lib/auth";
-import { activePrompt, loadAccess, loadAllSettings, loadUsage, recordUsage } from "@/lib/runtime";
+import { activePrompt, loadAccess, loadAllSettings, loadUsage, recordAiFailure, recordUsage } from "@/lib/runtime";
 
 export const maxDuration = 120;
 
@@ -147,14 +147,12 @@ export async function POST(request: Request) {
   }
 
   const result = await generate({ config: settings.ai_model, instructions: (await activePrompt()) ?? undefined, input });
-  if (!result.ok) return respond(result.message, "error", result.code);
+  const feature = currentDocs.length ? "document_analysis" : "assistant";
+  if (!result.ok) {
+    await recordAiFailure({ user_id: user.id, feature, model: settings.ai_model.model, code: result.code });
+    return respond(result.message, "error", result.code);
+  }
 
-  await recordUsage({
-    user_id: user.id,
-    feature: currentDocs.length ? "document_analysis" : "assistant",
-    model: result.model,
-    input_tokens: result.inputTokens,
-    output_tokens: result.outputTokens,
-  });
+  await recordUsage({ user_id: user.id, feature, result });
   return respond(result.text, "ok", undefined, result.model);
 }

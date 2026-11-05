@@ -1,9 +1,10 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeAccess, EMPTY_USAGE, type Access, type Usage } from "@/lib/access";
+import type { UsageReport } from "@/lib/ai";
+import { costRecord, pickPrice, type ModelPrice } from "@/lib/pricing";
 import { getOpenAiKey } from "@/lib/secrets";
-import { DEFAULT_SETTINGS, mergeSettings, type PublicSettings, type Settings } from "@/lib/settings";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { DEFAULT_SETTINGS, mergeSettings, parseSetting, type PublicSettings, type Settings } from "@/lib/settings";import { createAdminClient } from "@/lib/supabase/admin";
 
 // Leituras de servidor usadas pelo workspace e pelas rotas de IA.
 
@@ -64,7 +65,8 @@ export async function loadUsage(supabase: SupabaseClient, userId: string): Promi
   const { data, error } = await supabase
     .from("usage_events")
     .select("feature,input_tokens,output_tokens,created_at")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("status", "ok");
   if (error || !data) return EMPTY_USAGE;
   const now = new Date();
   const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -83,16 +85,65 @@ export async function loadUsage(supabase: SupabaseClient, userId: string): Promi
   return usage;
 }
 
-export async function recordUsage(event: {
-  user_id: string;
-  feature: string;
-  model: string;
-  input_tokens: number;
-  output_tokens: number;
-}) {
+/**
+ * Registra uma chamada bem-sucedida com o uso real retornado pela OpenAI e o custo pela tabela de preços vigente.
+ * Não grava conteúdo de mensagens, petições ou documentos: apenas metadados de consumo.
+ */
+export async function recordUsage(event: { user_id: string; feature: string; result: UsageReport }) {
   const admin = createAdminClient();
   if (!admin) return;
-  await admin.from("usage_events").insert(event);
+  const { result } = event;
+  const [{ data: prices }, { data: finance }] = await Promise.all([
+    admin.from("ai_model_prices").select("*").lte("effective_from", new Date().toISOString()),
+    admin.from("admin_settings").select("value").eq("key", "finance").maybeSingle<{ value: unknown }>(),
+  ]);
+  const usdBrl = parseSetting("finance", finance?.value).data?.usd_brl ?? null;
+  const usage = {
+    inputTokens: result.inputTokens,
+    cachedInputTokens: result.cachedInputTokens,
+    outputTokens: result.outputTokens,
+    toolCalls: result.toolCalls,
+  };
+  const cost = costRecord(usage, pickPrice(normalizePrices(prices), result.model), usdBrl);
+  await admin.from("usage_events").insert({
+    user_id: event.user_id,
+    feature: event.feature,
+    model: result.model,
+    request_id: result.requestId,
+    input_tokens: result.inputTokens,
+    cached_input_tokens: result.cachedInputTokens,
+    output_tokens: result.outputTokens,
+    reasoning_tokens: result.reasoningTokens,
+    tool_calls: result.toolCalls,
+    status: "ok",
+    ...cost,
+  });
+}
+
+/** Registra uma chamada que falhou (sem tokens cobrados), para acompanhamento. Não conta na cota. */
+export async function recordAiFailure(event: { user_id: string; feature: string; model: string; code: string }) {
+  const admin = createAdminClient();
+  if (!admin) return;
+  await admin.from("usage_events").insert({
+    user_id: event.user_id,
+    feature: event.feature,
+    model: event.model || null,
+    status: "error",
+    error_code: event.code,
+    cost_usd: 0,
+  });
+}
+
+function normalizePrices(rows: Record<string, unknown>[] | null): ModelPrice[] {
+  return (rows ?? []).map((r) => ({
+    id: String(r.id),
+    model: String(r.model),
+    input_per_mtok_usd: Number(r.input_per_mtok_usd),
+    cached_input_per_mtok_usd: r.cached_input_per_mtok_usd == null ? null : Number(r.cached_input_per_mtok_usd),
+    output_per_mtok_usd: Number(r.output_per_mtok_usd),
+    tool_prices_per_1k_usd: (r.tool_prices_per_1k_usd as Record<string, number>) ?? {},
+    effective_from: String(r.effective_from),
+  }));
 }
 
 /** IA pronta = chave da OpenAI no servidor + modelo autorizado pelo admin. Não expõe nenhum valor. */

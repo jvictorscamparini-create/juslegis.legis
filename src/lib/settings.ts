@@ -60,6 +60,10 @@ export const settingsSchemas = {
     max_tokens: optInt,
     on_expire: z.enum(["block", "view"]),
   }),
+  finance: z.object({
+    // Câmbio USD→BRL usado para converter o custo da OpenAI. Definido pelo administrador; nulo = sem conversão.
+    usd_brl: optMoney,
+  }),
   legal: z.object({
     provider: z.enum(["", "oficial", "lic"]),
     contract: z.enum(["nc", "neg", "at"]),
@@ -94,6 +98,7 @@ export const DEFAULT_SETTINGS: Settings = {
     features: allFeatures(["assistant", "petitions", "documents"]),
   },
   trial: { days: 3, ai_requests: null, documents: null, petitions: null, max_tokens: null, on_expire: "block" },
+  finance: { usd_brl: null },
   legal: {
     provider: "",
     contract: "nc",
