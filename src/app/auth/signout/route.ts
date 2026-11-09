@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { relativeRedirect } from "@/lib/relative-redirect";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   const supabase = await createClient();
-  if (supabase) await supabase.auth.signOut();
-  return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+  // scope "local": encerra só esta sessão; os cookies removidos seguem na resposta.
+  if (supabase) await supabase.auth.signOut({ scope: "local" });
+  return relativeRedirect("/login", 303);
 }

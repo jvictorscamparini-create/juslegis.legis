@@ -2,23 +2,62 @@ import Link from "next/link";
 import { Section } from "@/components/admin/kit";
 import { loadLastChecks, loadSettingsFor, loadSecretsPresent, statusLabel } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
+import { AdminCharts } from "./AdminCharts";
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export default async function AdminDashboard() {
   const { supabase } = await requireAdmin();
   const sp = await loadSecretsPresent();
-  const [checks, settings, users, subs, usage, audit] = await Promise.all([
+  const [checks, settings, users, subs, usage, audit, profilesList] = await Promise.all([
     loadLastChecks(supabase),
     loadSettingsFor(supabase),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "authorized"),
     supabase.from("usage_events").select("input_tokens,output_tokens,created_at"),
     supabase.from("admin_audit_log").select("action,target,created_at").order("created_at", { ascending: false }).limit(8),
+    supabase.from("profiles").select("created_at"),
   ]);
 
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
-  const monthTokens = (usage.data ?? []).filter((e) => new Date(e.created_at).getTime() >= monthStart).reduce((s, e) => s + e.input_tokens + e.output_tokens, 0);
+  const usageEvents = usage.data ?? [];
+  const monthTokens = usageEvents.filter((e) => new Date(e.created_at).getTime() >= monthStart).reduce((s, e) => s + e.input_tokens + e.output_tokens, 0);
+
+  const now = new Date();
+  const chartMap: Record<string, { label: string; users: number; tokens: number }> = {};
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const label = d.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+    chartMap[key] = { label: label.charAt(0).toUpperCase() + label.slice(1), users: 0, tokens: 0 };
+  }
+
+  for (const p of profilesList.data ?? []) {
+    if (!p.created_at) continue;
+    const key = p.created_at.substring(0, 7);
+    if (chartMap[key]) {
+      chartMap[key].users += 1;
+    } else {
+      const d = new Date(p.created_at);
+      const label = d.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+      chartMap[key] = { label: label.charAt(0).toUpperCase() + label.slice(1), users: 1, tokens: 0 };
+    }
+  }
+
+  for (const u of usageEvents) {
+    if (!u.created_at) continue;
+    const key = u.created_at.substring(0, 7);
+    const tokens = (u.input_tokens ?? 0) + (u.output_tokens ?? 0);
+    if (chartMap[key]) {
+      chartMap[key].tokens += tokens;
+    } else {
+      const d = new Date(u.created_at);
+      const label = d.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+      chartMap[key] = { label: label.charAt(0).toUpperCase() + label.slice(1), users: 0, tokens };
+    }
+  }
+
+  const chartData = Object.keys(chartMap).sort().map((k) => chartMap[k]);
 
   const tiles: [string, string, string][] = [
     ["Usuários cadastrados", users.error ? "—" : String(users.count ?? 0), users.error ? "Dados indisponíveis" : "Total de contas"],
@@ -54,6 +93,7 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
+      <AdminCharts data={chartData} />
       <Section title="Estado das integrações" desc="Resultado do último teste real. Credencial definida não significa conexão: rode o teste em Gerenciamento de APIs.">
         <div>
           {integ.map(([n, s]) => (

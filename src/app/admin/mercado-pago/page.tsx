@@ -3,6 +3,7 @@ import { loadLastChecks, loadSettingsFor, loadSecretsPresent, statusLabel } from
 import { requireAdmin } from "@/lib/auth";
 import { isBillingEnabled, mpEnvironment } from "@/lib/env";
 import SyncPlanButton from "./SyncPlanButton";
+import ExportCsvButton from "@/components/admin/ExportCsvButton";
 
 const TABS: [string, string][] = [["planos", "Plano e conta"], ["assinaturas", "Assinaturas"], ["cobrancas", "Cobranças"], ["webhooks", "Webhooks"], ["ambiente", "Ambiente"]];
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -47,9 +48,27 @@ export default async function MercadoPagoPage({ searchParams }: { searchParams: 
   } else if (tab === "cobrancas") {
     const { data } = await supabase.from("payments").select("mp_payment_id,user_id,amount,status,environment,created_at").order("created_at", { ascending: false }).limit(100);
     const emails = await emailOf((data ?? []).map((r) => r.user_id));
+    const rawRows = (data ?? []).map((r) => ({
+      date: when(r.created_at),
+      email: r.user_id ? emails[r.user_id] ?? "—" : "—",
+      amount: r.amount != null ? brl(Number(r.amount)) : "—",
+      status: r.status,
+      paymentId: r.mp_payment_id,
+    }));
     body = (
       <Section title="Cobranças" desc="Status confirmado pelo servidor junto ao Mercado Pago.">
-        <DataTable cols={["Data", "E-mail", "Valor", "Status", "ID do pagamento"]} rows={(data ?? []).map((r) => [when(r.created_at), r.user_id ? emails[r.user_id] ?? "—" : "—", r.amount != null ? brl(Number(r.amount)) : "—", r.status, r.mp_payment_id])} empty="Nenhuma cobrança registrada." />
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+          <ExportCsvButton
+            filename="juslegis-cobrancas-mp"
+            headers={["Data", "E-mail", "Valor", "Status", "ID do pagamento"]}
+            rows={rawRows.map((r) => [r.date, r.email, r.amount, r.status, r.paymentId])}
+          />
+        </div>
+        <DataTable
+          cols={["Data", "E-mail", "Valor", "Status", "ID do pagamento"]}
+          rows={rawRows.map((r) => [r.date, r.email, r.amount, r.status, r.paymentId])}
+          empty="Nenhuma cobrança registrada."
+        />
       </Section>
     );
   } else if (tab === "webhooks") {

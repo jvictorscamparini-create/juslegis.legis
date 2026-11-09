@@ -15,3 +15,8 @@ npm-debug.log*
 # Segredos locais das Edge Functions
 supabase/functions/.env
 supabase/functions/*/.env
+
+# Cloudflare (OpenNext / Wrangler)
+.open-next/
+.wrangler/
+.dev.vars*
