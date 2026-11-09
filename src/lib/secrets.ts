@@ -1,5 +1,5 @@
 import "server-only";
-import { mpAccessToken as envMpToken, mpWebhookSecret as envMpWebhook, openAiKey as envOpenAiKey, type MpEnvironment } from "@/lib/env";
+import { mpAccessToken as envMpToken, mpWebhookSecret as envMpWebhook, openAiKey as envOpenAiKey, secretStorageMissing, type MpEnvironment } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { decryptSecret, encryptSecret, parseMasterKey } from "@/lib/secret-crypto";
 
@@ -23,6 +23,14 @@ function masterKey() {
 /** O painel só consegue gravar se a chave mestra (APP_SECRETS_KEY, 32 bytes em base64) estiver no servidor. */
 export function canStoreSecrets() {
   return masterKey() !== null && createAdminClient() !== null;
+}
+
+/** Itens que faltam no servidor para gravar pelo painel (só nomes, nunca valores). Vazio = pronto. */
+export function storageProblems(): string[] {
+  const problems = [...secretStorageMissing()];
+  if (!process.env.APP_SECRETS_KEY) problems.push("APP_SECRETS_KEY (chave mestra de cifra)");
+  else if (masterKey() === null) problems.push("APP_SECRETS_KEY está definida, mas não tem 32 bytes em base64");
+  return problems;
 }
 
 const TTL_MS = 20_000;

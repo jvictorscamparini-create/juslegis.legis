@@ -10,8 +10,20 @@ export function isSupabaseConfigured() {
   return supabasePublicConfig() !== null;
 }
 
+/**
+ * Chave de serviço do Supabase (só servidor). Aceita o nome clássico e o da integração Supabase da Vercel
+ * (SUPABASE_SECRET_KEY), que cumpre a mesma função e já vem configurada em Produção.
+ */
 export function serviceRoleKey() {
-  return process.env.SUPABASE_SERVICE_ROLE_KEY || null;
+  return process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || null;
+}
+
+/** O que falta no servidor para o painel gravar credenciais (só nomes, nunca valores). */
+export function secretStorageMissing(): string[] {
+  const missing: string[] = [];
+  if (!supabasePublicConfig()) missing.push("NEXT_PUBLIC_SUPABASE_URL / chave pública");
+  if (!serviceRoleKey()) missing.push("SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY)");
+  return missing;
 }
 
 export function openAiKey() {
