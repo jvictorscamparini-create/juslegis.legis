@@ -2,10 +2,18 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabasePublicConfig } from "@/lib/env";
 import { isPasswordRecoveryPath } from "@/lib/auth-flow";
-import { relativeRedirect } from "@/lib/relative-redirect";
-import { postLoginPath } from "@/lib/safe-redirect";
+import { postLoginPath, safeInternalPath } from "@/lib/safe-redirect";
 
 const PROTECTED = ["/app", "/admin"];
+
+/**
+ * No proxy o Next exige Location absoluto (ele próprio interpreta o cabeçalho). `request.nextUrl`
+ * já vem com o host público reconstruído pelo Next, e destinos do mesmo site são relativizados por ele.
+ */
+function proxyRedirect(request: NextRequest, destination: string) {
+  const target = new URL(safeInternalPath(destination), request.nextUrl.origin);
+  return NextResponse.redirect(target, 307);
+}
 
 /**
  * Renova a sessão do Supabase e faz a checagem otimista de login.
@@ -17,7 +25,7 @@ export async function updateSession(request: NextRequest) {
   const isProtected = PROTECTED.some((p) => path === p || path.startsWith(p + "/"));
 
   if (!cfg) {
-    if (isProtected) return relativeRedirect("/login?erro=config", 307);
+    if (isProtected) return proxyRedirect(request, "/login?erro=config");
     return NextResponse.next({ request });
   }
 
@@ -41,7 +49,7 @@ export async function updateSession(request: NextRequest) {
 
   // Redireciona preservando os cookies que o Supabase acabou de renovar (ou limpar).
   const redirectKeepingSession = (destination: string) => {
-    const redirect = relativeRedirect(destination, 307);
+    const redirect = proxyRedirect(request, destination);
     response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
     return redirect;
   };
