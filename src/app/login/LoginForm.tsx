@@ -11,6 +11,7 @@ import {
   passwordRecoveryRedirect,
   passwordSignInError,
   signUpError,
+  shouldSubmitOnEnter,
   withTimeout,
 } from "@/lib/auth-flow";
 
@@ -268,7 +269,7 @@ export default function LoginForm({
           <button
             type="button"
             onClick={google}
-            disabled={!configured || busy}
+            disabled={!configured || busy || googleStatus !== true}
             className="btn btn-outline"
             style={{ height: 46, borderRadius: 11, fontSize: 14, gap: 10, width: "100%" }}
             aria-busy={busyAction === "google"}
@@ -288,6 +289,7 @@ export default function LoginForm({
               </>
             )}
           </button>
+          {googleStatus === false && <p className="hint">Google OAuth não foi confirmado no Supabase. Use o acesso por e-mail.</p>}
           <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12, color: "var(--muted)" }}>
             <span style={{ flex: 1, height: 1, background: "#E3DFD6" }} />
             ou
@@ -301,7 +303,12 @@ export default function LoginForm({
                 setEmail(e.target.value);
                 setError(null);
               }}
-              onKeyDown={(e) => e.key === "Enter" && (up ? signUp() : emailMethod === "code" ? sendCode() : signInWithPassword())}
+              onKeyDown={(e) => {
+                if (!shouldSubmitOnEnter(e)) return;
+                if (up) signUp();
+                else if (emailMethod === "code") sendCode();
+                else signInWithPassword();
+              }}
               placeholder="seu@email.com.br"
               type="email"
               autoComplete="email"
@@ -316,7 +323,11 @@ export default function LoginForm({
                 <input
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(null); }}
-                  onKeyDown={(e) => e.key === "Enter" && (up ? signUp() : signInWithPassword())}
+                  onKeyDown={(e) => {
+                    if (!shouldSubmitOnEnter(e)) return;
+                    if (up) signUp();
+                    else signInWithPassword();
+                  }}
                   type={showPassword ? "text" : "password"}
                   autoComplete={up ? "new-password" : "current-password"}
                   placeholder={up ? `Mínimo de ${MIN_PASSWORD_LENGTH} caracteres` : undefined}
@@ -420,7 +431,7 @@ export default function LoginForm({
           <input
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            onKeyDown={(e) => e.key === "Enter" && verify()}
+            onKeyDown={(e) => { if (shouldSubmitOnEnter(e)) verify(); }}
             maxLength={6}
             placeholder="000000"
             inputMode="numeric"
@@ -474,7 +485,7 @@ export default function LoginForm({
               <input
                 value={newPassword}
                 onChange={(e) => { setNewPassword(e.target.value); setError(null); }}
-                onKeyDown={(e) => e.key === "Enter" && updatePassword()}
+                onKeyDown={(e) => { if (shouldSubmitOnEnter(e)) updatePassword(); }}
                 type={showNewPassword ? "text" : "password"}
                 autoComplete="new-password"
                 style={{ ...inputStyle, paddingRight: 42 }}

@@ -117,6 +117,8 @@ export function mergeSettings(rows: { key: string; value: unknown }[] | null | u
     const parsed = parseSetting(row.key, row.value);
     if (parsed.success) out[row.key] = parsed.data;
   }
+  const aiModel = out.ai_model as Settings["ai_model"];
+  if (aiModel.model === "gpt-4-mini") out.ai_model = { ...aiModel, model: "gpt-4o-mini" };
   return out as Settings;
 }
 

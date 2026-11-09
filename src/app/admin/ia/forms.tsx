@@ -24,7 +24,7 @@ export function ModelForm({ initial, check }: { initial: Settings["ai_model"]; c
         </label>
         <label className="field">
           Modelo ativo
-          <input className="input" value={v.model} onChange={(e) => setV({ ...v, model: e.target.value.trim() })} placeholder="ID do modelo autorizado (ex.: definido pelo administrador)" />
+          <input className="input" value={v.model} onChange={(e) => setV({ ...v, model: e.target.value.trim() })} placeholder="gpt-4o-mini" />
           <span className="hint">Sem modelo, o assistente informa que a IA não está configurada. O teste de conexão confirma se a credencial enxerga este modelo.</span>
         </label>
         <label className="field">

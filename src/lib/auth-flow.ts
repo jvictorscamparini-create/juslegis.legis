@@ -51,12 +51,13 @@ export async function oauthProviderStatus(provider: "google", fetcher: typeof fe
   }
 }
 
-/**
- * Consulta as configurações públicas do Supabase Auth (só a chave pública).
- * Em falha de rede ou timeout devolve true para não bloquear um provedor que pode estar ativo.
- */
+/** Só permite OAuth quando o Supabase confirma explicitamente que o provedor está habilitado. */
 export async function isOAuthProviderEnabled(provider: "google", fetcher: typeof fetch = fetch, timeoutMs = 4000) {
-  return (await oauthProviderStatus(provider, fetcher, timeoutMs)) !== false;
+  return (await oauthProviderStatus(provider, fetcher, timeoutMs)) === true;
+}
+
+export function shouldSubmitOnEnter(event: { key: string; nativeEvent: { isComposing: boolean }; keyCode: number }) {
+  return event.key === "Enter" && !event.nativeEvent.isComposing && event.keyCode !== 229;
 }
 
 export class AuthTimeoutError extends Error {

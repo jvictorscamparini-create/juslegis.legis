@@ -11,6 +11,9 @@ describe("settings", () => {
   it("aplica valores válidos", () => {
     expect(mergeSettings([{ key: "trial", value: { ...DEFAULT_SETTINGS.trial, days: 14 } }]).trial.days).toBe(14);
   });
+  it("normaliza o identificador legado inválido da OpenAI", () => {
+    expect(mergeSettings([{ key: "ai_model", value: { ...DEFAULT_SETTINGS.ai_model, model: "gpt-4-mini" } }]).ai_model.model).toBe("gpt-4o-mini");
+  });
   it("valida limites", () => {
     expect(parseSetting("ai_model", { ...DEFAULT_SETTINGS.ai_model, temperature: 5 }).success).toBe(false);
     expect(parseSetting("ai_model", { ...DEFAULT_SETTINGS.ai_model, provider: "gemini" }).success).toBe(false);

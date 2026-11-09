@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emailOtpType, isOAuthProviderEnabled, isPasswordRecoveryPath, MIN_PASSWORD_LENGTH, passwordRecoveryRedirect, passwordSignInError, signUpError } from "@/lib/auth-flow";
+import { emailOtpType, isOAuthProviderEnabled, isPasswordRecoveryPath, MIN_PASSWORD_LENGTH, passwordRecoveryRedirect, passwordSignInError, shouldSubmitOnEnter, signUpError } from "@/lib/auth-flow";
 import { safeInternalPath } from "@/lib/safe-redirect";
 
 describe("password auth flow", () => {
@@ -41,9 +41,17 @@ describe("password auth flow", () => {
     const respond = (body: unknown, ok = true) => (async () => ({ ok, json: async () => body })) as unknown as typeof fetch;
     expect(await isOAuthProviderEnabled("google", respond({ external: { google: false } }))).toBe(false);
     expect(await isOAuthProviderEnabled("google", respond({ external: { google: true } }))).toBe(true);
-    expect(await isOAuthProviderEnabled("google", respond({}, false))).toBe(true);
+    expect(await isOAuthProviderEnabled("google", respond({}, false))).toBe(false);
     const offline = (async () => { throw new Error("offline"); }) as unknown as typeof fetch;
-    expect(await isOAuthProviderEnabled("google", offline)).toBe(true);
+    expect(await isOAuthProviderEnabled("google", offline)).toBe(false);
+  });
+
+  it("only allows Enter to submit outside IME composition", () => {
+    const event = (key: string, isComposing = false, keyCode = 13) => ({ key, nativeEvent: { isComposing }, keyCode });
+    expect(shouldSubmitOnEnter(event("Enter"))).toBe(true);
+    expect(shouldSubmitOnEnter(event("Enter", true))).toBe(false);
+    expect(shouldSubmitOnEnter(event("Enter", false, 229))).toBe(false);
+    expect(shouldSubmitOnEnter(event("a"))).toBe(false);
   });
 
   it("does not permit an external post-auth redirect", () => {
