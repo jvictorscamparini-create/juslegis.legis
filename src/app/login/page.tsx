@@ -1,5 +1,6 @@
 import { isSupabaseConfigured } from "@/lib/env";
-import { safeInternalPath } from "@/lib/safe-redirect";
+import { oauthProviderStatus } from "@/lib/auth-flow";
+import { postLoginPath } from "@/lib/safe-redirect";
 import { LogoMark } from "@/components/icons";
 import LoginForm from "./LoginForm";
 
@@ -13,7 +14,9 @@ const ERRORS: Record<string, string> = {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erro?: string; next?: string; recovery?: string }> }) {
   const { erro, next, recovery } = await searchParams;
   const configured = isSupabaseConfigured();
-  const safeNext = safeInternalPath(next);
+  const safeNext = postLoginPath(next);
+  // Estado real do Google no Supabase, lido no servidor: o botão não depende só de existir na tela.
+  const googleStatus = configured ? await oauthProviderStatus("google", fetch, 3000) : false;
 
   return (
     <div className="login-grid" style={{ minHeight: "100vh", display: "grid" }}>
@@ -44,7 +47,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
       </div>
       <div style={{ background: "var(--paper)", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 24px" }}>
-        <LoginForm configured={configured} initialError={erro ? ERRORS[erro] ?? null : null} next={safeNext} recovery={recovery === "1"} />
+        <LoginForm configured={configured} googleStatus={googleStatus} initialError={erro ? ERRORS[erro] ?? null : null} next={safeNext} recovery={recovery === "1"} />
       </div>
     </div>
   );

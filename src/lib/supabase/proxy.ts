@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabasePublicConfig } from "@/lib/env";
 import { isPasswordRecoveryPath } from "@/lib/auth-flow";
+import { relativeRedirect } from "@/lib/relative-redirect";
+import { postLoginPath } from "@/lib/safe-redirect";
 
 const PROTECTED = ["/app", "/admin"];
 
@@ -15,7 +17,7 @@ export async function updateSession(request: NextRequest) {
   const isProtected = PROTECTED.some((p) => path === p || path.startsWith(p + "/"));
 
   if (!cfg) {
-    if (isProtected) return NextResponse.redirect(new URL("/login?erro=config", request.url));
+    if (isProtected) return relativeRedirect("/login?erro=config", 307);
     return NextResponse.next({ request });
   }
 
@@ -37,13 +39,19 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Redireciona preservando os cookies que o Supabase acabou de renovar (ou limpar).
+  const redirectKeepingSession = (destination: string) => {
+    const redirect = relativeRedirect(destination, 307);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  };
+
   if (!user && isProtected) {
-    const url = new URL("/login", request.url);
-    url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+    const requested = `${path}${request.nextUrl.search}`;
+    return redirectKeepingSession(`/login?next=${encodeURIComponent(requested)}`);
   }
   if (user && path === "/login" && !isPasswordRecoveryPath(path, request.nextUrl.searchParams)) {
-    return NextResponse.redirect(new URL("/app", request.url));
+    return redirectKeepingSession(postLoginPath(request.nextUrl.searchParams.get("next")));
   }
   return response;
 }
