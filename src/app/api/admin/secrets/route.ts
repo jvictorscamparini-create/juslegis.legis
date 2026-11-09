@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiRequireAdmin, jsonError } from "@/lib/auth";
-import { SECRET_LIMITS, canStoreSecrets, isSecretName, removeSecret, saveSecret, secretStatuses } from "@/lib/secrets";
+import { SECRET_LIMITS, canStoreSecrets, isSecretName, removeSecret, saveSecret, secretStatuses, storageProblems } from "@/lib/secrets";
 
 const putSchema = z.object({
   name: z.string(),
@@ -14,7 +14,7 @@ const deleteSchema = z.object({ name: z.string() });
 export async function GET() {
   const auth = await apiRequireAdmin();
   if (!auth.ok) return auth.response;
-  return NextResponse.json({ canStore: canStoreSecrets(), secrets: await secretStatuses() });
+  return NextResponse.json({ canStore: canStoreSecrets(), missing: storageProblems(), secrets: await secretStatuses() });
 }
 
 /** Salva uma credencial cifrada. Somente Administrador Geral; o valor nunca é registrado nem devolvido. */
@@ -25,7 +25,7 @@ export async function PUT(request: Request) {
 
   const body = putSchema.safeParse(await request.json().catch(() => null));
   if (!body.success || !isSecretName(body.data.name)) return jsonError(400, "Credencial ou valor inválido.");
-  if (!canStoreSecrets()) return jsonError(503, "Salvar credenciais pelo painel exige APP_SECRETS_KEY no servidor.");
+  if (!canStoreSecrets()) return jsonError(503, `Falta configurar no servidor: ${storageProblems().join("; ")}.`);
 
   const saved = await saveSecret(body.data.name, body.data.value, user.id);
   if (!saved.ok) return jsonError(500, saved.message);

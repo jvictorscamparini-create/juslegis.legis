@@ -2,7 +2,7 @@ import { ReadOnlyField, SecretEditor, SecretRows, Section, TestButton, TestCard,
 import { loadLastChecks, loadSettingsFor, loadSecretsPresent, statusLabel } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { isBillingEnabled, mpEnvironment } from "@/lib/env";
-import { canStoreSecrets, secretStatuses } from "@/lib/secrets";
+import { canStoreSecrets, secretStatuses, storageProblems } from "@/lib/secrets";
 import LegalForm from "./LegalForm";
 
 const TABS: [string, string][] = [["", "Visão geral"], ["openai", "OpenAI"], ["mp", "Mercado Pago"], ["mcp", "Mercado Pago MCP"], ["sb", "Supabase"], ["jur", "APIs jurídicas"]];
@@ -15,6 +15,7 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
   const b = isBillingEnabled();
   const st = await secretStatuses();
   const canStore = canStoreSecrets();
+  const missing = canStore ? [] : storageProblems();
 
   return (
     <>
@@ -47,7 +48,7 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
             </div>
             <TestButton service="openai" initial={checks.openai ?? null} />
           </Section>
-          <SecretEditor canStore={canStore} rows={[{ label: "Chave da API OpenAI", kind: "Secreta", ...st.OPENAI_API_KEY }]} />
+          <SecretEditor canStore={canStore} missing={missing} rows={[{ label: "Chave da API OpenAI", kind: "Secreta", ...st.OPENAI_API_KEY }]} />
         </>
       )}
 
@@ -62,7 +63,7 @@ export default async function ApisPage({ searchParams }: { searchParams: Promise
             <TestButton service="mp_test" label="Testar conexão (teste)" initial={checks.mp_test ?? null} />
             <TestButton service="mp_prod" label="Testar conexão (produção)" initial={checks.mp_prod ?? null} />
           </Section>
-          <SecretEditor canStore={canStore} rows={[{ label: "Access token (teste)", kind: "Secreta · sandbox", ...st.MP_ACCESS_TOKEN_TEST }, { label: "Access token (produção)", kind: "Secreta · produção", hint: "Só será usado quando o ambiente de produção e BILLING_ENABLED forem liberados.", ...st.MP_ACCESS_TOKEN_PROD }, { label: "Segredo de assinatura do webhook", kind: "Secreta", ...st.MP_WEBHOOK_SECRET }]} />
+          <SecretEditor canStore={canStore} missing={missing} rows={[{ label: "Access token (teste)", kind: "Secreta · sandbox", ...st.MP_ACCESS_TOKEN_TEST }, { label: "Access token (produção)", kind: "Secreta · produção", hint: "Só será usado quando o ambiente de produção e BILLING_ENABLED forem liberados.", ...st.MP_ACCESS_TOKEN_PROD }, { label: "Segredo de assinatura do webhook", kind: "Secreta", ...st.MP_WEBHOOK_SECRET }]} />
         </>
       )}
 

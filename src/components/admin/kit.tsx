@@ -238,7 +238,7 @@ export const numOrNull = (v: string) => (v.trim() === "" ? null : Number(v));
 export type SecretRowInfo = { name: string; label: string; kind: string; source: "painel" | "ambiente" | null; last4: string | null; hint?: string };
 
 /** Campos para informar, trocar ou remover credenciais. O valor vai direto ao servidor, que o cifra; nunca volta ao navegador. */
-export function SecretEditor({ rows, canStore }: { rows: SecretRowInfo[]; canStore: boolean }) {
+export function SecretEditor({ rows, canStore, missing = [] }: { rows: SecretRowInfo[]; canStore: boolean; missing?: string[] }) {
   const say = useToast();
   const router = useRouter();
   const [values, setValues] = useState<Record<string, string>>({});
@@ -268,7 +268,7 @@ export function SecretEditor({ rows, canStore }: { rows: SecretRowInfo[]; canSto
     <Section title="Credenciais" desc="Informe aqui as chaves das integrações. Elas são cifradas no servidor, nunca são exibidas depois de salvas e cada alteração fica no log administrativo." tag="Somente Administrador Geral">
       {!canStore && (
         <div className="alert-err" style={{ fontSize: 12.5 }}>
-          Para salvar chaves por esta tela, defina a variável secreta APP_SECRETS_KEY (32 bytes em base64) na Vercel e reimplante. Enquanto isso, valem as variáveis de ambiente.
+          Ainda não é possível salvar chaves por esta tela. Falta no servidor: {missing.length ? missing.join("; ") : "APP_SECRETS_KEY"}. Defina como variável secreta na Vercel e reimplante. Enquanto isso, valem as variáveis de ambiente.
         </div>
       )}
       <div>
