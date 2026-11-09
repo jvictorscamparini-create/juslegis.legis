@@ -58,3 +58,57 @@ Em Configurações > Conectores > Adicionar conector personalizado, informe `htt
 - Função: `cd supabase/functions/mcp && deno task check && deno task test` (precisa do Deno).
 - App: `npm run lint && npm run typecheck && npm test && npm run build`.
 - Banco: `supabase/tests/rls_isolation.sql` no SQL Editor do projeto da JusLegis (termina em `ROLLBACK`).
+
+## MCP do Administrador Geral (`supabase/functions/mcp-admin`)
+
+Função separada, para o dono do site ajustar a JusLegis conversando com o Claude ou o ChatGPT, sem abrir o painel e sem mexer no código. Os advogados continuam usando só a função `mcp`, que segue somente leitura.
+
+| | `mcp` (advogados) | `mcp-admin` (Administrador Geral) |
+|---|---|---|
+| Endereço | `…/functions/v1/mcp` | `https://hbqlwwnnbvritknwwzos.supabase.co/functions/v1/mcp-admin` |
+| Quem consegue usar | Qualquer advogado logado | Só contas com papel `admin` e situação `active` em `public.profiles` |
+| Escreve no banco | Não | Sim: configurações e prompts, sempre com registro na auditoria |
+
+### Ferramentas
+
+- `admin_get_settings`: lê modelo e limites da IA, módulos ativos, plano e preço, teste grátis e fontes jurídicas (com os padrões quando nada foi salvo).
+- `admin_update_setting`: altera **só os campos informados** de uma configuração. Usa as mesmas regras do painel `/admin`, recusa campos desconhecidos, nunca altera `mp_plan_id` (que só muda pela sincronização com o Mercado Pago) e registra antes e depois em `admin_audit_log`. Com `dry_run: true` mostra o resultado sem gravar.
+- `admin_list_prompts`, `admin_get_prompt`: histórico e texto do prompt de sistema da IA.
+- `admin_create_prompt`: nova versão; com `active: true` passa a valer imediatamente para toda a IA do site.
+- `admin_activate_prompt`: reativa uma versão anterior (para desfazer uma troca de prompt).
+- `admin_list_users`: lista contas (filtro por situação e trecho do e-mail). Somente leitura.
+- `admin_recent_audit_log`: últimas alterações administrativas; para credenciais mostra só ação e alvo.
+- `whoami`: confirma com qual conta o cliente está conectado.
+
+Ficam **fora** de propósito, e continuam só no painel: bloquear ou reativar contas (exige a service role), credenciais de integrações (`/admin/apis`), sincronização do plano e cobranças do Mercado Pago. Mudanças de páginas, telas e funções do site continuam sendo feitas no código, com PR no GitHub.
+
+### Segurança
+
+1. A função valida o token do Supabase Auth (`withSupabase({ auth: 'user' })`), igual à `mcp`.
+2. Cada ferramenta consulta `public.profiles` e só age se o usuário do token for admin ativo. Os demais recebem erro sem que nenhuma outra tabela seja lida.
+3. O cliente usado é o do próprio admin, sem service role: as políticas RLS (`is_admin()`) do banco são a barreira final.
+4. Toda escrita grava em `admin_audit_log` (`settings.update`, `prompt.create`, `prompt.activate`) e aparece em `/admin/logs`.
+
+Os esquemas de validação são uma cópia de `src/lib/settings.ts` em `tools/settings.ts`, porque a Edge Function não importa arquivos de fora de `supabase/functions` na implantação. `tools/settings_parity_test.ts` falha no CI se as duas cópias divergirem: ao mudar uma configuração no app, mude as duas.
+
+### Implantação
+
+Mesmos pré-requisitos da função `mcp` (chaves JWT assimétricas e servidor OAuth ativo). Depois:
+
+```bash
+supabase link --project-ref hbqlwwnnbvritknwwzos
+supabase functions deploy mcp-admin   # lê verify_jwt=false de supabase/config.toml
+```
+
+As variáveis `MCP_ADMIN_SERVER_NAME` e `MCP_ADMIN_SERVER_DESCRIPTION` são opcionais (veja `supabase/functions/mcp-admin/.env.example`).
+
+### Conectar
+
+- **Claude:** Configurações > Conectores > Adicionar conector personalizado > `https://hbqlwwnnbvritknwwzos.supabase.co/functions/v1/mcp-admin`. Entre com a conta de Administrador Geral e permita o acesso.
+- **ChatGPT:** em Conectores (modo desenvolvedor, conforme o plano), adicione o mesmo endereço.
+
+Exemplos de pedidos: "aumente o teste grátis para 7 dias", "mostre o preço do plano e mude para R$ 49,90, mas me mostre antes", "ative o módulo Agenda e arquivos no plano", "volte o prompt da IA para a versão anterior", "quem alterou as configurações ontem?".
+
+### Testes
+
+`cd supabase/functions/mcp-admin && deno task check && deno task test`
