@@ -19,5 +19,16 @@
     "NEXT_PUBLIC_SITE_URL": "https://juslegis.juslegislegis.workers.dev",
     "BILLING_ENABLED": "false",
     "MERCADO_PAGO_ENVIRONMENT": "test"
+  },
+  // Prévias de branch (`wrangler preview`, usado pelo Workers Builds): mesmos valores públicos.
+  // Cobranças continuam travadas e o Mercado Pago em teste.
+  "previews": {
+    "vars": {
+      "NEXT_PUBLIC_SUPABASE_URL": "https://hbqlwwnnbvritknwwzos.supabase.co",
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_8ULFXJ7Xyedoxd4yqJoNWQ_SJl6a5Yu",
+      "NEXT_PUBLIC_SITE_URL": "https://juslegis.juslegislegis.workers.dev",
+      "BILLING_ENABLED": "false",
+      "MERCADO_PAGO_ENVIRONMENT": "test"
+    }
   }
 }
